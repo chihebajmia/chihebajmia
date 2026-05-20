@@ -17,7 +17,8 @@
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card-bg); border-top: 1px solid var(--panel-border); display: flex; justify-content: space-around; padding: 10px 0; padding-bottom: calc(10px + env(safe-area-inset-bottom)); z-index: 50; }
         .nav-btn { background: none; border: none; color: var(--text-muted); font-size: 10px; font-weight: bold; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; flex: 1; }
         .nav-btn.active { color: var(--accent); } .nav-icon { font-size: 22px; }
-        .vault-card { background-color: var(--card-bg); border-radius: 16px; padding: 16px; border: 1px solid var(--panel-border); }
+        .vault-card { background-color: var(--card-bg); border-radius: 16px; padding: 16px; border: 1px solid var(--panel-border); transition: transform 0.1s;}
+        .vault-card.clickable:active { transform: scale(0.98); border-color: var(--accent); }
         .vault-header { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); margin-bottom: 12px; text-align: center; display: flex; justify-content: space-between; align-items: center;}
         .vault-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
         .vault-item { background-color: var(--vault-bg); padding: 10px 4px; border-radius: 10px; text-align: center; border: 1px solid var(--panel-border); }
@@ -26,7 +27,8 @@
         .vault-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 12px; }
         .v-btn { background-color: #334155; color: white; border: none; border-radius: 8px; padding: 10px 4px; font-size: 10px; font-weight: bold; cursor: pointer; } .v-btn:active { background-color: var(--accent); color: #000; }
         .scoreboard-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        .score-box { background-color: var(--card-bg); border: 1px solid var(--panel-border); border-radius: 12px; padding: 10px; text-align: center; }
+        .score-box { background-color: var(--card-bg); border: 1px solid var(--panel-border); border-radius: 12px; padding: 10px; text-align: center; cursor: pointer; transition: transform 0.1s;}
+        .score-box:active { transform: scale(0.95); }
         .score-num { font-size: 18px; font-weight: 800; margin-top: 2px; } .score-box.green-box .score-num { color: var(--success); } .score-box.red-box .score-num { color: var(--danger); }
         .balance-card { background-color: var(--card-bg); border-radius: 16px; padding: 18px 20px; text-align: center; border: 1px solid var(--panel-border); position: relative;}
         .title { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); margin-bottom: 6px; }
@@ -53,7 +55,13 @@
         .iou-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--vault-bg); border-radius: 8px; margin-bottom: 8px; border: 1px solid var(--panel-border); }
         .iou-btn { background: var(--accent); color: #000; border: none; border-radius: 6px; padding: 6px 12px; font-size: 10px; font-weight: bold; cursor: pointer; }
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
-        .modal-content { background-color: var(--card-bg); border-radius: 16px; padding: 20px; width: 100%; max-width: 350px; border: 1px solid var(--panel-border); }
+        .modal-content { background-color: var(--card-bg); border-radius: 16px; padding: 20px; width: 100%; max-width: 350px; border: 1px solid var(--panel-border); max-height: 80vh; overflow-y: auto;}
+        .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;}
+        .modal-input-group { display: flex; flex-direction: column; gap: 4px; }
+        .modal-input-group label { font-size: 10px; color: var(--text-muted); font-weight: bold;}
+        .modal-btn-row { display: flex; gap: 10px; margin-top: 20px; }
+        .b-stat { background: var(--vault-bg); padding: 10px; border-radius: 10px; margin-bottom: 10px; border: 1px solid var(--panel-border); font-size: 12px;}
+        .b-stat span { color: var(--accent); font-weight: bold; float: right;}
         #printArea { display: none; }
         @media print { body > * { display: none !important; } #printArea { display: block !important; position: absolute; left: 0; top: 0; width: 100%; background: white; color: #0f172a; padding: 20px; box-sizing: border-box; } #printArea h1 { font-size: 24px; border-bottom: 2px solid #38bdf8; padding-bottom: 10px; margin-top:0;} .metric-grid { display: flex; justify-content: space-between; margin-bottom: 20px; border: 1px solid #ccc; padding: 15px; border-radius: 8px; } .metric-title { font-size: 12px; color: #666; } .metric-val { font-size: 20px; font-weight: bold; } table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 12px;} th, td { border: 1px solid #ddd; padding: 8px; text-align: left; } th { background-color: #f1f5f9; } }
     </style>
@@ -61,6 +69,7 @@
 <body>
 
 <div class="app-container" id="appWrapper">
+    
     <div id="tab-dash" class="page-section active">
         <div class="vault-card">
             <div class="vault-header"><span>🏦 Global Wealth Vault</span></div>
@@ -84,8 +93,8 @@
         </div>
 
         <div class="scoreboard-row">
-            <div class="score-box green-box"><div class="title">🟢 Safe Days</div><div class="score-num" id="safeDaysCount">0</div></div>
-            <div class="score-box red-box"><div class="title">🔴 Over Days</div><div class="score-num" id="overDaysCount">0</div></div>
+            <div class="score-box green-box" onclick="openBehaviorModal()"><div class="title">🟢 Safe Days</div><div class="score-num" id="safeDaysCount">0</div></div>
+            <div class="score-box red-box" onclick="openBehaviorModal()"><div class="title">🔴 Over Days</div><div class="score-num" id="overDaysCount">0</div></div>
         </div>
 
         <div class="balance-card">
@@ -130,13 +139,14 @@
     </div>
 
     <div id="tab-debt" class="page-section">
-        <div class="vault-card" style="border-color: rgba(248, 113, 113, 0.3);">
-            <div class="vault-header" style="color: var(--danger);"><span>🚨 STB Bank Loan</span><button onclick="editLoanRate()" style="background:none;border:none;color:var(--text-muted);">⚙️</button></div>
+        <div class="vault-card debt-card clickable" onclick="openSTBModal()">
+            <div class="vault-header" style="color: var(--danger);"><span>🚨 STB Bank Loan</span><span>Tap for Details ➔</span></div>
             <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
                 <div><div class="v-lbl">Unpaid Arrears</div><div class="v-val" id="l_arrears" style="font-size:20px; color:var(--danger);">0.00 TND</div></div>
                 <div style="text-align:right;"><div class="v-lbl">Daily Bleed</div><div class="v-val" id="l_bleed" style="font-size:14px; color:var(--warning);">0.00 TND</div></div>
             </div>
         </div>
+        
         <div class="vault-card" style="border-color: rgba(250, 204, 21, 0.4);">
             <div class="vault-header" style="color: var(--warning);"><span>💸 Payables (Money I Owe)</span><button onclick="addIOU('payable')" style="background:none;border:none;color:var(--text);font-size:16px;">➕</button></div>
             <div id="payablesList" style="margin-top: 10px;"></div>
@@ -148,6 +158,12 @@
     </div>
 
     <div id="tab-expenses" class="page-section">
+        <div class="vault-card" style="border-color: rgba(74, 222, 128, 0.5); text-align: center; padding: 25px 15px;">
+            <div class="title" style="color: var(--success);">Total Capital Saved</div>
+            <div style="font-size: 38px; font-weight: 800; color: var(--success);" id="uiCapitalSaved">0.00 TND</div>
+            <div style="font-size: 10px; color: var(--text-muted); margin-top: 5px;">Surplus accumulated across all modes.</div>
+        </div>
+
         <div class="vault-card">
             <div class="title" style="border-bottom: 1px solid var(--panel-border); padding-bottom: 4px;">Category Breakdown</div>
             <div style="display:flex; gap:10px; margin: 10px 0;"><button class="v-btn" style="flex:1" onclick="renderChart(7)">7 Days</button><button class="v-btn" style="flex:1" onclick="renderChart(30)">30 Days</button><button class="v-btn" style="flex:1" onclick="renderChart(9999)">All Time</button></div>
@@ -209,27 +225,51 @@
 </div>
 
 <div class="modal-overlay" id="editModal"><div class="modal-content"><div class="title" style="text-align:center; font-size:12px; color:white;">Override Vault Balances</div><div class="modal-grid"><div class="modal-input-group"><label>IBKR (USD)</label><input type="number" id="m_ibkr" inputmode="decimal"></div><div class="modal-input-group"><label>Brightwell (USD)</label><input type="number" id="m_brightwell" inputmode="decimal"></div><div class="modal-input-group"><label>Wise (USD)</label><input type="number" id="m_wise" inputmode="decimal"></div><div class="modal-input-group"><label>Cash (USD)</label><input type="number" id="m_cash_usd" inputmode="decimal"></div><div class="modal-input-group"><label>Cash (TND)</label><input type="number" id="m_cash_tnd" inputmode="decimal"></div><div class="modal-input-group"><label>Savings (TND)</label><input type="number" id="m_savings" inputmode="decimal"></div></div><div class="modal-btn-row"><button class="btn-secondary" onclick="document.getElementById('editModal').style.display='none'">Cancel</button><button class="v-btn" style="background:var(--success);" onclick="saveEditModal()">Save</button></div></div></div>
+
+<div class="modal-overlay" id="behaviorModal"><div class="modal-content"><div class="title" style="text-align:center; font-size:12px; color:white;">Behavioral Insights</div>
+    <div style="font-size:10px; color:var(--text-muted); text-align:center; margin-bottom:15px;">Analyzing <span id="b_modeName"></span> Mode</div>
+    <div class="b-stat">Current Safe Streak <span id="b_curStreak">0 Days</span></div>
+    <div class="b-stat">Max Safe Streak <span id="b_maxStreak">0 Days</span></div>
+    <div class="b-stat" style="border-color:rgba(248,113,113,0.3);">Average Overage <span id="b_avgOver" style="color:var(--danger);">0.00</span></div>
+    <div class="b-stat" style="border-color:rgba(250,204,21,0.3);">Danger Day (Most Overs) <span id="b_dangerDay" style="color:var(--warning);">N/A</span></div>
+    <div class="title" style="margin-top:15px;">The Extremes</div>
+    <div style="background:rgba(248,113,113,0.1); padding:10px; border-radius:10px; margin-bottom:10px;">
+        <div style="font-size:10px; color:var(--danger); font-weight:bold;">Highest Overage Day</div>
+        <div id="b_highDay" style="font-size:12px; margin-top:4px;">No data</div>
+        <div id="b_highItem" style="font-size:10px; color:var(--text-muted); margin-top:2px;"></div>
+    </div>
+    <div style="background:rgba(74,222,128,0.1); padding:10px; border-radius:10px;">
+        <div style="font-size:10px; color:var(--success); font-weight:bold;">Lowest Safe Spend Day (Active)</div>
+        <div id="b_lowDay" style="font-size:12px; margin-top:4px;">No data</div>
+        <div id="b_lowItem" style="font-size:10px; color:var(--text-muted); margin-top:2px;"></div>
+    </div>
+    <button class="btn-secondary" style="margin-top:20px;" onclick="document.getElementById('behaviorModal').style.display='none'">Close Insights</button>
+</div></div>
+
+<div class="modal-overlay" id="stbModal"><div class="modal-content"><div class="title" style="text-align:center; font-size:12px; color:var(--danger);">STB Debt Command</div>
+    <div style="display:flex; justify-content:space-between; margin-top:15px; background:var(--vault-bg); padding:10px; border-radius:10px;">
+        <div><div style="font-size:10px; color:var(--text-muted);">Current Arrears</div><div style="font-size:16px; font-weight:bold; color:var(--danger);" id="stb_arrearsModal">0.00 TND</div></div>
+        <div style="text-align:right;"><div style="font-size:10px; color:var(--text-muted);">Interest Rate</div><div style="font-size:16px; font-weight:bold;"><span id="stb_rateModal">13.5</span>% <button onclick="editSTBRate()" style="background:none;border:none;color:var(--accent);font-size:10px;padding:0;">Edit</button></div></div>
+    </div>
+    <div class="b-stat" style="margin-top:10px;">Months left until Nov 2026: <span id="stb_monthsLeft">0</span></div>
+    <div class="b-stat">Monthly "Kill Shot" Req.: <span id="stb_killShot">0.00 TND</span></div>
+    <div class="b-stat" style="border-color:rgba(248,113,113,0.3);">Total Projected Interest: <span id="stb_projInt" style="color:var(--danger);">0.00 TND</span></div>
+    <div style="margin-top:20px; border-top:1px dashed var(--panel-border); padding-top:15px;">
+        <div class="title">Log Direct Payment</div>
+        <input type="number" id="stbPayAmt" placeholder="Amount (TND)" style="margin-bottom:8px;">
+        <select id="stbPayWallet" style="margin-bottom:10px;"><option value="brightwell">Deduct from: Brightwell (Convert via FX)</option><option value="savings">Deduct from: Savings TND</option><option value="none">External/No Deduction</option></select>
+        <button class="v-btn" style="width:100%; background:var(--danger);" onclick="logSTBPayment()">Submit Payment</button>
+    </div>
+    <button class="btn-secondary" style="margin-top:10px;" onclick="document.getElementById('stbModal').style.display='none'">Close</button>
+</div></div>
+
 <div id="printArea"></div>
 
 <script>
-    // --- MASTER STATE ARCHITECTURE ---
-    const DEFAULT_STATE = {
-        vault: { ibkr: 0, brightwell: 0, wise: 0, cash_usd: 0, cash_tnd: 0, savings: 0, ibkr_fees: 0, lifetime_fees: 0 },
-        loan: { arrears: 20000, rate: 13.5 },
-        ious: { payables: [], receivables: [] },
-        history: {
-            vacation: { archive: [], current: [], limit: 35.00, balance: 35.00 },
-            onboard: { archive: [], current: [], limit: 7.25, balance: 7.25 }
-        },
-        capital_saved: 0,
-        fx_rate: 2.93,
-        mode: 'vacation'
-    };
-
+    const DEFAULT_STATE = { vault: { ibkr: 0, brightwell: 0, wise: 0, cash_usd: 0, cash_tnd: 0, savings: 0, ibkr_fees: 0, lifetime_fees: 0 }, loan: { arrears: 20000, rate: 13.5 }, ious: { payables: [], receivables: [] }, history: { vacation: { archive: [], current: [], limit: 35.00, balance: 35.00 }, onboard: { archive: [], current: [], limit: 7.25, balance: 7.25 } }, capital_saved: 0, fx_rate: 2.93, mode: 'vacation' };
     let s = JSON.parse(localStorage.getItem('CrewWalletMaster')) || DEFAULT_STATE;
     function saveState() { localStorage.setItem('CrewWalletMaster', JSON.stringify(s)); renderApp(); }
 
-    // --- TAB SWITCHER ---
     function switchTab(tabId) {
         document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
@@ -240,23 +280,19 @@
         if(tabId === 'settings') populateSettings();
     }
 
-    // --- CORE LOGIC ---
     function renderApp() {
         document.getElementById('v_ibkr').innerText = '$' + s.vault.ibkr.toFixed(2); document.getElementById('v_ibkr_fees').innerText = 'Fees: $' + s.vault.ibkr_fees.toFixed(2);
         document.getElementById('v_brightwell').innerText = '$' + s.vault.brightwell.toFixed(2); document.getElementById('v_wise').innerText = '$' + s.vault.wise.toFixed(2);
         document.getElementById('v_cash_usd').innerText = '$' + s.vault.cash_usd.toFixed(2); document.getElementById('v_cash_tnd').innerText = s.vault.cash_tnd.toFixed(2) + ' TND'; document.getElementById('v_savings').innerText = s.vault.savings.toFixed(2) + ' TND';
-        
         document.getElementById('l_arrears').innerText = s.loan.arrears.toFixed(2) + ' TND';
         document.getElementById('l_bleed').innerText = ((s.loan.arrears * (s.loan.rate / 100)) / 365).toFixed(2) + ' TND';
+        document.getElementById('uiCapitalSaved').innerText = s.capital_saved.toFixed(2) + ' TND';
 
-        let curHist = s.history[s.mode];
-        let sym = s.mode === 'vacation' ? ' TND' : ' USD';
-        let pre = s.mode === 'onboard' ? '$' : '';
+        let curHist = s.history[s.mode]; let sym = s.mode === 'vacation' ? ' TND' : ' USD'; let pre = s.mode === 'onboard' ? '$' : '';
         document.getElementById('balanceTitle').innerText = `Remaining Today (${s.mode === 'vacation' ? 'Vacation' : 'Onboard'})`;
         document.getElementById('balanceDisplay').innerText = pre + curHist.balance.toFixed(2) + sym;
         
-        let diff = curHist.balance;
-        const badge = document.getElementById('surplusBadge');
+        let diff = curHist.balance; const badge = document.getElementById('surplusBadge');
         badge.innerText = (diff >= 0 ? '+' : '') + diff.toFixed(2);
         badge.style.color = diff >= 0 ? 'var(--success)' : 'var(--danger)'; badge.style.background = diff >= 0 ? 'rgba(74,222,128,0.1)' : 'rgba(248,113,113,0.1)';
         
@@ -282,47 +318,32 @@
         renderIOUs();
     }
 
-    // --- MANUAL CLOSE OUT DAY ---
     function closeOutDay() {
-        if (!confirm("End the day now? This will archive today's logs and reset your dial for tomorrow.")) return;
+        if (!confirm("End the day now? This archives today's logs and resets your dial.")) return;
         let curHist = s.history[s.mode];
         if (curHist.current.length > 0) {
-            let surplus = curHist.balance;
-            let surplusTND = s.mode === 'onboard' ? surplus * s.fx_rate : surplus;
-            s.capital_saved += surplusTND;
-            curHist.archive.push({ date: new Date().toDateString(), logs: [...curHist.current] });
+            let surplus = curHist.balance; let surplusTND = s.mode === 'onboard' ? surplus * s.fx_rate : surplus;
+            s.capital_saved += surplusTND; curHist.archive.push({ date: new Date().toDateString(), logs: [...curHist.current] });
         }
-        curHist.current = [];
-        curHist.balance = curHist.limit;
-        saveState();
-        alert("Day closed successfully. Dial reset.");
+        curHist.current = []; curHist.balance = curHist.limit; saveState();
     }
 
-    // --- LOGGING ---
     function logExpense() {
         const cost = parseFloat(document.getElementById('customAmount').value); if (isNaN(cost) || cost <= 0) return;
         const src = document.getElementById('advSourceWallet').value; const bypass = (src !== 'default');
         let targetWallet = s.mode === 'vacation' ? 'cash_tnd' : 'cash_usd'; if (bypass) targetWallet = src;
-        
-        s.vault[targetWallet] -= cost;
-        if (!bypass) s.history[s.mode].balance -= cost;
-        
+        s.vault[targetWallet] -= cost; if (!bypass) s.history[s.mode].balance -= cost;
         s.history[s.mode].current.push({ amount: cost, tag: document.getElementById('customDescription').value.trim() || "💸 Expense", category: document.getElementById('advCategory').value, location: document.getElementById('advLocation').value.trim(), items: document.getElementById('advItems').value.trim(), whom: document.getElementById('advWhom').value.trim(), walletSource: targetWallet, bypassLimit: bypass, fxRate: s.fx_rate, ts: Date.now() });
-        
-        document.getElementById('customDescription').value = ''; document.getElementById('customAmount').value = ''; document.getElementById('advLocation').value = ''; document.getElementById('advItems').value = ''; document.getElementById('advWhom').value = ''; document.getElementById('advMain').style.display = 'none'; document.getElementById('advSourceWallet').value = 'default';
-        saveState();
+        document.getElementById('customDescription').value = ''; document.getElementById('customAmount').value = ''; document.getElementById('advLocation').value = ''; document.getElementById('advItems').value = ''; document.getElementById('advWhom').value = ''; document.getElementById('advMain').style.display = 'none'; document.getElementById('advSourceWallet').value = 'default'; saveState();
     }
 
     function editExpense(idx) {
-        let item = s.history[s.mode].current[idx]; 
-        if(!item.bypassLimit) s.history[s.mode].balance += item.amount;
+        let item = s.history[s.mode].current[idx]; if(!item.bypassLimit) s.history[s.mode].balance += item.amount;
         if(item.walletSource && s.vault[item.walletSource] !== undefined) s.vault[item.walletSource] += item.amount; 
-        
         document.getElementById('customDescription').value = item.tag; document.getElementById('customAmount').value = item.amount; document.getElementById('advCategory').value = item.category; document.getElementById('advSourceWallet').value = item.bypassLimit ? item.walletSource : 'default'; document.getElementById('advLocation').value = item.location || ''; document.getElementById('advItems').value = item.items || ''; document.getElementById('advWhom').value = item.whom || ''; document.getElementById('advMain').style.display = 'flex';
         s.history[s.mode].current.splice(idx, 1); saveState(); document.getElementById('customAmount').focus(); 
     }
 
-    // --- VAULT ACTIONS ---
     function saveEditModal() { ['ibkr','brightwell','wise','cash_usd','cash_tnd','savings'].forEach(k => s.vault[k] = parseFloat(document.getElementById('m_'+k).value) || 0); document.getElementById('editModal').style.display='none'; saveState(); }
     function vaultIncome() { let pay = parseFloat(prompt("Total Paycheck (USD):")); if(isNaN(pay) || pay <= 0) return; let toLoanTND = (pay * 0.40) * s.fx_rate; let toSavingsTND = (pay * 0.15) * s.fx_rate; let toVaultUSD = pay * 0.45; s.loan.arrears -= toLoanTND; if(s.loan.arrears < 0) s.loan.arrears = 0; s.vault.savings += toSavingsTND; s.vault.brightwell += toVaultUSD; saveState(); }
     function vaultDeposit() { let amount = parseFloat(prompt("Deposit amount:")); if(isNaN(amount) || amount <= 0) return; let t = prompt("Target? 1: Savings TND, 2: Cash TND, 3: Cash USD, 4: Brightwell"); if(t==='1') s.vault.savings+=amount; else if(t==='2') s.vault.cash_tnd+=amount; else if(t==='3') s.vault.cash_usd+=amount; else if(t==='4') s.vault.brightwell+=amount; saveState(); }
@@ -331,7 +352,89 @@
     function vaultATM() { let tndReq = parseFloat(prompt("TND to withdraw:")); if(isNaN(tndReq) || tndReq <= 0) return; if(s.vault.savings >= tndReq) { s.vault.savings -= tndReq; s.vault.cash_tnd += tndReq; saveState(); } else { let usdCharge = parseFloat(prompt(`Savings empty. USD from Brightwell:`)); if(!isNaN(usdCharge) && usdCharge > 0) { s.vault.brightwell -= usdCharge; s.vault.cash_tnd += tndReq; saveState(); } } }
     function vaultExchange() { let usdGiven = parseFloat(prompt("USD given:")); if(isNaN(usdGiven) || usdGiven <= 0) return; let tndRec = parseFloat(prompt("TND received:")); if(!isNaN(tndRec) && tndRec > 0) { s.vault.cash_usd -= usdGiven; s.vault.cash_tnd += tndRec; saveState(); } }
 
-    // --- IOUs ---
+    /* BEHAVIORAL ENGINE */
+    function openBehaviorModal() {
+        let arch = s.history[s.mode].archive;
+        document.getElementById('b_modeName').innerText = s.mode === 'vacation' ? '🏖️ Vacation' : '🚢 Onboard';
+        if (arch.length === 0) { alert("No archived days in this mode yet."); return; }
+        
+        let curStreak = 0, maxStreak = 0, totalOverage = 0, overCount = 0;
+        let highestOverage = -1, highestDay = null, lowestSafe = Infinity, lowestDay = null;
+        let daysOfWeek = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0}; // Sun-Sat
+        const daysMap = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+        arch.sort((a,b) => new Date(a.date) - new Date(b.date)).forEach(day => {
+            let tot = day.logs.reduce((sum, i) => sum + (i.bypassLimit ? 0 : i.amount), 0);
+            if (tot <= s.history[s.mode].limit) {
+                curStreak++; if(curStreak > maxStreak) maxStreak = curStreak;
+                if(tot > 0 && tot < lowestSafe) { lowestSafe = tot; lowestDay = day; }
+            } else {
+                curStreak = 0; overCount++;
+                let overAmt = tot - s.history[s.mode].limit; totalOverage += overAmt;
+                daysOfWeek[new Date(day.date).getDay()]++;
+                if(overAmt > highestOverage) { highestOverage = overAmt; highestDay = day; }
+            }
+        });
+
+        document.getElementById('b_curStreak').innerText = curStreak + " Days";
+        document.getElementById('b_maxStreak').innerText = maxStreak + " Days";
+        document.getElementById('b_avgOver').innerText = overCount > 0 ? (totalOverage/overCount).toFixed(2) : "0.00";
+        
+        let dangerIdx = Object.keys(daysOfWeek).reduce((a, b) => daysOfWeek[a] > daysOfWeek[b] ? a : b);
+        document.getElementById('b_dangerDay').innerText = overCount > 0 ? daysMap[dangerIdx] : "None";
+
+        if(highestDay) {
+            let biggestItem = highestDay.logs.reduce((max, obj) => (!obj.bypassLimit && obj.amount > (max?.amount||0)) ? obj : max, null);
+            document.getElementById('b_highDay').innerText = `${highestDay.date} (+${highestOverage.toFixed(2)} Over)`;
+            document.getElementById('b_highItem').innerText = biggestItem ? `Biggest Expense: ${biggestItem.tag} (${biggestItem.amount})` : '';
+        } else { document.getElementById('b_highDay').innerText = "Perfect record!"; document.getElementById('b_highItem').innerText = ""; }
+
+        if(lowestDay) {
+            let biggestItem = lowestDay.logs.reduce((max, obj) => (!obj.bypassLimit && obj.amount > (max?.amount||0)) ? obj : max, null);
+            document.getElementById('b_lowDay').innerText = `${lowestDay.date} (Spent ${lowestSafe.toFixed(2)})`;
+            document.getElementById('b_lowItem').innerText = biggestItem ? `Biggest Expense: ${biggestItem.tag} (${biggestItem.amount})` : '';
+        } else { document.getElementById('b_lowDay').innerText = "No active safe days recorded."; document.getElementById('b_lowItem').innerText = ""; }
+
+        document.getElementById('behaviorModal').style.display = 'flex';
+    }
+
+    /* STB COMMAND CENTER */
+    function openSTBModal() {
+        document.getElementById('stb_arrearsModal').innerText = s.loan.arrears.toFixed(2) + " TND";
+        document.getElementById('stb_rateModal').innerText = s.loan.rate;
+        
+        let now = new Date(); let target = new Date(2026, 10, 1); // Nov 1, 2026
+        let mLeft = (target.getFullYear() - now.getFullYear()) * 12 + target.getMonth() - now.getMonth();
+        if(mLeft <= 0) mLeft = 1; // Fallback if overdue
+        document.getElementById('stb_monthsLeft').innerText = mLeft;
+
+        let p = s.loan.arrears; let r = (s.loan.rate / 100) / 12; let n = mLeft;
+        let pmt = p === 0 ? 0 : (p * (r * Math.pow(1 + r, n))) / (Math.pow(1 + r, n) - 1);
+        document.getElementById('stb_killShot').innerText = pmt.toFixed(2) + " TND";
+        
+        let totalInt = p === 0 ? 0 : (pmt * n) - p;
+        document.getElementById('stb_projInt').innerText = totalInt.toFixed(2) + " TND";
+        
+        document.getElementById('stbModal').style.display = 'flex';
+    }
+    
+    function editSTBRate() { let r = parseFloat(prompt("New Interest Rate (%):", s.loan.rate)); if(!isNaN(r)) { s.loan.rate = r; saveState(); openSTBModal(); } }
+
+    function logSTBPayment() {
+        let amtTND = parseFloat(document.getElementById('stbPayAmt').value); if(isNaN(amtTND) || amtTND <= 0) return;
+        let wallet = document.getElementById('stbPayWallet').value;
+        if (wallet === 'brightwell') {
+            let reqUSD = amtTND / s.fx_rate;
+            if(confirm(`Deduct $${reqUSD.toFixed(2)} from Brightwell to pay ${amtTND} TND?`)) { s.vault.brightwell -= reqUSD; } else return;
+        } else if (wallet === 'savings') {
+            if(confirm(`Deduct ${amtTND} TND from Savings?`)) { s.vault.savings -= amtTND; } else return;
+        }
+        s.loan.arrears -= amtTND; if(s.loan.arrears < 0) s.loan.arrears = 0;
+        document.getElementById('stbPayAmt').value = '';
+        saveState(); openSTBModal(); alert("Payment logged.");
+    }
+
+    // IOUS & REMAINDER OF UTILS
     function renderIOUs() {
         const pList = document.getElementById('payablesList'); pList.innerHTML = '';
         s.ious.payables.forEach(p => { pList.innerHTML += `<div class="iou-item"><div><div style="font-weight:bold;">${p.name}</div><div style="color:var(--warning); font-size:11px;">Owe: ${p.amount.toFixed(2)} ${p.currency}</div></div><div><button class="iou-btn" onclick="processIOU('payable', ${p.id})">Pay</button><button class="iou-del" onclick="deleteIOU('payable', ${p.id})">❌</button></div></div>`; });
@@ -342,7 +445,6 @@
     function processIOU(type, id) { let list = s.ious[type + 's']; let idx = list.findIndex(i => i.id === id); if(idx === -1) return; let item = list[idx]; let reduceAmount = parseFloat(prompt(`Clear how much of ${item.amount}?`)); if(isNaN(reduceAmount) || reduceAmount <= 0) return; let w = prompt(`Wallet?\n1: Brightwell\n2: Cash(USD)\n3: Wise\n4: Cash(TND)\n5: Savings`); let key = ""; if(w==='1') key='brightwell'; else if(w==='2') key='cash_usd'; else if(w==='3') key='wise'; else if(w==='4') key='cash_tnd'; else if(w==='5') key='savings'; else return; let walletDeduct = parseFloat(prompt(`Amount deducted/added to ${key}:`, reduceAmount)); if(isNaN(walletDeduct)) return; if(type === 'payable') s.vault[key] -= walletDeduct; else s.vault[key] += walletDeduct; item.amount -= reduceAmount; if(item.amount <= 0) list.splice(idx, 1); saveState(); }
     function deleteIOU(type, id) { if(confirm("Delete record?")) { s.ious[type + 's'] = s.ious[type + 's'].filter(i => i.id !== id); saveState(); } }
 
-    // --- EXPENSES & PDF ---
     function renderChart(days) {
         let vol = 0; let cats = {}; let cutoff = Date.now() - (days * 86400000);
         ['vacation', 'onboard'].forEach(m => { 
@@ -361,19 +463,12 @@
         html += `</table></div>`; document.getElementById('printArea').innerHTML = html; window.print();
     }
 
-    // --- TIME MACHINE ---
     function loadPastDay() {
-        let targetStr = new Date(document.getElementById('tmDate').value.split('-').join('/')).toDateString(); // Safe parse
-        let listNode = document.getElementById('tmList'); listNode.innerHTML = '';
-        let found = false;
+        let dVal = document.getElementById('tmDate').value; if(!dVal) return; let targetStr = new Date(dVal.split('-').join('/')).toDateString(); 
+        let listNode = document.getElementById('tmList'); listNode.innerHTML = ''; let found = false;
         ['vacation', 'onboard'].forEach(m => {
             let dayData = s.history[m].archive.find(a => a.date === targetStr);
-            if(dayData) {
-                found = true;
-                dayData.logs.forEach((item, idx) => {
-                    listNode.innerHTML += `<div class="history-item"><div><div style="font-weight:600;">${item.tag} <span class="cat-badge">${item.category}</span></div><div style="font-size:9px;">[${m.toUpperCase()}] ${item.walletSource} ${item.bypassLimit?'(Bypass)':''}</div></div><div><span style="color:var(--danger); font-weight:bold;">-${item.amount.toFixed(2)}</span><button class="edit-btn" onclick="deletePastExpense('${m}', '${targetStr}', ${idx})">❌</button></div></div>`;
-                });
-            }
+            if(dayData) { found = true; dayData.logs.forEach((item, idx) => { let bypassNote = item.bypassLimit ? `<span style="color:var(--warning); font-size:9px;">(Bypass)</span>` : ''; listNode.innerHTML += `<div class="history-item"><div><div style="font-weight:600;">${item.tag} <span class="cat-badge">${item.category}</span></div><div style="font-size:9px;">[${m.toUpperCase()}] ${item.walletSource} ${bypassNote}</div></div><div><span style="color:var(--danger); font-weight:bold;">-${item.amount.toFixed(2)}</span><button class="edit-btn" onclick="deletePastExpense('${m}', '${targetStr}', ${idx})">❌</button></div></div>`; }); }
         });
         if(!found) listNode.innerHTML = '<div style="font-size:11px;text-align:center;">No logs found.</div>';
     }
@@ -381,20 +476,12 @@
     function logPastExpense() {
         let dVal = document.getElementById('tmDate').value; if(!dVal) return; let targetStr = new Date(dVal.split('-').join('/')).toDateString();
         let cost = parseFloat(document.getElementById('tmAmount').value); let tag = document.getElementById('tmTag').value.trim() || '💸 Past Item'; if(isNaN(cost) || cost <= 0) return;
-        
-        let src = document.getElementById('tmSourceWallet').value; let bypass = (src !== 'default');
-        let m = document.getElementById('setMode').value; // Uses current dropdown mode for new past days
+        let src = document.getElementById('tmSourceWallet').value; let bypass = (src !== 'default'); let m = document.getElementById('setMode').value; 
         let targetWallet = m === 'vacation' ? 'cash_tnd' : 'cash_usd'; if (bypass) targetWallet = src;
-        
-        s.vault[targetWallet] -= cost;
-        let dayIdx = s.history[m].archive.findIndex(a => a.date === targetStr);
-        let costTND = m === 'onboard' ? cost * s.fx_rate : cost;
-        
+        s.vault[targetWallet] -= cost; let dayIdx = s.history[m].archive.findIndex(a => a.date === targetStr); let costTND = m === 'onboard' ? cost * s.fx_rate : cost;
         if (!bypass) { if (dayIdx === -1) s.capital_saved += ((s.history[m].limit * (m==='onboard'?s.fx_rate:1)) - costTND); else s.capital_saved -= costTND; }
         let newLog = { amount: cost, tag: tag, category: document.getElementById('tmCategory').value, location: document.getElementById('tmLocation').value.trim(), items: document.getElementById('tmItems').value.trim(), whom: document.getElementById('tmWhom').value.trim(), walletSource: targetWallet, bypassLimit: bypass, fxRate: s.fx_rate, ts: new Date(dVal.split('-').join('/')).getTime() };
-        
         if(dayIdx === -1) s.history[m].archive.push({ date: targetStr, logs: [newLog] }); else s.history[m].archive[dayIdx].logs.push(newLog);
-        
         document.getElementById('tmAmount').value = ''; document.getElementById('advTM').style.display = 'none'; saveState(); loadPastDay();
     }
 
@@ -408,26 +495,14 @@
         }
     }
 
-    // --- SETTINGS & BACKUP ---
-    function populateSettings() {
-        document.getElementById('setMode').value = s.mode;
-        document.getElementById('setVacLimit').value = s.history.vacation.limit;
-        document.getElementById('setOnbLimit').value = s.history.onboard.limit;
-        document.getElementById('setFX').value = s.fx_rate;
-    }
+    function populateSettings() { document.getElementById('setMode').value = s.mode; document.getElementById('setVacLimit').value = s.history.vacation.limit; document.getElementById('setOnbLimit').value = s.history.onboard.limit; document.getElementById('setFX').value = s.fx_rate; }
     function changeMode() { s.mode = document.getElementById('setMode').value; saveState(); }
     function updateLimits() { s.history.vacation.limit = parseFloat(document.getElementById('setVacLimit').value) || 35; s.history.onboard.limit = parseFloat(document.getElementById('setOnbLimit').value) || 7.25; saveState(); }
     function updateFX() { s.fx_rate = parseFloat(document.getElementById('setFX').value) || 2.93; saveState(); }
     async function fetchLiveFX() { try { const res = await fetch('https://open.er-api.com/v6/latest/USD'); const data = await res.json(); if (data?.rates?.TND) { s.fx_rate = parseFloat(data.rates.TND); populateSettings(); saveState(); alert("FX updated to " + s.fx_rate); } } catch (e) { alert("Offline"); } }
     
-    function exportData() {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(s));
-        const dlAnchorElem = document.createElement('a'); dlAnchorElem.setAttribute("href", dataStr); dlAnchorElem.setAttribute("download", `CrewWallet_Backup_${new Date().toISOString().split('T')[0]}.json`); dlAnchorElem.click();
-    }
-    function importData(event) {
-        const file = event.target.files[0]; if(!file) return;
-        const reader = new FileReader(); reader.onload = function(e) { try { const imported = JSON.parse(e.target.result); if(imported.vault && imported.history) { s = imported; saveState(); alert("✅ Backup Restored Successfully!"); } else alert("Invalid Backup File"); } catch(err) { alert("Error reading file"); } }; reader.readAsText(file);
-    }
+    function exportData() { const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(s)); const dlAnchorElem = document.createElement('a'); dlAnchorElem.setAttribute("href", dataStr); dlAnchorElem.setAttribute("download", `CrewWallet_Backup_${new Date().toISOString().split('T')[0]}.json`); dlAnchorElem.click(); }
+    function importData(event) { const file = event.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = function(e) { try { const imported = JSON.parse(e.target.result); if(imported.vault && imported.history) { s = imported; saveState(); alert("✅ Backup Restored Successfully!"); } else alert("Invalid Backup File"); } catch(err) { alert("Error reading file"); } }; reader.readAsText(file); }
     function factoryReset() { if (prompt("Type RESET to wipe everything:") === "RESET") { localStorage.clear(); location.reload(); } }
 
     renderApp();
