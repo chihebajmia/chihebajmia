@@ -1,7 +1,8 @@
 {
   "name": "Crew Wallet Master",
   "short_name": "Vault",
-  "start_url": "/index.html",
+  "start_url": "/chihebajmia/",
+  "scope": "/chihebajmia/",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#38bdf8",
