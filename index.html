@@ -7,15 +7,14 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0f172a">
     <link rel="manifest" href="manifest.json">
-    <base href="/chihebajmia/">
     <title>Crew Wallet Master</title>
     <style>
-        :root { --bg-color: #0f172a; --card-bg: #1e293b; --accent: #38bdf8; --text: #f8fafc; --text-muted: #94a3b8; --success: #4ade80; --warning: #facc15; --danger: #f87171; --panel-border: #334155; --vault-bg: rgba(15, 23, 42, 0.5); }
+        :root { --bg-color: #0f172a; --card-bg: #1e293b; --accent: #fbbf24; --text: #f8fafc; --text-muted: #94a3b8; --success: #4ade80; --warning: #facc15; --danger: #f87171; --panel-border: #334155; --vault-bg: rgba(15, 23, 42, 0.5); }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-color); color: var(--text); margin: 0; padding: 16px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; -webkit-tap-highlight-color: transparent; padding-bottom: 90px; }
         .app-container { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 14px; }
         .page-section { display: none; flex-direction: column; gap: 14px; } .page-section.active { display: flex; }
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card-bg); border-top: 1px solid var(--panel-border); display: flex; justify-content: space-around; padding: 10px 0; padding-bottom: calc(10px + env(safe-area-inset-bottom)); z-index: 50; }
-        .nav-btn { background: none; border: none; color: var(--text-muted); font-size: 10px; font-weight: bold; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; flex: 1; }
+        .nav-btn { background: none; border: none; color: var(--text-muted); font-size: 10px; font-weight: bold; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; flex: 1; transition: color 0.2s;}
         .nav-btn.active { color: var(--accent); } .nav-icon { font-size: 22px; }
         .vault-card { background-color: var(--card-bg); border-radius: 16px; padding: 16px; border: 1px solid var(--panel-border); transition: transform 0.1s;}
         .vault-card.clickable:active { transform: scale(0.98); border-color: var(--accent); }
@@ -40,13 +39,13 @@
         .input-row { display: flex; gap: 8px; align-items: center; }
         input, select { background-color: #0f172a; border: 1px solid var(--panel-border); border-radius: 10px; padding: 12px; color: var(--text); font-size: 14px; outline: none; box-sizing: border-box; width: 100%; -webkit-appearance: none;}
         .flex-main { flex: 2; width: 50%; } .flex-side { flex: 1; width: 25%; text-align: center; }
-        .btn-action { background-color: var(--accent); color: #0f172a; border: none; border-radius: 10px; padding: 12px; font-size: 14px; font-weight: 700; cursor: pointer; }
+        .btn-action { background-color: var(--accent); color: #0f172a; border: none; border-radius: 10px; padding: 12px; font-size: 14px; font-weight: 700; cursor: pointer; transition: background-color 0.3s ease; }
         .expand-btn { background: none; border: 1px solid var(--panel-border); color: var(--text-muted); border-radius: 10px; padding: 12px; cursor: pointer; font-size: 14px; }
         .advanced-context-box { display: none; flex-direction: column; gap: 8px; background-color: var(--vault-bg); padding: 12px; border-radius: 10px; border: 1px dashed var(--panel-border); }
-        .history-card { background-color: var(--card-bg); border-radius: 16px; padding: 16px; max-height: 250px; overflow-y: auto; border: 1px solid var(--panel-border); }
-        .history-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--panel-border); font-size: 13px; } .history-item:last-child { border-bottom: none; }
+        .history-card { background-color: var(--card-bg); border-radius: 16px; padding: 16px; max-height: 280px; overflow-y: auto; border: 1px solid var(--panel-border); }
+        .history-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--panel-border); font-size: 13px; animation: fadeIn 0.3s ease;} .history-item:last-child { border-bottom: none; }
         .history-details { font-size: 10px; color: var(--text-muted); margin-top: 4px; line-height: 1.3; }
-        .edit-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 0 4px; font-size: 12px; }
+        .edit-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 0 4px; font-size: 14px; transition: transform 0.1s; } .edit-btn:active { transform: scale(0.8); }
         .cat-badge { background: #334155; color: white; padding: 2px 6px; border-radius: 4px; font-size: 8px; margin-left: 6px; vertical-align: middle; }
         .chart-row { display: flex; align-items: center; justify-content: space-between; font-size: 11px; margin: 6px 0; }
         .chart-bar-bg { flex: 1; background-color: #0f172a; height: 6px; border-radius: 3px; margin: 0 8px; overflow: hidden; }
@@ -54,16 +53,18 @@
         .btn-secondary { background-color: var(--card-bg); color: var(--text-muted); border: 1px solid var(--panel-border); border-radius: 12px; padding: 10px; font-size: 12px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 5px; }
         .iou-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--vault-bg); border-radius: 8px; margin-bottom: 8px; border: 1px solid var(--panel-border); }
         .iou-btn { background: var(--accent); color: #000; border: none; border-radius: 6px; padding: 6px 12px; font-size: 10px; font-weight: bold; cursor: pointer; }
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
-        .modal-content { background-color: var(--card-bg); border-radius: 16px; padding: 20px; width: 100%; max-width: 350px; border: 1px solid var(--panel-border); max-height: 80vh; overflow-y: auto;}
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; backdrop-filter: blur(4px); }
+        .modal-content { background-color: var(--card-bg); border-radius: 16px; padding: 20px; width: 100%; max-width: 350px; border: 1px solid var(--panel-border); max-height: 85vh; overflow-y: auto; animation: slideUp 0.3s ease; }
         .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;}
         .modal-input-group { display: flex; flex-direction: column; gap: 4px; }
         .modal-input-group label { font-size: 10px; color: var(--text-muted); font-weight: bold;}
         .modal-btn-row { display: flex; gap: 10px; margin-top: 20px; }
         .b-stat { background: var(--vault-bg); padding: 10px; border-radius: 10px; margin-bottom: 10px; border: 1px solid var(--panel-border); font-size: 12px;}
         .b-stat span { color: var(--accent); font-weight: bold; float: right;}
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         #printArea { display: none; }
-        @media print { body > * { display: none !important; } #printArea { display: block !important; position: absolute; left: 0; top: 0; width: 100%; background: white; color: #0f172a; padding: 20px; box-sizing: border-box; } #printArea h1 { font-size: 24px; border-bottom: 2px solid #38bdf8; padding-bottom: 10px; margin-top:0;} .metric-grid { display: flex; justify-content: space-between; margin-bottom: 20px; border: 1px solid #ccc; padding: 15px; border-radius: 8px; } .metric-title { font-size: 12px; color: #666; } .metric-val { font-size: 20px; font-weight: bold; } table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 12px;} th, td { border: 1px solid #ddd; padding: 8px; text-align: left; } th { background-color: #f1f5f9; } }
+        @media print { body > * { display: none !important; } #printArea { display: block !important; position: absolute; left: 0; top: 0; width: 100%; background: white; color: #0f172a; padding: 20px; box-sizing: border-box; } #printArea h1 { font-size: 24px; border-bottom: 2px solid var(--accent); padding-bottom: 10px; margin-top:0;} .metric-grid { display: flex; justify-content: space-between; margin-bottom: 20px; border: 1px solid #ccc; padding: 15px; border-radius: 8px; } .metric-title { font-size: 12px; color: #666; } .metric-val { font-size: 20px; font-weight: bold; } table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 12px;} th, td { border: 1px solid #ddd; padding: 8px; text-align: left; } th { background-color: #f1f5f9; } }
     </style>
 </head>
 <body>
@@ -71,8 +72,15 @@
 <div class="app-container" id="appWrapper">
     
     <div id="tab-dash" class="page-section active">
-        <div class="vault-card">
-            <div class="vault-header"><span>🏦 Global Wealth Vault</span></div>
+        <div class="vault-card" style="border-color: var(--accent); position: relative; overflow: hidden;">
+            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: var(--accent);"></div>
+            <div class="vault-header" style="margin-top: 8px;"><span>🏦 Global Wealth Vault</span></div>
+            
+            <div style="text-align: center; margin-bottom: 15px; padding: 10px; background: var(--vault-bg); border-radius: 12px; border: 1px solid var(--panel-border);">
+                <div class="title" style="color:var(--accent); font-size: 9px;">Liquid Runway (Remaining Power)</div>
+                <div style="font-size:22px; font-weight:800; color: var(--text);" id="uiRunway">0 Days</div>
+            </div>
+
             <div class="vault-grid">
                 <div class="vault-item"><span class="v-lbl">IBKR (USD)</span><span class="v-val" id="v_ibkr">0.00</span><div class="v-sub" id="v_ibkr_fees">Fees: $0</div></div>
                 <div class="vault-item"><span class="v-lbl">Brightwell ($)</span><span class="v-val" id="v_brightwell">0.00</span></div>
@@ -87,7 +95,7 @@
                 <button class="v-btn" style="background:#ca8a04;" onclick="vaultWise()">🦉 Wise</button>
                 <button class="v-btn" onclick="vaultExchange()">💱 Exchange</button>
                 <button class="v-btn" onclick="vaultIBKR()">📈 IBKR</button>
-                <button class="v-btn" onclick="vaultATM()">🏧 ATM</button>
+                <button class="v-btn" style="background:var(--accent); color:#000;" onclick="openATMModal()">🏧 ATM</button>
             </div>
             <button style="background:none; border:none; color:var(--text-muted); font-size:10px; cursor:pointer; width:100%; text-align:center; margin-top:12px; text-decoration:underline;" onclick="document.getElementById('editModal').style.display='flex'">✏️ Manual Override Balances</button>
         </div>
@@ -115,6 +123,7 @@
             <div class="advanced-context-box" id="advMain">
                 <select id="advSourceWallet">
                     <option value="default">💰 Deduct from: Daily Pocket Cash</option>
+                    <option value="cash_tnd">💵 Deduct from: Cash TND (Bypasses Limit)</option>
                     <option value="brightwell">💳 Deduct from: Brightwell (Bypasses Limit)</option>
                     <option value="wise">🦉 Deduct from: Wise (Bypasses Limit)</option>
                     <option value="savings">🏦 Deduct from: Savings TND (Bypasses Limit)</option>
@@ -127,7 +136,8 @@
                     <option value="Utilities & Tech">📡 Utilities & Tech</option>
                     <option value="Clothing & Gear">👕 Clothing & Gear</option>
                     <option value="Home Improvement">🛠️ Home Improvement</option>
-                    <option value="Financial & Fees">🏦 Financial & Fees</option>
+                    <option value="💨 Vape">💨 Vape</option>
+                    <option value="🏦 Financial & Fees">🏦 Financial & Fees</option>
                 </select>
                 <input type="text" id="advLocation" placeholder="📍 Location" enterkeyhint="done">
                 <input type="text" id="advItems" placeholder="🛒 Exact items" enterkeyhint="done">
@@ -164,6 +174,15 @@
             <div style="font-size: 10px; color: var(--text-muted); margin-top: 5px;">Surplus accumulated across all modes.</div>
         </div>
 
+        <div class="vault-card" style="border-color: #8b5cf6;">
+            <div class="title" style="color:#8b5cf6; border-bottom: 1px solid var(--panel-border); padding-bottom: 4px;">💨 Vape Analytics (All Time)</div>
+            <div style="display:flex; justify-content:space-between; margin-top:10px;">
+                <div style="text-align:center; flex:1;"><div class="v-lbl">Total Spent</div><div class="v-val" id="vapeTotal">0.00</div></div>
+                <div style="text-align:center; flex:1; border-left:1px solid var(--panel-border);"><div class="v-lbl">Avg Frequency</div><div class="v-val" id="vapeFreq" style="color:var(--warning);">0 Days</div></div>
+            </div>
+            <div style="font-size:9px; color:var(--text-muted); text-align:center; margin-top:8px;" id="vapeLast">Last purchase: N/A</div>
+        </div>
+
         <div class="vault-card">
             <div class="title" style="border-bottom: 1px solid var(--panel-border); padding-bottom: 4px;">Category Breakdown</div>
             <div style="display:flex; gap:10px; margin: 10px 0;"><button class="v-btn" style="flex:1" onclick="renderChart(7)">7 Days</button><button class="v-btn" style="flex:1" onclick="renderChart(30)">30 Days</button><button class="v-btn" style="flex:1" onclick="renderChart(9999)">All Time</button></div>
@@ -186,8 +205,8 @@
                     <button class="btn-action" onclick="logPastExpense()">Add</button>
                 </div>
                 <div class="advanced-context-box" id="advTM">
-                    <select id="tmSourceWallet"><option value="default">💰 Default Pocket Cash</option><option value="brightwell">💳 Brightwell</option><option value="wise">🦉 Wise</option><option value="savings">🏦 Savings TND</option></select>
-                    <select id="tmCategory"><option value="Coffee & Drinks">☕ Coffee & Drinks</option><option value="Dining & Lifestyle">🍔 Dining & Lifestyle</option><option value="Groceries & Essentials">🛒 Groceries & Essentials</option><option value="Transit & Travel">🚗 Transit & Travel</option><option value="Utilities & Tech">📡 Utilities & Tech</option><option value="Clothing & Gear">👕 Clothing & Gear</option><option value="Home Improvement">🛠️ Home Improvement</option><option value="Financial & Fees">🏦 Financial & Fees</option></select>
+                    <select id="tmSourceWallet"><option value="default">💰 Default Pocket Cash</option><option value="cash_tnd">💵 Deduct from: Cash TND (Bypass)</option><option value="brightwell">💳 Brightwell</option><option value="wise">🦉 Wise</option><option value="savings">🏦 Savings TND</option></select>
+                    <select id="tmCategory"><option value="Coffee & Drinks">☕ Coffee & Drinks</option><option value="Dining & Lifestyle">🍔 Dining & Lifestyle</option><option value="Groceries & Essentials">🛒 Groceries & Essentials</option><option value="Transit & Travel">🚗 Transit & Travel</option><option value="Utilities & Tech">📡 Utilities & Tech</option><option value="Clothing & Gear">👕 Clothing & Gear</option><option value="Home Improvement">🛠️ Home Improvement</option><option value="💨 Vape">💨 Vape</option><option value="🏦 Financial & Fees">🏦 Financial & Fees</option></select>
                     <input type="text" id="tmLocation" placeholder="📍 Location"><input type="text" id="tmItems" placeholder="🛒 Exact items"><input type="text" id="tmWhom" placeholder="👥 For whom?">
                 </div>
             </div>
@@ -216,7 +235,6 @@
             <button class="btn-secondary" onclick="exportData()" style="color:var(--text);">💾 Export JSON Backup</button>
             <input type="file" id="importFile" style="display:none;" onchange="importData(event)" accept=".json">
             <button class="btn-secondary" onclick="document.getElementById('importFile').click()" style="color:var(--text);">📂 Restore from Backup</button>
-            
             <button class="btn-secondary" onclick="recalibrateMath()" style="margin-top: 10px; border-color: var(--warning); color: var(--warning);">🧮 Recalibrate Database Math</button>
             <button class="btn-secondary" onclick="factoryReset()" style="margin-top: 10px; border-color: var(--danger); color: var(--danger); background: rgba(248, 113, 113, 0.1);">🗑️ Factory Reset App</button>
         </div>
@@ -229,6 +247,35 @@
     <button class="nav-btn" id="nav-expenses" onclick="switchTab('expenses')"><span class="nav-icon">📊</span>Charts</button>
     <button class="nav-btn" id="nav-time" onclick="switchTab('time')"><span class="nav-icon">⏳</span>Logs</button>
     <button class="nav-btn" id="nav-settings" onclick="switchTab('settings')"><span class="nav-icon">⚙️</span>Setup</button>
+</div>
+
+<div class="modal-overlay" id="atmModal">
+    <div class="modal-content">
+        <div class="title" style="text-align:center; font-size:12px; color:var(--accent);">🏧 ATM Withdrawal Wizard</div>
+        <div style="font-size:9px; color:var(--text-muted); text-align:center; margin-bottom:15px;">Fees bypass daily limit and log to Financial & Fees.</div>
+        
+        <input type="number" id="atmAmt" placeholder="Withdrawal Amount (TND)" style="margin-top:5px; width:100%;" inputmode="decimal">
+        
+        <select id="atmSource" style="margin-top:10px; width:100%;">
+            <option value="savings">Source: Savings TND (0 Fee)</option>
+            <option value="brightwell">Source: Brightwell USD (FX + Fee)</option>
+            <option value="wise">Source: Wise USD (FX + Fee)</option>
+        </select>
+        
+        <select id="atmLoc" style="margin-top:10px; width:100%;" onchange="toggleATMFee()">
+            <option value="tunisia">Location: Tunisia (+10 TND Fee)</option>
+            <option value="intl">Location: International (Manual Fee)</option>
+        </select>
+        
+        <div id="atmFeeGroup" style="display:none; flex-direction:column; margin-top:10px;">
+            <input type="number" id="atmFee" placeholder="Manual ATM Fee (USD)" style="width:100%;" inputmode="decimal">
+        </div>
+
+        <div class="modal-btn-row">
+            <button class="btn-secondary" onclick="document.getElementById('atmModal').style.display='none'">Cancel</button>
+            <button class="v-btn" style="background:var(--accent); color:#000;" onclick="processATM()">Confirm Withdrawal</button>
+        </div>
+    </div>
 </div>
 
 <div class="modal-overlay" id="incomeModal">
@@ -306,7 +353,7 @@
 <div id="printArea"></div>
 
 <script>
-    const DEFAULT_STATE = { vault: { ibkr: 0, brightwell: 0, wise: 0, cash_usd: 0, cash_tnd: 0, savings: 0, ibkr_fees: 0, lifetime_fees: 0 }, loan: { arrears: 20000, rate: 13.5 }, ious: { payables: [], receivables: [] }, history: { vacation: { archive: [], current: [], limit: 35.00, balance: 35.00 }, onboard: { archive: [], current: [], limit: 7.25, balance: 7.25 } }, capital_saved: 0, fx_rate: 2.93, mode: 'vacation', income_logs: [] };
+    const DEFAULT_STATE = { vault: { ibkr: 0, brightwell: 0, wise: 0, cash_usd: 0, cash_tnd: 0, savings: 0, ibkr_fees: 0, lifetime_fees: 0 }, loan: { arrears: 20000, rate: 13.5 }, ious: { payables: [], receivables: [] }, history: { vacation: { archive: [], current: [], limit: 49.00, balance: 49.00 }, onboard: { archive: [], current: [], limit: 7.25, balance: 7.25 } }, capital_saved: 0, fx_rate: 2.93, mode: 'vacation', income_logs: [] };
     let s = JSON.parse(localStorage.getItem('CrewWalletMaster')) || DEFAULT_STATE;
     if(!s.income_logs) s.income_logs = []; 
     function saveState() { localStorage.setItem('CrewWalletMaster', JSON.stringify(s)); renderApp(); }
@@ -316,12 +363,21 @@
         document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
         document.getElementById('tab-' + tabId).classList.add('active');
         document.getElementById('nav-' + tabId).classList.add('active');
-        if(tabId === 'expenses') renderChart(30);
+        if(tabId === 'expenses') { renderChart(30); renderVapeStats(); }
         if(tabId === 'time') { loadPastDay(); renderIncomeLogs(); }
         if(tabId === 'settings') populateSettings();
     }
 
+    function applyTheme() {
+        if(s.mode === 'vacation') {
+            document.documentElement.style.setProperty('--accent', '#fbbf24'); // Gold
+        } else {
+            document.documentElement.style.setProperty('--accent', '#38bdf8'); // Blue
+        }
+    }
+
     function renderApp() {
+        applyTheme();
         document.getElementById('v_ibkr').innerText = '$' + s.vault.ibkr.toFixed(2); document.getElementById('v_ibkr_fees').innerText = 'Fees: $' + s.vault.ibkr_fees.toFixed(2);
         document.getElementById('v_brightwell').innerText = '$' + s.vault.brightwell.toFixed(2); document.getElementById('v_wise').innerText = '$' + s.vault.wise.toFixed(2);
         document.getElementById('v_cash_usd').innerText = '$' + s.vault.cash_usd.toFixed(2); document.getElementById('v_cash_tnd').innerText = s.vault.cash_tnd.toFixed(2) + ' TND'; document.getElementById('v_savings').innerText = s.vault.savings.toFixed(2) + ' TND';
@@ -329,36 +385,50 @@
         document.getElementById('l_bleed').innerText = ((s.loan.arrears * (s.loan.rate / 100)) / 365).toFixed(2) + ' TND';
         document.getElementById('uiCapitalSaved').innerText = s.capital_saved.toFixed(2) + ' TND';
 
+        // Liquid Runway Calculation
+        let totalLiquid = (s.vault.cash_usd * s.fx_rate) + s.vault.cash_tnd + s.vault.savings + (s.vault.brightwell * s.fx_rate) + (s.vault.wise * s.fx_rate);
+        let daily = s.history[s.mode].limit;
+        document.getElementById('uiRunway').innerText = daily > 0 ? Math.floor(totalLiquid / daily) + " Days" : "N/A";
+
         let curHist = s.history[s.mode]; let sym = s.mode === 'vacation' ? ' TND' : ' USD'; let pre = s.mode === 'onboard' ? '$' : '';
         document.getElementById('balanceTitle').innerText = `Remaining Today (${s.mode === 'vacation' ? 'Vacation' : 'Onboard'})`;
-        document.getElementById('balanceDisplay').innerText = pre + curHist.balance.toFixed(2) + sym;
         
-        let diff = curHist.balance; const badge = document.getElementById('surplusBadge');
+        // Exclude "Financial & Fees" from daily budget reduction dynamically
+        let spentToday = curHist.current.reduce((sum, item) => {
+            if (item.bypassLimit || item.category === "🏦 Financial & Fees") return sum;
+            return sum + item.amount;
+        }, 0);
+        let currentBalance = curHist.limit - spentToday;
+        
+        document.getElementById('balanceDisplay').innerText = pre + currentBalance.toFixed(2) + sym;
+        
+        let diff = currentBalance; const badge = document.getElementById('surplusBadge');
         badge.innerText = (diff >= 0 ? '+' : '') + diff.toFixed(2);
         badge.style.color = diff >= 0 ? 'var(--success)' : 'var(--danger)'; badge.style.background = diff >= 0 ? 'rgba(74,222,128,0.1)' : 'rgba(248,113,113,0.1)';
         
         const pb = document.getElementById('progressBar');
-        pb.style.width = Math.max(0, (curHist.balance / curHist.limit) * 100) + "%";
-        pb.style.backgroundColor = diff <= 0 ? 'var(--danger)' : (curHist.balance < (curHist.limit * 0.3) ? 'var(--warning)' : 'var(--success)');
+        pb.style.width = Math.max(0, (currentBalance / curHist.limit) * 100) + "%";
+        pb.style.backgroundColor = diff <= 0 ? 'var(--danger)' : (currentBalance < (curHist.limit * 0.3) ? 'var(--warning)' : 'var(--success)');
         
         const listNode = document.getElementById('historyList'); listNode.innerHTML = '';
-        if (curHist.current.length === 0) listNode.innerHTML = '<div class="history-item" style="color:var(--text-muted)">No metrics logged.</div>';
+        if (curHist.current.length === 0) listNode.innerHTML = '<div class="history-item" style="color:var(--text-muted); justify-content:center;">No metrics logged.</div>';
         else {
             curHist.current.slice().reverse().forEach((item, index) => {
                 let actualIndex = curHist.current.length - 1 - index; let subtextArr = [];
                 if(item.location) subtextArr.push(`📍 ${item.location}`); if(item.items) subtextArr.push(`🛒 ${item.items}`); if(item.whom) subtextArr.push(`👥 For: ${item.whom}`);
-                let bypassNote = item.bypassLimit ? `<span style="color:var(--warning); font-size:9px;">(Bypass)</span>` : '';
-                listNode.innerHTML += `<div class="history-item"><div style="flex:1;"><div style="font-weight:600;">${item.tag} <span class="cat-badge">${item.category}</span></div><div style="font-size:9px; color:var(--text-muted);">${item.walletSource} ${bypassNote}</div>${subtextArr.length ? `<div class="history-details">${subtextArr.join(' | ')}</div>` : ''}</div><div style="display:flex; align-items:center; gap:10px;"><span style="font-weight:bold; color:var(--danger);">-${!item.bypassLimit && s.mode==='onboard'?'$':''}${item.amount.toFixed(2)}${!item.bypassLimit && s.mode==='vacation'?' TND':''}</span><button class="edit-btn" onclick="editExpense(${actualIndex})">✏️</button><button class="edit-btn" onclick="deleteExpense(${actualIndex})">❌</button></div></div>`;
+                let bypassNote = (item.bypassLimit || item.category === "🏦 Financial & Fees") ? `<span style="color:var(--warning); font-size:9px;">(Bypass Daily)</span>` : '';
+                listNode.innerHTML += `<div class="history-item"><div style="flex:1;"><div style="font-weight:600;">${item.tag} <span class="cat-badge">${item.category}</span></div><div style="font-size:9px; color:var(--text-muted);">${item.walletSource} ${bypassNote}</div>${subtextArr.length ? `<div class="history-details">${subtextArr.join(' | ')}</div>` : ''}</div><div style="display:flex; align-items:center; gap:8px;"><span style="font-weight:bold; color:var(--danger);">-${!item.bypassLimit && s.mode==='onboard'?'$':''}${item.amount.toFixed(2)}${!item.bypassLimit && s.mode==='vacation'?' TND':''}</span><button class="edit-btn" onclick="editExpense(${actualIndex})">✏️</button><button class="edit-btn" onclick="deleteExpense(${actualIndex})">❌</button></div></div>`;
             });
         }
         
         let safe=0; let over=0;
-        ['vacation', 'onboard'].forEach(m => { s.history[m].archive.forEach(day => { let tot = day.logs.reduce((sum, i) => sum + (i.bypassLimit ? 0 : i.amount), 0); if(tot <= s.history[m].limit) safe++; else over++; }); });
+        ['vacation', 'onboard'].forEach(m => { s.history[m].archive.forEach(day => { let tot = day.logs.reduce((sum, i) => sum + ((i.bypassLimit || i.category==="🏦 Financial & Fees") ? 0 : i.amount), 0); if(tot <= s.history[m].limit) safe++; else over++; }); });
         document.getElementById('safeDaysCount').innerText = safe; document.getElementById('overDaysCount').innerText = over;
         
         renderIOUs();
     }
 
+    /* V13 SMART CLOSE OUT */
     function closeOutDay() {
         let curHist = s.history[s.mode]; let guessDate = new Date();
         if (curHist.current.length > 0) { guessDate = new Date(curHist.current[0].ts); } else if (guessDate.getHours() < 5) { guessDate.setDate(guessDate.getDate() - 1); }
@@ -366,8 +436,11 @@
         if (!archiveDate) return; 
 
         if (curHist.current.length > 0) {
-            let surplus = curHist.balance; let surplusTND = s.mode === 'onboard' ? surplus * s.fx_rate : surplus;
+            let spent = curHist.current.reduce((sum, item) => sum + ((item.bypassLimit || item.category === "🏦 Financial & Fees") ? 0 : item.amount), 0);
+            let surplus = curHist.limit - spent; 
+            let surplusTND = s.mode === 'onboard' ? surplus * s.fx_rate : surplus;
             s.capital_saved += surplusTND; 
+            
             let existingIdx = curHist.archive.findIndex(a => a.date === archiveDate);
             if (existingIdx > -1) { curHist.archive[existingIdx].logs.push(...curHist.current); } else { curHist.archive.push({ date: archiveDate, logs: [...curHist.current] }); }
         }
@@ -378,13 +451,14 @@
         const cost = parseFloat(document.getElementById('customAmount').value); if (isNaN(cost) || cost <= 0) return;
         const src = document.getElementById('advSourceWallet').value; const bypass = (src !== 'default');
         let targetWallet = s.mode === 'vacation' ? 'cash_tnd' : 'cash_usd'; if (bypass) targetWallet = src;
-        s.vault[targetWallet] -= cost; if (!bypass) s.history[s.mode].balance -= cost;
+        s.vault[targetWallet] -= cost; 
+        
         s.history[s.mode].current.push({ amount: cost, tag: document.getElementById('customDescription').value.trim() || "💸 Expense", category: document.getElementById('advCategory').value, location: document.getElementById('advLocation').value.trim(), items: document.getElementById('advItems').value.trim(), whom: document.getElementById('advWhom').value.trim(), walletSource: targetWallet, bypassLimit: bypass, fxRate: s.fx_rate, ts: Date.now() });
         document.getElementById('customDescription').value = ''; document.getElementById('customAmount').value = ''; document.getElementById('advLocation').value = ''; document.getElementById('advItems').value = ''; document.getElementById('advWhom').value = ''; document.getElementById('advMain').style.display = 'none'; document.getElementById('advSourceWallet').value = 'default'; saveState();
     }
 
     function editExpense(idx) {
-        let item = s.history[s.mode].current[idx]; if(!item.bypassLimit) s.history[s.mode].balance += item.amount;
+        let item = s.history[s.mode].current[idx]; 
         if(item.walletSource && s.vault[item.walletSource] !== undefined) s.vault[item.walletSource] += item.amount; 
         document.getElementById('customDescription').value = item.tag; document.getElementById('customAmount').value = item.amount; document.getElementById('advCategory').value = item.category; document.getElementById('advSourceWallet').value = item.bypassLimit ? item.walletSource : 'default'; document.getElementById('advLocation').value = item.location || ''; document.getElementById('advItems').value = item.items || ''; document.getElementById('advWhom').value = item.whom || ''; document.getElementById('advMain').style.display = 'flex';
         s.history[s.mode].current.splice(idx, 1); saveState(); document.getElementById('customAmount').focus(); 
@@ -393,12 +467,54 @@
     function deleteExpense(idx) {
         if(!confirm("Delete this expense entirely?")) return;
         let item = s.history[s.mode].current[idx]; 
-        if(!item.bypassLimit) s.history[s.mode].balance += item.amount;
         if(item.walletSource && s.vault[item.walletSource] !== undefined) s.vault[item.walletSource] += item.amount; 
         s.history[s.mode].current.splice(idx, 1); saveState();
     }
 
-    /* INCOME & FUNDING ENGINE */
+    /* V15 ATM WIZARD */
+    function openATMModal() {
+        document.getElementById('atmAmt').value = '';
+        document.getElementById('atmFee').value = '';
+        document.getElementById('atmFeeGroup').style.display = 'none';
+        document.getElementById('atmLoc').value = 'tunisia';
+        document.getElementById('atmModal').style.display = 'flex';
+    }
+    
+    function toggleATMFee() {
+        if(document.getElementById('atmLoc').value === 'intl') {
+            document.getElementById('atmFeeGroup').style.display = 'flex';
+        } else {
+            document.getElementById('atmFeeGroup').style.display = 'none';
+        }
+    }
+
+    function processATM() {
+        let amt = parseFloat(document.getElementById('atmAmt').value);
+        if(isNaN(amt) || amt <= 0) return;
+        let src = document.getElementById('atmSource').value;
+        let loc = document.getElementById('atmLoc').value;
+        
+        let feeTND = 0; let feeUSD = 0;
+        
+        if (loc === 'tunisia') { feeTND = 10; feeUSD = 10 / s.fx_rate; } 
+        else { feeUSD = parseFloat(document.getElementById('atmFee').value) || 0; feeTND = feeUSD * s.fx_rate; }
+        
+        if (src === 'savings') {
+            s.vault.savings -= amt; feeTND = 0; feeUSD = 0; // No fee applied directly from savings transfers
+        } else {
+            let totalUSD = (amt / s.fx_rate) + feeUSD; s.vault[src] -= totalUSD;
+        }
+        
+        s.vault.cash_tnd += amt;
+        
+        if (feeTND > 0) {
+            let logAmount = (loc === 'tunisia') ? 10 : feeUSD; 
+            s.history[s.mode].current.push({ amount: logAmount, tag: "ATM Withdrawal Fee", category: "🏦 Financial & Fees", location: loc === 'tunisia' ? "Tunisia" : "International", walletSource: src, bypassLimit: true, fxRate: s.fx_rate, ts: Date.now() });
+        }
+        document.getElementById('atmModal').style.display = 'none'; saveState();
+    }
+
+    /* INCOME ENGINE */
     function openIncomeModal() {
         document.getElementById('incAmount').value = ''; document.getElementById('incDetails').value = ''; document.getElementById('incSource').value = 'gig'; document.getElementById('incWallet').value = 'cash_tnd'; updateIncPlaceholder();
         document.getElementById('incomeModal').style.display = 'flex';
@@ -442,7 +558,6 @@
     function vaultIncome() { let pay = parseFloat(prompt("Total Paycheck (USD):")); if(isNaN(pay) || pay <= 0) return; let toLoanTND = (pay * 0.40) * s.fx_rate; let toSavingsTND = (pay * 0.15) * s.fx_rate; let toVaultUSD = pay * 0.45; s.loan.arrears -= toLoanTND; if(s.loan.arrears < 0) s.loan.arrears = 0; s.vault.savings += toSavingsTND; s.vault.brightwell += toVaultUSD; saveState(); }
     function vaultWise() { let amount = parseFloat(prompt("Amount to Wise (USD):")); if(isNaN(amount) || amount <= 0) return; let method = prompt("1: Wire ($1) | 2: Apple Pay ($1.25)"); let fee = method === '1' ? 1.00 : (method === '2' ? 1.25 : 0); if(fee === 0) return; s.vault.brightwell -= (amount + fee); s.vault.wise += amount; s.vault.lifetime_fees += fee; saveState(); }
     function vaultIBKR() { let grossUSD = parseFloat(prompt("Gross USD from Wise to IBKR:")); if(isNaN(grossUSD) || grossUSD <= 0) return; let feesUSD = parseFloat(prompt(`Fees:`)); if(!isNaN(feesUSD) && feesUSD >= 0) { s.vault.wise -= grossUSD; s.vault.ibkr += (grossUSD - feesUSD); s.vault.ibkr_fees += feesUSD; s.vault.lifetime_fees += feesUSD; saveState(); } }
-    function vaultATM() { let tndReq = parseFloat(prompt("TND to withdraw:")); if(isNaN(tndReq) || tndReq <= 0) return; if(s.vault.savings >= tndReq) { s.vault.savings -= tndReq; s.vault.cash_tnd += tndReq; saveState(); } else { let usdCharge = parseFloat(prompt(`Savings empty. USD from Brightwell:`)); if(!isNaN(usdCharge) && usdCharge > 0) { s.vault.brightwell -= usdCharge; s.vault.cash_tnd += tndReq; saveState(); } } }
     function vaultExchange() { let usdGiven = parseFloat(prompt("USD given:")); if(isNaN(usdGiven) || usdGiven <= 0) return; let tndRec = parseFloat(prompt("TND received:")); if(!isNaN(tndRec) && tndRec > 0) { s.vault.cash_usd -= usdGiven; s.vault.cash_tnd += tndRec; saveState(); } }
 
     /* BEHAVIORAL ENGINE */
@@ -453,7 +568,7 @@
         let curStreak = 0, maxStreak = 0, totalOverage = 0, overCount = 0; let highestOverage = -1, highestDay = null, lowestSafe = Infinity, lowestDay = null; let daysOfWeek = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0}; const daysMap = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
         arch.sort((a,b) => new Date(a.date.split('-').join('/')) - new Date(b.date.split('-').join('/'))).forEach(day => {
-            let tot = day.logs.reduce((sum, i) => sum + (i.bypassLimit ? 0 : i.amount), 0);
+            let tot = day.logs.reduce((sum, i) => sum + ((i.bypassLimit || i.category==="🏦 Financial & Fees") ? 0 : i.amount), 0);
             if (tot <= s.history[s.mode].limit) { curStreak++; if(curStreak > maxStreak) maxStreak = curStreak; if(tot > 0 && tot < lowestSafe) { lowestSafe = tot; lowestDay = day; } } 
             else { curStreak = 0; overCount++; let overAmt = tot - s.history[s.mode].limit; totalOverage += overAmt; daysOfWeek[new Date(day.date.split('-').join('/')).getDay()]++; if(overAmt > highestOverage) { highestOverage = overAmt; highestDay = day; } }
         });
@@ -461,8 +576,8 @@
         document.getElementById('b_curStreak').innerText = curStreak + " Days"; document.getElementById('b_maxStreak').innerText = maxStreak + " Days"; document.getElementById('b_avgOver').innerText = overCount > 0 ? (totalOverage/overCount).toFixed(2) : "0.00";
         let dangerIdx = Object.keys(daysOfWeek).reduce((a, b) => daysOfWeek[a] > daysOfWeek[b] ? a : b); document.getElementById('b_dangerDay').innerText = overCount > 0 ? daysMap[dangerIdx] : "None";
 
-        if(highestDay) { let biggestItem = highestDay.logs.reduce((max, obj) => (!obj.bypassLimit && obj.amount > (max?.amount||0)) ? obj : max, null); document.getElementById('b_highDay').innerText = `${highestDay.date} (+${highestOverage.toFixed(2)} Over)`; document.getElementById('b_highItem').innerText = biggestItem ? `Biggest Expense: ${biggestItem.tag} (${biggestItem.amount})` : ''; } else { document.getElementById('b_highDay').innerText = "Perfect record!"; document.getElementById('b_highItem').innerText = ""; }
-        if(lowestDay) { let biggestItem = lowestDay.logs.reduce((max, obj) => (!obj.bypassLimit && obj.amount > (max?.amount||0)) ? obj : max, null); document.getElementById('b_lowDay').innerText = `${lowestDay.date} (Spent ${lowestSafe.toFixed(2)})`; document.getElementById('b_lowItem').innerText = biggestItem ? `Biggest Expense: ${biggestItem.tag} (${biggestItem.amount})` : ''; } else { document.getElementById('b_lowDay').innerText = "No active safe days recorded."; document.getElementById('b_lowItem').innerText = ""; }
+        if(highestDay) { let biggestItem = highestDay.logs.reduce((max, obj) => (!obj.bypassLimit && obj.category!=="🏦 Financial & Fees" && obj.amount > (max?.amount||0)) ? obj : max, null); document.getElementById('b_highDay').innerText = `${highestDay.date} (+${highestOverage.toFixed(2)} Over)`; document.getElementById('b_highItem').innerText = biggestItem ? `Biggest Expense: ${biggestItem.tag} (${biggestItem.amount})` : ''; } else { document.getElementById('b_highDay').innerText = "Perfect record!"; document.getElementById('b_highItem').innerText = ""; }
+        if(lowestDay) { let biggestItem = lowestDay.logs.reduce((max, obj) => (!obj.bypassLimit && obj.category!=="🏦 Financial & Fees" && obj.amount > (max?.amount||0)) ? obj : max, null); document.getElementById('b_lowDay').innerText = `${lowestDay.date} (Spent ${lowestSafe.toFixed(2)})`; document.getElementById('b_lowItem').innerText = biggestItem ? `Biggest Expense: ${biggestItem.tag} (${biggestItem.amount})` : ''; } else { document.getElementById('b_lowDay').innerText = "No active safe days recorded."; document.getElementById('b_lowItem').innerText = ""; }
         document.getElementById('behaviorModal').style.display = 'flex';
     }
 
@@ -487,9 +602,9 @@
     // IOUS & CHARTS
     function renderIOUs() {
         const pList = document.getElementById('payablesList'); pList.innerHTML = '';
-        s.ious.payables.forEach(p => { pList.innerHTML += `<div class="iou-item"><div><div style="font-weight:bold;">${p.name}</div><div style="color:var(--warning); font-size:11px;">Owe: ${p.amount.toFixed(2)} ${p.currency}</div></div><div><button class="iou-btn" onclick="processIOU('payable', ${p.id})">Pay</button><button class="iou-del" onclick="deleteIOU('payable', ${p.id})">❌</button></div></div>`; });
+        s.ious.payables.forEach(p => { pList.innerHTML += `<div class="iou-item"><div><div style="font-weight:bold;">${p.name}</div><div style="color:var(--warning); font-size:11px;">Owe: ${p.amount.toFixed(2)} ${p.currency}</div></div><div><button class="iou-btn" onclick="processIOU('payable', ${p.id})">Pay</button><button class="iou-del" style="background:none;border:none;color:var(--danger);" onclick="deleteIOU('payable', ${p.id})">❌</button></div></div>`; });
         const rList = document.getElementById('receivablesList'); rList.innerHTML = '';
-        s.ious.receivables.forEach(r => { rList.innerHTML += `<div class="iou-item"><div><div style="font-weight:bold;">${r.name}</div><div style="color:var(--success); font-size:11px;">Owed: ${r.amount.toFixed(2)} ${r.currency}</div></div><div><button class="iou-btn" style="background:var(--success);" onclick="processIOU('receivable', ${r.id})">Collect</button><button class="iou-del" onclick="deleteIOU('receivable', ${r.id})">❌</button></div></div>`; });
+        s.ious.receivables.forEach(r => { rList.innerHTML += `<div class="iou-item"><div><div style="font-weight:bold;">${r.name}</div><div style="color:var(--success); font-size:11px;">Owed: ${r.amount.toFixed(2)} ${r.currency}</div></div><div><button class="iou-btn" style="background:var(--success);" onclick="processIOU('receivable', ${r.id})">Collect</button><button class="iou-del" style="background:none;border:none;color:var(--danger);" onclick="deleteIOU('receivable', ${r.id})">❌</button></div></div>`; });
     }
     function addIOU(type) { let name = prompt("Entity Name:"); if(!name) return; let amount = parseFloat(prompt("Amount:")); if(isNaN(amount) || amount <= 0) return; let currency = prompt("Currency (USD/TND):", "USD"); if(!currency) return; s.ious[type + 's'].push({ id: Date.now(), name, amount, currency: currency.toUpperCase() }); saveState(); }
     function processIOU(type, id) { let list = s.ious[type + 's']; let idx = list.findIndex(i => i.id === id); if(idx === -1) return; let item = list[idx]; let reduceAmount = parseFloat(prompt(`Clear how much of ${item.amount}?`)); if(isNaN(reduceAmount) || reduceAmount <= 0) return; let w = prompt(`Wallet?\n1: Brightwell\n2: Cash(USD)\n3: Wise\n4: Cash(TND)\n5: Savings`); let key = ""; if(w==='1') key='brightwell'; else if(w==='2') key='cash_usd'; else if(w==='3') key='wise'; else if(w==='4') key='cash_tnd'; else if(w==='5') key='savings'; else return; let walletDeduct = parseFloat(prompt(`Amount deducted/added to ${key}:`, reduceAmount)); if(isNaN(walletDeduct)) return; if(type === 'payable') s.vault[key] -= walletDeduct; else s.vault[key] += walletDeduct; item.amount -= reduceAmount; if(item.amount <= 0) list.splice(idx, 1); saveState(); }
@@ -503,7 +618,40 @@
         });
         const bd = document.getElementById('catGraphContainer'); bd.innerHTML = ''; 
         if (vol === 0) { bd.innerHTML = '<div style="font-size:11px;color:var(--text-muted);text-align:center;">No data.</div>'; return; }
-        Object.keys(cats).sort((a,b) => cats[b] - cats[a]).forEach(tag => { let pct = (cats[tag] / vol) * 100; bd.innerHTML += `<div class="chart-row"><span style="width:110px; font-weight:bold; overflow:hidden;">${tag}</span><div class="chart-bar-bg"><div class="chart-bar-fill" style="width:${pct}%"></div></div><span style="font-weight:bold;width:80px;text-align:right;">${cats[tag].toFixed(1)} TND</span></div>`; });
+        Object.keys(cats).sort((a,b) => cats[b] - cats[a]).forEach(tag => { let pct = (cats[tag] / vol) * 100; bd.innerHTML += `<div class="chart-row"><span style="width:110px; font-weight:bold; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;">${tag}</span><div class="chart-bar-bg"><div class="chart-bar-fill" style="width:${pct}%"></div></div><span style="font-weight:bold;width:80px;text-align:right;">${cats[tag].toFixed(1)} TND</span></div>`; });
+    }
+
+    /* V15 VAPE TRACKER */
+    function renderVapeStats() {
+        let vapeLogs = [];
+        ['vacation', 'onboard'].forEach(m => {
+            s.history[m].archive.forEach(d => d.logs.forEach(l => { if(l.category === "💨 Vape") vapeLogs.push(l); }));
+            s.history[m].current.forEach(l => { if(l.category === "💨 Vape") vapeLogs.push(l); });
+        });
+        
+        if (vapeLogs.length === 0) {
+            document.getElementById('vapeTotal').innerText = "0.00";
+            document.getElementById('vapeFreq').innerText = "N/A";
+            document.getElementById('vapeLast').innerText = "Last purchase: N/A";
+            return;
+        }
+
+        vapeLogs.sort((a,b) => a.ts - b.ts);
+        let total = vapeLogs.reduce((sum, item) => sum + item.amount, 0);
+        document.getElementById('vapeTotal').innerText = total.toFixed(2) + " TND";
+
+        if(vapeLogs.length > 1) {
+            let firstDate = vapeLogs[0].ts;
+            let lastDate = vapeLogs[vapeLogs.length-1].ts;
+            let daysDiff = (lastDate - firstDate) / (1000 * 3600 * 24);
+            let avgFreq = daysDiff / (vapeLogs.length - 1);
+            document.getElementById('vapeFreq').innerText = avgFreq.toFixed(1) + " Days";
+        } else {
+            document.getElementById('vapeFreq').innerText = "N/A";
+        }
+        
+        let lastDateString = new Date(vapeLogs[vapeLogs.length-1].ts).toLocaleDateString();
+        document.getElementById('vapeLast').innerText = "Last purchase: " + lastDateString;
     }
     
     function exportPDFReport() {
@@ -518,7 +666,7 @@
         let listNode = document.getElementById('tmList'); listNode.innerHTML = ''; let found = false;
         ['vacation', 'onboard'].forEach(m => {
             let dayData = s.history[m].archive.find(a => a.date === targetStr);
-            if(dayData) { found = true; dayData.logs.forEach((item, idx) => { let bypassNote = item.bypassLimit ? `<span style="color:var(--warning); font-size:9px;">(Bypass)</span>` : ''; listNode.innerHTML += `<div class="history-item"><div><div style="font-weight:600;">${item.tag} <span class="cat-badge">${item.category}</span></div><div style="font-size:9px;">[${m.toUpperCase()}] ${item.walletSource} ${bypassNote}</div></div><div><span style="color:var(--danger); font-weight:bold;">-${item.amount.toFixed(2)}</span><button class="edit-btn" onclick="deletePastExpense('${m}', '${targetStr}', ${idx})">❌</button></div></div>`; }); }
+            if(dayData) { found = true; dayData.logs.forEach((item, idx) => { let bypassNote = (item.bypassLimit || item.category === "🏦 Financial & Fees") ? `<span style="color:var(--warning); font-size:9px;">(Bypass)</span>` : ''; listNode.innerHTML += `<div class="history-item"><div><div style="font-weight:600;">${item.tag} <span class="cat-badge">${item.category}</span></div><div style="font-size:9px;">[${m.toUpperCase()}] ${item.walletSource} ${bypassNote}</div></div><div><span style="color:var(--danger); font-weight:bold;">-${item.amount.toFixed(2)}</span><button class="edit-btn" onclick="deletePastExpense('${m}', '${targetStr}', ${idx})">❌</button></div></div>`; }); }
         });
         if(!found) listNode.innerHTML = '<div style="font-size:11px;text-align:center;">No logs found.</div>';
     }
@@ -542,12 +690,13 @@
             let item = s.history[m].archive[dayIdx].logs[idx];
             if(item.walletSource && s.vault[item.walletSource] !== undefined) s.vault[item.walletSource] += item.amount;
             s.history[m].archive[dayIdx].logs.splice(idx, 1); 
-            // Auto-Pruning: if day is now empty, delete it
+            // V14 Auto-Pruning: if day is now empty, delete it
             if(s.history[m].archive[dayIdx].logs.length === 0) { s.history[m].archive.splice(dayIdx, 1); }
             saveState(); loadPastDay();
         }
     }
 
+    /* V14 RECALIBRATE ENGINE */
     function recalibrateMath() {
         if(!confirm("Sweep database? This destroys ghost days and perfectly recalculates your Capital Saved.")) return;
         let cap = 0;
@@ -556,7 +705,7 @@
                 let day = s.history[m].archive[i];
                 if (day.logs.length === 0) { s.history[m].archive.splice(i, 1); } 
                 else {
-                    let spent = day.logs.reduce((sum, item) => sum + (item.bypassLimit ? 0 : item.amount), 0);
+                    let spent = day.logs.reduce((sum, item) => sum + ((item.bypassLimit || item.category === "🏦 Financial & Fees") ? 0 : item.amount), 0);
                     let surplus = s.history[m].limit - spent;
                     cap += (m === 'onboard' ? surplus * s.fx_rate : surplus);
                 }
@@ -567,7 +716,7 @@
 
     function populateSettings() { document.getElementById('setMode').value = s.mode; document.getElementById('setVacLimit').value = s.history.vacation.limit; document.getElementById('setOnbLimit').value = s.history.onboard.limit; document.getElementById('setFX').value = s.fx_rate; }
     function changeMode() { s.mode = document.getElementById('setMode').value; saveState(); }
-    function updateLimits() { s.history.vacation.limit = parseFloat(document.getElementById('setVacLimit').value) || 35; s.history.onboard.limit = parseFloat(document.getElementById('setOnbLimit').value) || 7.25; saveState(); }
+    function updateLimits() { s.history.vacation.limit = parseFloat(document.getElementById('setVacLimit').value) || 49; s.history.onboard.limit = parseFloat(document.getElementById('setOnbLimit').value) || 7.25; saveState(); }
     function updateFX() { s.fx_rate = parseFloat(document.getElementById('setFX').value) || 2.93; saveState(); }
     async function fetchLiveFX() { try { const res = await fetch('https://open.er-api.com/v6/latest/USD'); const data = await res.json(); if (data?.rates?.TND) { s.fx_rate = parseFloat(data.rates.TND); populateSettings(); saveState(); alert("FX updated to " + s.fx_rate); } } catch (e) { alert("Offline"); } }
     
