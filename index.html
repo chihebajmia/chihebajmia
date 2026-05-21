@@ -271,6 +271,7 @@
         <select id="atmLoc" style="margin-top:10px; width:100%;" onchange="toggleATMFee()">
             <option value="tunisia">Location: Tunisia (+10 TND Fee)</option>
             <option value="intl">Location: International (Manual Fee)</option>
+            <option value="no-fee">Location: No-Fee Channel (0 Fee)</option>
         </select>
         
         <div id="atmFeeGroup" style="display:none; flex-direction:column; margin-top:10px;">
@@ -474,7 +475,7 @@
         s.history[s.mode].current.splice(idx, 1); saveState();
     }
 
-    /* V16 DYNAMIC ATM WIZARD */
+    /* V16.1 DYNAMIC ATM WIZARD WITH NO-FEE OPTION */
     function openATMModal() {
         document.getElementById('atmAmt').value = '';
         document.getElementById('atmAmt').placeholder = s.mode === 'vacation' ? "Withdrawal Amount (TND)" : "Withdrawal Amount (USD)";
@@ -498,8 +499,11 @@
         let src = document.getElementById('atmSource').value;
         let loc = document.getElementById('atmLoc').value;
         
-        let feeUSD = (loc === 'tunisia') ? (10 / s.fx_rate) : (parseFloat(document.getElementById('atmFee').value) || 0);
-        let feeTND = (loc === 'tunisia') ? 10 : (feeUSD * s.fx_rate);
+        // Fee logic: Tunisia = 10TND, International = Manual, No-Fee = 0
+        let feeUSD = 0;
+        if (loc === 'tunisia') { feeUSD = (10 / s.fx_rate); }
+        else if (loc === 'intl') { feeUSD = (parseFloat(document.getElementById('atmFee').value) || 0); }
+        else if (loc === 'no-fee') { feeUSD = 0; }
         
         let isUSDMode = (s.mode === 'onboard');
         let amtUSD = isUSDMode ? amt : (amt / s.fx_rate);
@@ -507,7 +511,7 @@
         
         if (src === 'savings') {
             s.vault.savings -= amtTND; 
-            feeTND = 0; feeUSD = 0; 
+            // Savings is treated as fee-free in core logic regardless, but no-fee explicit choice makes it perfectly clean
         } else {
             s.vault[src] -= (amtUSD + feeUSD);
         }
@@ -518,10 +522,13 @@
             s.vault.cash_tnd += amt;
         }
         
-        if (feeUSD > 0 || feeTND > 0) {
-            let logAmount = (loc === 'tunisia') ? 10 : feeUSD; 
-            s.history[s.mode].current.push({ amount: logAmount, tag: "ATM Withdrawal Fee", category: "🏦 Financial & Fees", location: loc === 'tunisia' ? "Tunisia" : "International", walletSource: src, bypassLimit: true, fxRate: s.fx_rate, ts: Date.now() });
+        // Only log a fee expense if a fee actually existed
+        if (feeUSD > 0) {
+            let logAmount = (loc === 'tunisia') ? 10 : (isUSDMode ? feeUSD : (feeUSD * s.fx_rate));
+            let locLabel = loc === 'tunisia' ? "Tunisia" : (loc === 'intl' ? "International" : "No-Fee");
+            s.history[s.mode].current.push({ amount: logAmount, tag: "ATM Withdrawal Fee", category: "🏦 Financial & Fees", location: locLabel, walletSource: src, bypassLimit: true, fxRate: s.fx_rate, ts: Date.now() });
         }
+        
         document.getElementById('atmModal').style.display = 'none'; saveState();
     }
 
