@@ -83,7 +83,7 @@
             </div>
             <div class="vault-actions">
                 <button class="v-btn" style="background:#16a34a;" onclick="vaultIncome()">💵 Paycheck</button>
-                <button class="v-btn" onclick="vaultDeposit()">📥 Deposit</button>
+                <button class="v-btn" onclick="openIncomeModal()">📥 Deposit</button>
                 <button class="v-btn" style="background:#ca8a04;" onclick="vaultWise()">🦉 Wise</button>
                 <button class="v-btn" onclick="vaultExchange()">💱 Exchange</button>
                 <button class="v-btn" onclick="vaultIBKR()">📈 IBKR</button>
@@ -192,6 +192,11 @@
                 </div>
             </div>
         </div>
+
+        <div class="vault-card" style="border-color: rgba(74, 222, 128, 0.4);">
+            <div class="title" style="color:var(--success); border-bottom: 1px solid var(--panel-border); padding-bottom: 4px;">💵 Income & Funding Ledger</div>
+            <div class="history-card" style="margin-top:10px; max-height:200px; padding:8px;" id="incomeList"></div>
+        </div>
     </div>
 
     <div id="tab-settings" class="page-section">
@@ -222,6 +227,39 @@
     <button class="nav-btn" id="nav-expenses" onclick="switchTab('expenses')"><span class="nav-icon">📊</span>Charts</button>
     <button class="nav-btn" id="nav-time" onclick="switchTab('time')"><span class="nav-icon">⏳</span>Logs</button>
     <button class="nav-btn" id="nav-settings" onclick="switchTab('settings')"><span class="nav-icon">⚙️</span>Setup</button>
+</div>
+
+<div class="modal-overlay" id="incomeModal">
+    <div class="modal-content">
+        <div class="title" style="text-align:center; font-size:12px; color:var(--success);">Log Income / Add Funds</div>
+        <div class="input-row" style="margin-top:15px;">
+            <input type="number" id="incAmount" placeholder="Amount" style="width:100%;" inputmode="decimal">
+        </div>
+        
+        <select id="incSource" style="margin-top:10px;" onchange="updateIncPlaceholder()">
+            <option value="gig">🛠️ Side Gig</option>
+            <option value="sale">🏷️ Sale</option>
+            <option value="borrow">🤝 Borrowed Money</option>
+            <option value="custom">✏️ Custom / Other</option>
+        </select>
+        
+        <select id="incWallet" style="margin-top:10px;">
+            <option value="cash_tnd">Deposit into: Cash (TND)</option>
+            <option value="cash_usd">Deposit into: Cash (USD)</option>
+            <option value="brightwell">Deposit into: Brightwell (USD)</option>
+            <option value="wise">Deposit into: Wise (USD)</option>
+            <option value="savings">Deposit into: Savings (TND)</option>
+            <option value="ibkr">Deposit into: IBKR (USD)</option>
+        </select>
+
+        <input type="text" id="incDetails" placeholder="What was the gig?" style="margin-top:10px;" enterkeyhint="done">
+        <div style="font-size:9px; color:var(--warning); text-align:center; margin-top:10px; display:none;" id="incBorrowWarning">This will automatically generate a Payable IOU in the currency of the selected wallet.</div>
+
+        <div class="modal-btn-row">
+            <button class="btn-secondary" onclick="document.getElementById('incomeModal').style.display='none'">Cancel</button>
+            <button class="v-btn" style="background:var(--success);" onclick="processIncome()">Save Income</button>
+        </div>
+    </div>
 </div>
 
 <div class="modal-overlay" id="editModal"><div class="modal-content"><div class="title" style="text-align:center; font-size:12px; color:white;">Override Vault Balances</div><div class="modal-grid"><div class="modal-input-group"><label>IBKR (USD)</label><input type="number" id="m_ibkr" inputmode="decimal"></div><div class="modal-input-group"><label>Brightwell (USD)</label><input type="number" id="m_brightwell" inputmode="decimal"></div><div class="modal-input-group"><label>Wise (USD)</label><input type="number" id="m_wise" inputmode="decimal"></div><div class="modal-input-group"><label>Cash (USD)</label><input type="number" id="m_cash_usd" inputmode="decimal"></div><div class="modal-input-group"><label>Cash (TND)</label><input type="number" id="m_cash_tnd" inputmode="decimal"></div><div class="modal-input-group"><label>Savings (TND)</label><input type="number" id="m_savings" inputmode="decimal"></div></div><div class="modal-btn-row"><button class="btn-secondary" onclick="document.getElementById('editModal').style.display='none'">Cancel</button><button class="v-btn" style="background:var(--success);" onclick="saveEditModal()">Save</button></div></div></div>
@@ -256,7 +294,7 @@
     <div class="b-stat" style="border-color:rgba(248,113,113,0.3);">Total Projected Interest: <span id="stb_projInt" style="color:var(--danger);">0.00 TND</span></div>
     <div style="margin-top:20px; border-top:1px dashed var(--panel-border); padding-top:15px;">
         <div class="title">Log Direct Payment</div>
-        <input type="number" id="stbPayAmt" placeholder="Amount (TND)" style="margin-bottom:8px;">
+        <input type="number" id="stbPayAmt" placeholder="Amount (TND)" style="margin-bottom:8px;" inputmode="decimal">
         <select id="stbPayWallet" style="margin-bottom:10px;"><option value="brightwell">Deduct from: Brightwell (Convert via FX)</option><option value="savings">Deduct from: Savings TND</option><option value="none">External/No Deduction</option></select>
         <button class="v-btn" style="width:100%; background:var(--danger);" onclick="logSTBPayment()">Submit Payment</button>
     </div>
@@ -266,8 +304,9 @@
 <div id="printArea"></div>
 
 <script>
-    const DEFAULT_STATE = { vault: { ibkr: 0, brightwell: 0, wise: 0, cash_usd: 0, cash_tnd: 0, savings: 0, ibkr_fees: 0, lifetime_fees: 0 }, loan: { arrears: 20000, rate: 13.5 }, ious: { payables: [], receivables: [] }, history: { vacation: { archive: [], current: [], limit: 35.00, balance: 35.00 }, onboard: { archive: [], current: [], limit: 7.25, balance: 7.25 } }, capital_saved: 0, fx_rate: 2.93, mode: 'vacation' };
+    const DEFAULT_STATE = { vault: { ibkr: 0, brightwell: 0, wise: 0, cash_usd: 0, cash_tnd: 0, savings: 0, ibkr_fees: 0, lifetime_fees: 0 }, loan: { arrears: 20000, rate: 13.5 }, ious: { payables: [], receivables: [] }, history: { vacation: { archive: [], current: [], limit: 35.00, balance: 35.00 }, onboard: { archive: [], current: [], limit: 7.25, balance: 7.25 } }, capital_saved: 0, fx_rate: 2.93, mode: 'vacation', income_logs: [] };
     let s = JSON.parse(localStorage.getItem('CrewWalletMaster')) || DEFAULT_STATE;
+    if(!s.income_logs) s.income_logs = []; // Migration safeguard
     function saveState() { localStorage.setItem('CrewWalletMaster', JSON.stringify(s)); renderApp(); }
 
     function switchTab(tabId) {
@@ -276,7 +315,7 @@
         document.getElementById('tab-' + tabId).classList.add('active');
         document.getElementById('nav-' + tabId).classList.add('active');
         if(tabId === 'expenses') renderChart(30);
-        if(tabId === 'time') loadPastDay();
+        if(tabId === 'time') { loadPastDay(); renderIncomeLogs(); }
         if(tabId === 'settings') populateSettings();
     }
 
@@ -344,9 +383,50 @@
         s.history[s.mode].current.splice(idx, 1); saveState(); document.getElementById('customAmount').focus(); 
     }
 
+    /* INCOME & FUNDING ENGINE */
+    function openIncomeModal() {
+        document.getElementById('incAmount').value = ''; document.getElementById('incDetails').value = ''; document.getElementById('incSource').value = 'gig'; document.getElementById('incWallet').value = 'cash_tnd'; updateIncPlaceholder();
+        document.getElementById('incomeModal').style.display = 'flex';
+    }
+    function updateIncPlaceholder() {
+        let src = document.getElementById('incSource').value; let el = document.getElementById('incDetails'); let warn = document.getElementById('incBorrowWarning');
+        if(src === 'gig') { el.placeholder = "What was the gig?"; warn.style.display = 'none'; }
+        else if(src === 'sale') { el.placeholder = "What did you sell?"; warn.style.display = 'none'; }
+        else if(src === 'borrow') { el.placeholder = "From whom did you borrow?"; warn.style.display = 'block'; }
+        else { el.placeholder = "Details..."; warn.style.display = 'none'; }
+    }
+    function processIncome() {
+        let amt = parseFloat(document.getElementById('incAmount').value); if(isNaN(amt) || amt <= 0) return;
+        let source = document.getElementById('incSource').value;
+        let wallet = document.getElementById('incWallet').value; 
+        let details = document.getElementById('incDetails').value.trim() || "No details";
+        
+        s.vault[wallet] += amt;
+        let isUSD = ['brightwell', 'wise', 'cash_usd', 'ibkr'].includes(wallet); let currency = isUSD ? 'USD' : 'TND';
+        
+        if(source === 'borrow') {
+            s.ious.payables.push({ id: Date.now(), name: details, amount: amt, currency: currency });
+            alert(`✅ Added ${amt} ${currency} to your ${wallet} vault AND created a Payable IOU for ${details}.`);
+        } else { alert(`✅ Income logged: ${amt} ${currency} added to your ${wallet} vault.`); }
+        
+        s.income_logs.push({ id: Date.now(), amount: amt, currency: currency, wallet: wallet, source: source, details: details, ts: Date.now() });
+        document.getElementById('incomeModal').style.display = 'none'; saveState();
+    }
+    function renderIncomeLogs() {
+        const listNode = document.getElementById('incomeList'); listNode.innerHTML = '';
+        if(s.income_logs.length === 0) { listNode.innerHTML = '<div style="font-size:11px;text-align:center;color:var(--text-muted);">No income logged yet.</div>'; return; }
+        s.income_logs.slice().reverse().forEach((inc, idx) => {
+            let actualIdx = s.income_logs.length - 1 - idx;
+            let srcIcon = inc.source === 'gig' ? '🛠️' : (inc.source === 'sale' ? '🏷️' : (inc.source === 'borrow' ? '🤝' : '✏️'));
+            listNode.innerHTML += `<div class="history-item"><div><div style="font-weight:600;">${srcIcon} ${inc.details}</div><div style="font-size:9px; color:var(--text-muted);">To: ${inc.wallet}</div></div><div style="display:flex; gap:10px; align-items:center;"><span style="color:var(--success); font-weight:bold;">+${inc.amount.toFixed(2)} ${inc.currency}</span><button class="edit-btn" onclick="deleteIncome(${actualIdx})">❌</button></div></div>`;
+        });
+    }
+    function deleteIncome(idx) {
+        if(confirm("Delete this income log? (This will NOT automatically deduct the funds from your vault or delete IOUs).")) { s.income_logs.splice(idx, 1); saveState(); renderIncomeLogs(); }
+    }
+
     function saveEditModal() { ['ibkr','brightwell','wise','cash_usd','cash_tnd','savings'].forEach(k => s.vault[k] = parseFloat(document.getElementById('m_'+k).value) || 0); document.getElementById('editModal').style.display='none'; saveState(); }
     function vaultIncome() { let pay = parseFloat(prompt("Total Paycheck (USD):")); if(isNaN(pay) || pay <= 0) return; let toLoanTND = (pay * 0.40) * s.fx_rate; let toSavingsTND = (pay * 0.15) * s.fx_rate; let toVaultUSD = pay * 0.45; s.loan.arrears -= toLoanTND; if(s.loan.arrears < 0) s.loan.arrears = 0; s.vault.savings += toSavingsTND; s.vault.brightwell += toVaultUSD; saveState(); }
-    function vaultDeposit() { let amount = parseFloat(prompt("Deposit amount:")); if(isNaN(amount) || amount <= 0) return; let t = prompt("Target? 1: Savings TND, 2: Cash TND, 3: Cash USD, 4: Brightwell"); if(t==='1') s.vault.savings+=amount; else if(t==='2') s.vault.cash_tnd+=amount; else if(t==='3') s.vault.cash_usd+=amount; else if(t==='4') s.vault.brightwell+=amount; saveState(); }
     function vaultWise() { let amount = parseFloat(prompt("Amount to Wise (USD):")); if(isNaN(amount) || amount <= 0) return; let method = prompt("1: Wire ($1) | 2: Apple Pay ($1.25)"); let fee = method === '1' ? 1.00 : (method === '2' ? 1.25 : 0); if(fee === 0) return; s.vault.brightwell -= (amount + fee); s.vault.wise += amount; s.vault.lifetime_fees += fee; saveState(); }
     function vaultIBKR() { let grossUSD = parseFloat(prompt("Gross USD from Wise to IBKR:")); if(isNaN(grossUSD) || grossUSD <= 0) return; let feesUSD = parseFloat(prompt(`Fees:`)); if(!isNaN(feesUSD) && feesUSD >= 0) { s.vault.wise -= grossUSD; s.vault.ibkr += (grossUSD - feesUSD); s.vault.ibkr_fees += feesUSD; s.vault.lifetime_fees += feesUSD; saveState(); } }
     function vaultATM() { let tndReq = parseFloat(prompt("TND to withdraw:")); if(isNaN(tndReq) || tndReq <= 0) return; if(s.vault.savings >= tndReq) { s.vault.savings -= tndReq; s.vault.cash_tnd += tndReq; saveState(); } else { let usdCharge = parseFloat(prompt(`Savings empty. USD from Brightwell:`)); if(!isNaN(usdCharge) && usdCharge > 0) { s.vault.brightwell -= usdCharge; s.vault.cash_tnd += tndReq; saveState(); } } }
@@ -354,87 +434,44 @@
 
     /* BEHAVIORAL ENGINE */
     function openBehaviorModal() {
-        let arch = s.history[s.mode].archive;
-        document.getElementById('b_modeName').innerText = s.mode === 'vacation' ? '🏖️ Vacation' : '🚢 Onboard';
+        let arch = s.history[s.mode].archive; document.getElementById('b_modeName').innerText = s.mode === 'vacation' ? '🏖️ Vacation' : '🚢 Onboard';
         if (arch.length === 0) { alert("No archived days in this mode yet."); return; }
         
-        let curStreak = 0, maxStreak = 0, totalOverage = 0, overCount = 0;
-        let highestOverage = -1, highestDay = null, lowestSafe = Infinity, lowestDay = null;
-        let daysOfWeek = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0}; // Sun-Sat
-        const daysMap = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        let curStreak = 0, maxStreak = 0, totalOverage = 0, overCount = 0; let highestOverage = -1, highestDay = null, lowestSafe = Infinity, lowestDay = null; let daysOfWeek = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0}; const daysMap = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-        arch.sort((a,b) => new Date(a.date) - new Date(b.date)).forEach(day => {
+        arch.sort((a,b) => new Date(a.date.split('-').join('/')) - new Date(b.date.split('-').join('/'))).forEach(day => {
             let tot = day.logs.reduce((sum, i) => sum + (i.bypassLimit ? 0 : i.amount), 0);
-            if (tot <= s.history[s.mode].limit) {
-                curStreak++; if(curStreak > maxStreak) maxStreak = curStreak;
-                if(tot > 0 && tot < lowestSafe) { lowestSafe = tot; lowestDay = day; }
-            } else {
-                curStreak = 0; overCount++;
-                let overAmt = tot - s.history[s.mode].limit; totalOverage += overAmt;
-                daysOfWeek[new Date(day.date).getDay()]++;
-                if(overAmt > highestOverage) { highestOverage = overAmt; highestDay = day; }
-            }
+            if (tot <= s.history[s.mode].limit) { curStreak++; if(curStreak > maxStreak) maxStreak = curStreak; if(tot > 0 && tot < lowestSafe) { lowestSafe = tot; lowestDay = day; } } 
+            else { curStreak = 0; overCount++; let overAmt = tot - s.history[s.mode].limit; totalOverage += overAmt; daysOfWeek[new Date(day.date.split('-').join('/')).getDay()]++; if(overAmt > highestOverage) { highestOverage = overAmt; highestDay = day; } }
         });
 
-        document.getElementById('b_curStreak').innerText = curStreak + " Days";
-        document.getElementById('b_maxStreak').innerText = maxStreak + " Days";
-        document.getElementById('b_avgOver').innerText = overCount > 0 ? (totalOverage/overCount).toFixed(2) : "0.00";
-        
-        let dangerIdx = Object.keys(daysOfWeek).reduce((a, b) => daysOfWeek[a] > daysOfWeek[b] ? a : b);
-        document.getElementById('b_dangerDay').innerText = overCount > 0 ? daysMap[dangerIdx] : "None";
+        document.getElementById('b_curStreak').innerText = curStreak + " Days"; document.getElementById('b_maxStreak').innerText = maxStreak + " Days"; document.getElementById('b_avgOver').innerText = overCount > 0 ? (totalOverage/overCount).toFixed(2) : "0.00";
+        let dangerIdx = Object.keys(daysOfWeek).reduce((a, b) => daysOfWeek[a] > daysOfWeek[b] ? a : b); document.getElementById('b_dangerDay').innerText = overCount > 0 ? daysMap[dangerIdx] : "None";
 
-        if(highestDay) {
-            let biggestItem = highestDay.logs.reduce((max, obj) => (!obj.bypassLimit && obj.amount > (max?.amount||0)) ? obj : max, null);
-            document.getElementById('b_highDay').innerText = `${highestDay.date} (+${highestOverage.toFixed(2)} Over)`;
-            document.getElementById('b_highItem').innerText = biggestItem ? `Biggest Expense: ${biggestItem.tag} (${biggestItem.amount})` : '';
-        } else { document.getElementById('b_highDay').innerText = "Perfect record!"; document.getElementById('b_highItem').innerText = ""; }
-
-        if(lowestDay) {
-            let biggestItem = lowestDay.logs.reduce((max, obj) => (!obj.bypassLimit && obj.amount > (max?.amount||0)) ? obj : max, null);
-            document.getElementById('b_lowDay').innerText = `${lowestDay.date} (Spent ${lowestSafe.toFixed(2)})`;
-            document.getElementById('b_lowItem').innerText = biggestItem ? `Biggest Expense: ${biggestItem.tag} (${biggestItem.amount})` : '';
-        } else { document.getElementById('b_lowDay').innerText = "No active safe days recorded."; document.getElementById('b_lowItem').innerText = ""; }
-
+        if(highestDay) { let biggestItem = highestDay.logs.reduce((max, obj) => (!obj.bypassLimit && obj.amount > (max?.amount||0)) ? obj : max, null); document.getElementById('b_highDay').innerText = `${highestDay.date} (+${highestOverage.toFixed(2)} Over)`; document.getElementById('b_highItem').innerText = biggestItem ? `Biggest Expense: ${biggestItem.tag} (${biggestItem.amount})` : ''; } else { document.getElementById('b_highDay').innerText = "Perfect record!"; document.getElementById('b_highItem').innerText = ""; }
+        if(lowestDay) { let biggestItem = lowestDay.logs.reduce((max, obj) => (!obj.bypassLimit && obj.amount > (max?.amount||0)) ? obj : max, null); document.getElementById('b_lowDay').innerText = `${lowestDay.date} (Spent ${lowestSafe.toFixed(2)})`; document.getElementById('b_lowItem').innerText = biggestItem ? `Biggest Expense: ${biggestItem.tag} (${biggestItem.amount})` : ''; } else { document.getElementById('b_lowDay').innerText = "No active safe days recorded."; document.getElementById('b_lowItem').innerText = ""; }
         document.getElementById('behaviorModal').style.display = 'flex';
     }
 
     /* STB COMMAND CENTER */
     function openSTBModal() {
-        document.getElementById('stb_arrearsModal').innerText = s.loan.arrears.toFixed(2) + " TND";
-        document.getElementById('stb_rateModal').innerText = s.loan.rate;
-        
-        let now = new Date(); let target = new Date(2026, 10, 1); // Nov 1, 2026
-        let mLeft = (target.getFullYear() - now.getFullYear()) * 12 + target.getMonth() - now.getMonth();
-        if(mLeft <= 0) mLeft = 1; // Fallback if overdue
+        document.getElementById('stb_arrearsModal').innerText = s.loan.arrears.toFixed(2) + " TND"; document.getElementById('stb_rateModal').innerText = s.loan.rate;
+        let now = new Date(); let target = new Date(2026, 10, 1); let mLeft = (target.getFullYear() - now.getFullYear()) * 12 + target.getMonth() - now.getMonth(); if(mLeft <= 0) mLeft = 1; 
         document.getElementById('stb_monthsLeft').innerText = mLeft;
-
-        let p = s.loan.arrears; let r = (s.loan.rate / 100) / 12; let n = mLeft;
-        let pmt = p === 0 ? 0 : (p * (r * Math.pow(1 + r, n))) / (Math.pow(1 + r, n) - 1);
+        let p = s.loan.arrears; let r = (s.loan.rate / 100) / 12; let n = mLeft; let pmt = p === 0 ? 0 : (p * (r * Math.pow(1 + r, n))) / (Math.pow(1 + r, n) - 1);
         document.getElementById('stb_killShot').innerText = pmt.toFixed(2) + " TND";
-        
-        let totalInt = p === 0 ? 0 : (pmt * n) - p;
-        document.getElementById('stb_projInt').innerText = totalInt.toFixed(2) + " TND";
-        
+        let totalInt = p === 0 ? 0 : (pmt * n) - p; document.getElementById('stb_projInt').innerText = totalInt.toFixed(2) + " TND";
         document.getElementById('stbModal').style.display = 'flex';
     }
-    
     function editSTBRate() { let r = parseFloat(prompt("New Interest Rate (%):", s.loan.rate)); if(!isNaN(r)) { s.loan.rate = r; saveState(); openSTBModal(); } }
-
     function logSTBPayment() {
-        let amtTND = parseFloat(document.getElementById('stbPayAmt').value); if(isNaN(amtTND) || amtTND <= 0) return;
-        let wallet = document.getElementById('stbPayWallet').value;
-        if (wallet === 'brightwell') {
-            let reqUSD = amtTND / s.fx_rate;
-            if(confirm(`Deduct $${reqUSD.toFixed(2)} from Brightwell to pay ${amtTND} TND?`)) { s.vault.brightwell -= reqUSD; } else return;
-        } else if (wallet === 'savings') {
-            if(confirm(`Deduct ${amtTND} TND from Savings?`)) { s.vault.savings -= amtTND; } else return;
-        }
-        s.loan.arrears -= amtTND; if(s.loan.arrears < 0) s.loan.arrears = 0;
-        document.getElementById('stbPayAmt').value = '';
-        saveState(); openSTBModal(); alert("Payment logged.");
+        let amtTND = parseFloat(document.getElementById('stbPayAmt').value); if(isNaN(amtTND) || amtTND <= 0) return; let wallet = document.getElementById('stbPayWallet').value;
+        if (wallet === 'brightwell') { let reqUSD = amtTND / s.fx_rate; if(confirm(`Deduct $${reqUSD.toFixed(2)} from Brightwell to pay ${amtTND} TND?`)) { s.vault.brightwell -= reqUSD; } else return; } 
+        else if (wallet === 'savings') { if(confirm(`Deduct ${amtTND} TND from Savings?`)) { s.vault.savings -= amtTND; } else return; }
+        s.loan.arrears -= amtTND; if(s.loan.arrears < 0) s.loan.arrears = 0; document.getElementById('stbPayAmt').value = ''; saveState(); openSTBModal(); alert("Payment logged.");
     }
 
-    // IOUS & REMAINDER OF UTILS
+    // IOUS & CHARTS
     function renderIOUs() {
         const pList = document.getElementById('payablesList'); pList.innerHTML = '';
         s.ious.payables.forEach(p => { pList.innerHTML += `<div class="iou-item"><div><div style="font-weight:bold;">${p.name}</div><div style="color:var(--warning); font-size:11px;">Owe: ${p.amount.toFixed(2)} ${p.currency}</div></div><div><button class="iou-btn" onclick="processIOU('payable', ${p.id})">Pay</button><button class="iou-del" onclick="deleteIOU('payable', ${p.id})">❌</button></div></div>`; });
