@@ -306,7 +306,7 @@
 <script>
     const DEFAULT_STATE = { vault: { ibkr: 0, brightwell: 0, wise: 0, cash_usd: 0, cash_tnd: 0, savings: 0, ibkr_fees: 0, lifetime_fees: 0 }, loan: { arrears: 20000, rate: 13.5 }, ious: { payables: [], receivables: [] }, history: { vacation: { archive: [], current: [], limit: 35.00, balance: 35.00 }, onboard: { archive: [], current: [], limit: 7.25, balance: 7.25 } }, capital_saved: 0, fx_rate: 2.93, mode: 'vacation', income_logs: [] };
     let s = JSON.parse(localStorage.getItem('CrewWalletMaster')) || DEFAULT_STATE;
-    if(!s.income_logs) s.income_logs = []; // Migration safeguard
+    if(!s.income_logs) s.income_logs = []; 
     function saveState() { localStorage.setItem('CrewWalletMaster', JSON.stringify(s)); renderApp(); }
 
     function switchTab(tabId) {
@@ -357,12 +357,31 @@
         renderIOUs();
     }
 
+    /* THE V13 SMART CLOSE OUT ENGINE */
     function closeOutDay() {
-        if (!confirm("End the day now? This archives today's logs and resets your dial.")) return;
         let curHist = s.history[s.mode];
+        let guessDate = new Date();
+        
+        // Smart Date Detection: Extract date from the first log, or guess "yesterday" if it's past midnight.
+        if (curHist.current.length > 0) {
+            guessDate = new Date(curHist.current[0].ts); 
+        } else if (guessDate.getHours() < 5) {
+            guessDate.setDate(guessDate.getDate() - 1); 
+        }
+        
+        let archiveDate = prompt("Archive today's logs under which date?", guessDate.toDateString());
+        if (!archiveDate) return; // User cancelled
+
         if (curHist.current.length > 0) {
             let surplus = curHist.balance; let surplusTND = s.mode === 'onboard' ? surplus * s.fx_rate : surplus;
-            s.capital_saved += surplusTND; curHist.archive.push({ date: new Date().toDateString(), logs: [...curHist.current] });
+            s.capital_saved += surplusTND; 
+            
+            let existingIdx = curHist.archive.findIndex(a => a.date === archiveDate);
+            if (existingIdx > -1) {
+                curHist.archive[existingIdx].logs.push(...curHist.current); // Safely append if day exists
+            } else {
+                curHist.archive.push({ date: archiveDate, logs: [...curHist.current] });
+            }
         }
         curHist.current = []; curHist.balance = curHist.limit; saveState();
     }
@@ -397,9 +416,7 @@
     }
     function processIncome() {
         let amt = parseFloat(document.getElementById('incAmount').value); if(isNaN(amt) || amt <= 0) return;
-        let source = document.getElementById('incSource').value;
-        let wallet = document.getElementById('incWallet').value; 
-        let details = document.getElementById('incDetails').value.trim() || "No details";
+        let source = document.getElementById('incSource').value; let wallet = document.getElementById('incWallet').value; let details = document.getElementById('incDetails').value.trim() || "No details";
         
         s.vault[wallet] += amt;
         let isUSD = ['brightwell', 'wise', 'cash_usd', 'ibkr'].includes(wallet); let currency = isUSD ? 'USD' : 'TND';
