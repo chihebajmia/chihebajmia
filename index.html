@@ -216,7 +216,9 @@
             <button class="btn-secondary" onclick="exportData()" style="color:var(--text);">💾 Export JSON Backup</button>
             <input type="file" id="importFile" style="display:none;" onchange="importData(event)" accept=".json">
             <button class="btn-secondary" onclick="document.getElementById('importFile').click()" style="color:var(--text);">📂 Restore from Backup</button>
-            <button class="btn-secondary" onclick="factoryReset()" style="margin-top: 20px; border-color: var(--danger); color: var(--danger); background: rgba(248, 113, 113, 0.1);">🗑️ Factory Reset App</button>
+            
+            <button class="btn-secondary" onclick="recalibrateMath()" style="margin-top: 10px; border-color: var(--warning); color: var(--warning);">🧮 Recalibrate Database Math</button>
+            <button class="btn-secondary" onclick="factoryReset()" style="margin-top: 10px; border-color: var(--danger); color: var(--danger); background: rgba(248, 113, 113, 0.1);">🗑️ Factory Reset App</button>
         </div>
     </div>
 </div>
@@ -346,7 +348,7 @@
                 let actualIndex = curHist.current.length - 1 - index; let subtextArr = [];
                 if(item.location) subtextArr.push(`📍 ${item.location}`); if(item.items) subtextArr.push(`🛒 ${item.items}`); if(item.whom) subtextArr.push(`👥 For: ${item.whom}`);
                 let bypassNote = item.bypassLimit ? `<span style="color:var(--warning); font-size:9px;">(Bypass)</span>` : '';
-                listNode.innerHTML += `<div class="history-item"><div style="flex:1;"><div style="font-weight:600;">${item.tag} <span class="cat-badge">${item.category}</span></div><div style="font-size:9px; color:var(--text-muted);">${item.walletSource} ${bypassNote}</div>${subtextArr.length ? `<div class="history-details">${subtextArr.join(' | ')}</div>` : ''}</div><div style="display:flex; align-items:center; gap:10px;"><span style="font-weight:bold; color:var(--danger);">-${!item.bypassLimit && s.mode==='onboard'?'$':''}${item.amount.toFixed(2)}${!item.bypassLimit && s.mode==='vacation'?' TND':''}</span><button class="edit-btn" onclick="editExpense(${actualIndex})">✏️</button></div></div>`;
+                listNode.innerHTML += `<div class="history-item"><div style="flex:1;"><div style="font-weight:600;">${item.tag} <span class="cat-badge">${item.category}</span></div><div style="font-size:9px; color:var(--text-muted);">${item.walletSource} ${bypassNote}</div>${subtextArr.length ? `<div class="history-details">${subtextArr.join(' | ')}</div>` : ''}</div><div style="display:flex; align-items:center; gap:10px;"><span style="font-weight:bold; color:var(--danger);">-${!item.bypassLimit && s.mode==='onboard'?'$':''}${item.amount.toFixed(2)}${!item.bypassLimit && s.mode==='vacation'?' TND':''}</span><button class="edit-btn" onclick="editExpense(${actualIndex})">✏️</button><button class="edit-btn" onclick="deleteExpense(${actualIndex})">❌</button></div></div>`;
             });
         }
         
@@ -357,31 +359,17 @@
         renderIOUs();
     }
 
-    /* THE V13 SMART CLOSE OUT ENGINE */
     function closeOutDay() {
-        let curHist = s.history[s.mode];
-        let guessDate = new Date();
-        
-        // Smart Date Detection: Extract date from the first log, or guess "yesterday" if it's past midnight.
-        if (curHist.current.length > 0) {
-            guessDate = new Date(curHist.current[0].ts); 
-        } else if (guessDate.getHours() < 5) {
-            guessDate.setDate(guessDate.getDate() - 1); 
-        }
-        
+        let curHist = s.history[s.mode]; let guessDate = new Date();
+        if (curHist.current.length > 0) { guessDate = new Date(curHist.current[0].ts); } else if (guessDate.getHours() < 5) { guessDate.setDate(guessDate.getDate() - 1); }
         let archiveDate = prompt("Archive today's logs under which date?", guessDate.toDateString());
-        if (!archiveDate) return; // User cancelled
+        if (!archiveDate) return; 
 
         if (curHist.current.length > 0) {
             let surplus = curHist.balance; let surplusTND = s.mode === 'onboard' ? surplus * s.fx_rate : surplus;
             s.capital_saved += surplusTND; 
-            
             let existingIdx = curHist.archive.findIndex(a => a.date === archiveDate);
-            if (existingIdx > -1) {
-                curHist.archive[existingIdx].logs.push(...curHist.current); // Safely append if day exists
-            } else {
-                curHist.archive.push({ date: archiveDate, logs: [...curHist.current] });
-            }
+            if (existingIdx > -1) { curHist.archive[existingIdx].logs.push(...curHist.current); } else { curHist.archive.push({ date: archiveDate, logs: [...curHist.current] }); }
         }
         curHist.current = []; curHist.balance = curHist.limit; saveState();
     }
@@ -400,6 +388,14 @@
         if(item.walletSource && s.vault[item.walletSource] !== undefined) s.vault[item.walletSource] += item.amount; 
         document.getElementById('customDescription').value = item.tag; document.getElementById('customAmount').value = item.amount; document.getElementById('advCategory').value = item.category; document.getElementById('advSourceWallet').value = item.bypassLimit ? item.walletSource : 'default'; document.getElementById('advLocation').value = item.location || ''; document.getElementById('advItems').value = item.items || ''; document.getElementById('advWhom').value = item.whom || ''; document.getElementById('advMain').style.display = 'flex';
         s.history[s.mode].current.splice(idx, 1); saveState(); document.getElementById('customAmount').focus(); 
+    }
+
+    function deleteExpense(idx) {
+        if(!confirm("Delete this expense entirely?")) return;
+        let item = s.history[s.mode].current[idx]; 
+        if(!item.bypassLimit) s.history[s.mode].balance += item.amount;
+        if(item.walletSource && s.vault[item.walletSource] !== undefined) s.vault[item.walletSource] += item.amount; 
+        s.history[s.mode].current.splice(idx, 1); saveState();
     }
 
     /* INCOME & FUNDING ENGINE */
@@ -532,10 +528,11 @@
         let cost = parseFloat(document.getElementById('tmAmount').value); let tag = document.getElementById('tmTag').value.trim() || '💸 Past Item'; if(isNaN(cost) || cost <= 0) return;
         let src = document.getElementById('tmSourceWallet').value; let bypass = (src !== 'default'); let m = document.getElementById('setMode').value; 
         let targetWallet = m === 'vacation' ? 'cash_tnd' : 'cash_usd'; if (bypass) targetWallet = src;
-        s.vault[targetWallet] -= cost; let dayIdx = s.history[m].archive.findIndex(a => a.date === targetStr); let costTND = m === 'onboard' ? cost * s.fx_rate : cost;
-        if (!bypass) { if (dayIdx === -1) s.capital_saved += ((s.history[m].limit * (m==='onboard'?s.fx_rate:1)) - costTND); else s.capital_saved -= costTND; }
+        s.vault[targetWallet] -= cost; let dayIdx = s.history[m].archive.findIndex(a => a.date === targetStr); 
+        
         let newLog = { amount: cost, tag: tag, category: document.getElementById('tmCategory').value, location: document.getElementById('tmLocation').value.trim(), items: document.getElementById('tmItems').value.trim(), whom: document.getElementById('tmWhom').value.trim(), walletSource: targetWallet, bypassLimit: bypass, fxRate: s.fx_rate, ts: new Date(dVal.split('-').join('/')).getTime() };
-        if(dayIdx === -1) s.history[m].archive.push({ date: targetStr, logs: [newLog] }); else s.history[m].archive[dayIdx].logs.push(newLog);
+        
+        if(dayIdx === -1) { s.history[m].archive.push({ date: targetStr, logs: [newLog] }); } else { s.history[m].archive[dayIdx].logs.push(newLog); }
         document.getElementById('tmAmount').value = ''; document.getElementById('advTM').style.display = 'none'; saveState(); loadPastDay();
     }
 
@@ -544,9 +541,28 @@
         if(dayIdx > -1) {
             let item = s.history[m].archive[dayIdx].logs[idx];
             if(item.walletSource && s.vault[item.walletSource] !== undefined) s.vault[item.walletSource] += item.amount;
-            if(!item.bypassLimit) s.capital_saved += (m === 'onboard' ? item.amount * item.fxRate : item.amount);
-            s.history[m].archive[dayIdx].logs.splice(idx, 1); saveState(); loadPastDay();
+            s.history[m].archive[dayIdx].logs.splice(idx, 1); 
+            // Auto-Pruning: if day is now empty, delete it
+            if(s.history[m].archive[dayIdx].logs.length === 0) { s.history[m].archive.splice(dayIdx, 1); }
+            saveState(); loadPastDay();
         }
+    }
+
+    function recalibrateMath() {
+        if(!confirm("Sweep database? This destroys ghost days and perfectly recalculates your Capital Saved.")) return;
+        let cap = 0;
+        ['vacation', 'onboard'].forEach(m => {
+            for (let i = s.history[m].archive.length - 1; i >= 0; i--) {
+                let day = s.history[m].archive[i];
+                if (day.logs.length === 0) { s.history[m].archive.splice(i, 1); } 
+                else {
+                    let spent = day.logs.reduce((sum, item) => sum + (item.bypassLimit ? 0 : item.amount), 0);
+                    let surplus = s.history[m].limit - spent;
+                    cap += (m === 'onboard' ? surplus * s.fx_rate : surplus);
+                }
+            }
+        });
+        s.capital_saved = cap; saveState(); alert("✅ Database recalibrated!");
     }
 
     function populateSettings() { document.getElementById('setMode').value = s.mode; document.getElementById('setVacLimit').value = s.history.vacation.limit; document.getElementById('setOnbLimit').value = s.history.onboard.limit; document.getElementById('setFX').value = s.fx_rate; }
