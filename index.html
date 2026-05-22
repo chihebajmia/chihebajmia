@@ -12,23 +12,29 @@
         :root { --bg-color: #0f172a; --card-bg: #1e293b; --accent: #fbbf24; --text: #f8fafc; --text-muted: #94a3b8; --success: #4ade80; --warning: #facc15; --danger: #f87171; --panel-border: #334155; --vault-bg: rgba(15, 23, 42, 0.5); }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-color); color: var(--text); margin: 0; padding: 16px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; -webkit-tap-highlight-color: transparent; padding-bottom: 90px; }
         .app-container { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 14px; }
-        .page-section { display: none; flex-direction: column; gap: 14px; } .page-section.active { display: flex; }
+        .page-section { display: none; flex-direction: column; gap: 14px; } 
+        .page-section.active { display: flex; }
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card-bg); border-top: 1px solid var(--panel-border); display: flex; justify-content: space-around; padding: 10px 0; padding-bottom: calc(10px + env(safe-area-inset-bottom)); z-index: 50; }
         .nav-btn { background: none; border: none; color: var(--text-muted); font-size: 10px; font-weight: bold; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; flex: 1; transition: color 0.2s;}
-        .nav-btn.active { color: var(--accent); } .nav-icon { font-size: 22px; }
+        .nav-btn.active { color: var(--accent); } 
+        .nav-icon { font-size: 22px; }
         .vault-card { background-color: var(--card-bg); border-radius: 16px; padding: 16px; border: 1px solid var(--panel-border); transition: transform 0.1s;}
         .vault-card.clickable:active { transform: scale(0.98); border-color: var(--accent); }
         .vault-header { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); margin-bottom: 12px; text-align: center; display: flex; justify-content: space-between; align-items: center;}
         .vault-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
         .vault-item { background-color: var(--vault-bg); padding: 10px 4px; border-radius: 10px; text-align: center; border: 1px solid var(--panel-border); }
         .v-lbl { font-size: 9px; color: var(--text-muted); display: block; margin-bottom: 3px; font-weight: bold;}
-        .v-val { font-size: 13px; font-weight: 800; color: var(--text); } .v-sub { font-size: 8px; color: var(--danger); margin-top: 2px; }
+        .v-val { font-size: 13px; font-weight: 800; color: var(--text); } 
+        .v-sub { font-size: 8px; color: var(--danger); margin-top: 2px; }
         .vault-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 12px; }
-        .v-btn { background-color: #334155; color: white; border: none; border-radius: 8px; padding: 10px 4px; font-size: 10px; font-weight: bold; cursor: pointer; } .v-btn:active { background-color: var(--accent); color: #000; }
+        .v-btn { background-color: #334155; color: white; border: none; border-radius: 8px; padding: 10px 4px; font-size: 10px; font-weight: bold; cursor: pointer; } 
+        .v-btn:active { background-color: var(--accent); color: #000; }
         .scoreboard-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
         .score-box { background-color: var(--card-bg); border: 1px solid var(--panel-border); border-radius: 12px; padding: 10px; text-align: center; cursor: pointer; transition: transform 0.1s;}
         .score-box:active { transform: scale(0.95); }
-        .score-num { font-size: 18px; font-weight: 800; margin-top: 2px; } .score-box.green-box .score-num { color: var(--success); } .score-box.red-box .score-num { color: var(--danger); }
+        .score-num { font-size: 18px; font-weight: 800; margin-top: 2px; } 
+        .score-box.green-box .score-num { color: var(--success); } 
+        .score-box.red-box .score-num { color: var(--danger); }
         .balance-card { background-color: var(--card-bg); border-radius: 16px; padding: 18px 20px; text-align: center; border: 1px solid var(--panel-border); position: relative;}
         .title { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); margin-bottom: 6px; display:flex; justify-content:space-between; align-items:center;}
         .balance { font-size: 34px; font-weight: 800; margin: 0; color: var(--success); transition: color 0.3s ease; }
@@ -38,14 +44,17 @@
         .form-panel { background-color: var(--card-bg); border-radius: 16px; padding: 14px; border: 1px solid var(--panel-border); display: flex; flex-direction: column; gap: 10px; }
         .input-row { display: flex; gap: 8px; align-items: center; }
         input, select { background-color: #0f172a; border: 1px solid var(--panel-border); border-radius: 10px; padding: 12px; color: var(--text); font-size: 14px; outline: none; box-sizing: border-box; width: 100%; -webkit-appearance: none;}
-        .flex-main { flex: 2; width: 50%; } .flex-side { flex: 1; width: 25%; text-align: center; }
+        .flex-main { flex: 2; width: 50%; } 
+        .flex-side { flex: 1; width: 25%; text-align: center; }
         .btn-action { background-color: var(--accent); color: #0f172a; border: none; border-radius: 10px; padding: 12px; font-size: 14px; font-weight: 700; cursor: pointer; transition: background-color 0.3s ease; }
         .expand-btn { background: none; border: 1px solid var(--panel-border); color: var(--text-muted); border-radius: 10px; padding: 12px; cursor: pointer; font-size: 14px; }
         .advanced-context-box { display: none; flex-direction: column; gap: 8px; background-color: var(--vault-bg); padding: 12px; border-radius: 10px; border: 1px dashed var(--panel-border); }
         .history-card { background-color: var(--card-bg); border-radius: 16px; padding: 16px; max-height: 280px; overflow-y: auto; border: 1px solid var(--panel-border); }
-        .history-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--panel-border); font-size: 13px; animation: fadeIn 0.3s ease;} .history-item:last-child { border-bottom: none; }
+        .history-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--panel-border); font-size: 13px; animation: fadeIn 0.3s ease;} 
+        .history-item:last-child { border-bottom: none; }
         .history-details { font-size: 10px; color: var(--text-muted); margin-top: 4px; line-height: 1.3; }
-        .edit-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 0 4px; font-size: 14px; transition: transform 0.1s; } .edit-btn:active { transform: scale(0.8); }
+        .edit-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 0 4px; font-size: 14px; transition: transform 0.1s; } 
+        .edit-btn:active { transform: scale(0.8); }
         .cat-badge { background: #334155; color: white; padding: 2px 6px; border-radius: 4px; font-size: 8px; margin-left: 6px; vertical-align: middle; }
         .project-badge { font-size:9px; color:var(--accent); display:block; margin-top:2px; font-weight:bold; }
         .chart-row { display: flex; align-items: center; justify-content: space-between; font-size: 11px; margin: 6px 0; }
@@ -64,8 +73,13 @@
         .b-stat span { color: var(--accent); font-weight: bold; float: right;}
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
         #printArea { display: none; }
-        @media print { body > * { display: none !important; } body { background-color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; } #printArea { display: block !important; position: absolute; left: 0; top: 0; width: 100%; background: white; color: #0f172a; padding: 0; margin: 0; box-sizing: border-box; } }
+        @media print { 
+            body > * { display: none !important; } 
+            body { background-color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            #printArea { display: block !important; position: absolute; left: 0; top: 0; width: 100%; background: white; color: #0f172a; padding: 0; margin: 0; box-sizing: border-box; } 
+        }
     </style>
 </head>
 <body>
@@ -394,33 +408,36 @@
 
 <script>
     // ==========================================
-    // 1. STATE & INITIALIZATION (V19)
+    // 1. DATA INJECTION & STARTUP (V20 SAFETY)
     // ==========================================
-    const DEFAULT_STATE = { 
-        vault: { ibkr: 0, brightwell: 0, wise: 0, cash_usd: 0, cash_tnd: 0, savings: 0, ibkr_fees: 0, lifetime_fees: 0 }, 
-        loan: { arrears: 20000, rate: 13.5, schedule: [] }, 
-        ious: { payables: [], receivables: [] }, 
-        history: { vacation: { archive: [], current: [], limit: 49.00, balance: 49.00 }, onboard: { archive: [], current: [], limit: 7.25, balance: 7.25 } }, 
-        capital_saved: 0, fx_rate: 2.93, mode: 'vacation', income_logs: [],
-        projects: {
-            envelopes: { getaway: { name: '🏖️ Vacation Getaway', limit: 300, spent: 0, archived: false }, groceries: { name: '🛒 Bulk Groceries', limit: 200, spent: 0, archived: false }, bills: { name: '🧾 Bills & Admin', limit: 150, spent: 0, archived: false }, travel: { name: '✈️ Travel Buffer', limit: 440, spent: 0, archived: false } },
-            missions: { port: { name: '⚓ Port of Call', spent: 0, hasLogistics: false, archived: false }, homeport: { name: '🏢 Homeport Logistics', spent: 0, hasLogistics: false, archived: false }, online: { name: '📦 Online Ordering', spent: 0, dead: 0, hasLogistics: true, archived: false } },
-            goals: [ { id: 1, name: '💻 MacBook Fund', target: 3000, saved: 0, archived: false } ]
-        }
-    };
     
-    let s = JSON.parse(localStorage.getItem('CrewWalletMaster')) || DEFAULT_STATE;
+    // Your exact JSON payload. This acts as the uncorruptable fallback.
+    const USER_PRISTINE_DATA = {"vault":{"ibkr":330,"brightwell":550,"wise":0,"cash_usd":462,"cash_tnd":53,"savings":261,"ibkr_fees":1.13,"lifetime_fees":1.13},"loan":{"arrears":20000,"rate":11.5,"schedule":[]},"ious":{"payables":[{"id":1779300930444,"name":"Adelith","amount":1000,"currency":"USD"},{"id":1779300945128,"name":"Ayoub","amount":1000,"currency":"TND"},{"id":1779300956262,"name":"Haroun","amount":600,"currency":"TND"}],"receivables":[{"id":1779300967539,"name":"Houssem","amount":1400,"currency":"TND"},{"id":1779300977213,"name":"Last","amount":70,"currency":"USD"}]},"history":{"vacation":{"archive":[{"date":"Tue May 19 2026","logs":[{"amount":3,"tag":"Coffee","category":"Coffee & Drinks","location":"VIP Side","items":"Filtre x2","whom":"","walletSource":"cash_tnd","bypassLimit":false,"fxRate":2.93,"ts":1779145200000},{"amount":5,"tag":"Smoothie","category":"Coffee & Drinks","location":"VIP Side","items":"Smoothie Pineapple","whom":"","walletSource":"cash_tnd","bypassLimit":false,"fxRate":2.93,"ts":1779145200000},{"amount":3,"tag":"Boga + Pastry","category":"Coffee & Drinks","location":"Nassim","items":"Boga + Gateau","whom":"","walletSource":"cash_tnd","bypassLimit":false,"fxRate":2.93,"ts":1779145200000}]},{"date":"Wed May 20 2026","logs":[{"amount":2,"tag":"Coffee","category":"Coffee & Drinks","location":"VIP SIDE","items":"Filtre","whom":"","walletSource":"cash_tnd","bypassLimit":false,"fxRate":2.907316,"ts":1779231600000},{"amount":10,"tag":"Mlewi","category":"Dining & Lifestyle","location":"El Kantaoui","items":"Mlewi msammen","whom":"","walletSource":"cash_tnd","bypassLimit":false,"fxRate":2.907316,"ts":1779231600000},{"amount":10,"tag":"Tea","category":"Coffee & Drinks","location":"Rendezvous","items":"2x Tea + Water","whom":"Aziz 1x Tea + Water","walletSource":"cash_tnd","bypassLimit":false,"fxRate":2.907316,"ts":1779231600000},{"amount":7,"tag":"Smoothie","category":"Coffee & Drinks","location":"VIP SIDE","items":"Smoothie + Water","whom":"Houssem  Water","walletSource":"cash_tnd","bypassLimit":false,"fxRate":2.907316,"ts":1779231600000}]},{"date":"Sun May 17 2026","logs":[{"amount":35,"tag":"Vape","category":"💨 Vape","location":"Akouda","items":"Vape","whom":"","walletSource":"cash_tnd","bypassLimit":false,"fxRate":2.908138,"ts":1778972400000}]},{"date":"Thu May 21 2026","logs":[{"amount":35,"tag":"Vape","category":"💨 Vape","location":"Akouda","items":"Vape","whom":"","walletSource":"cash_tnd","bypassLimit":true,"fxRate":2.908138,"ts":1779371790714},{"amount":3,"tag":"Coffee","category":"Coffee & Drinks","location":"VIP SIDE","items":"2 x Filtre","whom":"","walletSource":"cash_tnd","bypassLimit":false,"fxRate":2.908138,"ts":1779380201182},{"amount":5,"tag":"Taxi","category":"Transit & Travel","location":"Akouda - Kantaoui","items":"Taxi Fare","whom":"Aziz","walletSource":"cash_tnd","bypassLimit":false,"fxRate":2.908138,"ts":1779381528582},{"amount":17,"tag":"Coffee","category":"Coffee & Drinks","location":"Cafe Medina - Kantaoui","items":"2 x Direct + Garci + 0.5TND tip","whom":"Aziz","walletSource":"cash_tnd","bypassLimit":false,"fxRate":2.908138,"ts":1779389162912}]}],"current":[],"limit":35,"balance":35},"onboard":{"archive":[],"current":[],"limit":7.25,"balance":7.25}},"capital_saved":40,"fx_rate":2.908138,"mode":"vacation","income_logs":[],"projects":{"envelopes":{"getaway":{"name":"🏖️ Vacation Getaway","limit":300,"spent":0,"archived":false},"groceries":{"name":"🛒 Bulk Groceries","limit":200,"spent":0,"archived":false},"bills":{"name":"🧾 Bills & Admin","limit":150,"spent":0,"archived":false},"travel":{"name":"✈️ Travel Buffer","limit":440,"spent":0,"archived":false}},"missions":{"port":{"name":"⚓ Port of Call","spent":0,"archived":false},"homeport":{"name":"🏢 Homeport Logistics","spent":0,"archived":false},"online":{"name":"📦 Online Ordering","spent":0,"dead":0,"archived":false,"hasLogistics":true}},"goals":[{"id":1,"name":"💻 MacBook Fund","target":3000,"saved":0,"archived":false}]}};
+
+    // Load from local storage, or fallback to the pristine data
+    let s = null;
+    try {
+        s = JSON.parse(localStorage.getItem('CrewWalletMaster'));
+    } catch(e) {}
     
-    // Safety Migrations for Older Versions
-    if(!s.income_logs) s.income_logs = []; 
-    if(!s.projects) s.projects = DEFAULT_STATE.projects;
-    if(!s.projects.goals) s.projects.goals = DEFAULT_STATE.projects.goals;
-    if(!s.loan.schedule) s.loan.schedule = [];
+    // If the data is empty, null, or corrupted, instantly overwrite with your Pristine Data
+    if (!s || !s.vault || !s.history) {
+        s = USER_PRISTINE_DATA;
+    }
+
+    // --- AUTO-REPAIR ENGINE --- (This guarantees a crash never happens again)
+    if (!s.loan.schedule) s.loan.schedule = [];
+    if (!s.projects) s.projects = USER_PRISTINE_DATA.projects;
+    if (!s.projects.envelopes) s.projects.envelopes = {};
+    if (!s.projects.missions) s.projects.missions = {};
+    if (!s.projects.goals) s.projects.goals = [];
+    if (!s.income_logs) s.income_logs = [];
+    if (!s.fx_rate || isNaN(s.fx_rate)) s.fx_rate = 2.93;
+
     Object.keys(s.projects.envelopes).forEach(k => { if(s.projects.envelopes[k].archived === undefined) s.projects.envelopes[k].archived = false; });
     Object.keys(s.projects.missions).forEach(k => { if(s.projects.missions[k].archived === undefined) s.projects.missions[k].archived = false; });
     if(s.projects.missions.online && s.projects.missions.online.hasLogistics === undefined) s.projects.missions.online.hasLogistics = true;
     s.projects.goals.forEach(g => { if(g.archived === undefined) g.archived = false; });
-    if(!s.fx_rate || isNaN(s.fx_rate)) s.fx_rate = 2.93;
 
     function saveState() { 
         localStorage.setItem('CrewWalletMaster', JSON.stringify(s)); 
@@ -446,6 +463,24 @@
         } else {
             document.documentElement.style.setProperty('--accent', '#38bdf8');
         }
+    }
+
+    function populateProjectDropdowns() {
+        let html = `<option value="none">📌 General Daily Spend (No Mission)</option>`;
+        let activeEnv = Object.keys(s.projects.envelopes).filter(k => !s.projects.envelopes[k].archived);
+        if(activeEnv.length > 0) { 
+            html += `<optgroup label="Earmarked Envelopes (Bypass Limit)">`; 
+            activeEnv.forEach(k => html += `<option value="env_${k}">${s.projects.envelopes[k].name}</option>`); 
+            html += `</optgroup>`; 
+        }
+        let activeMis = Object.keys(s.projects.missions).filter(k => !s.projects.missions[k].archived);
+        if(activeMis.length > 0) { 
+            html += `<optgroup label="Active Missions (Hits Daily Limit)">`; 
+            activeMis.forEach(k => html += `<option value="mis_${k}">${s.projects.missions[k].name}</option>`); 
+            html += `</optgroup>`; 
+        }
+        document.getElementById('advProject').innerHTML = html; 
+        document.getElementById('tmProject').innerHTML = html;
     }
 
     function renderApp() {
@@ -523,7 +558,6 @@
                 
                 let origSym = s.mode === 'vacation' ? 'TND' : 'USD'; 
                 let convSym = s.mode === 'vacation' ? 'USD' : 'TND'; 
-                // Safety calculation for historical display
                 let rate = item.fxRate && !isNaN(item.fxRate) ? item.fxRate : s.fx_rate;
                 let convAmount = s.mode === 'vacation' ? item.amount / rate : item.amount * rate;
                 
@@ -561,9 +595,158 @@
         renderSchedule();
     }
 
+    function toggleOnlineFields(prefix) {
+        let val = document.getElementById(prefix + 'Project').value; 
+        let show = false;
+        if(val.startsWith('mis_')) { 
+            let key = val.replace('mis_', ''); 
+            if(s.projects.missions[key] && s.projects.missions[key].hasLogistics) show = true; 
+        }
+        document.getElementById(prefix + 'OnlineBox').style.display = show ? 'flex' : 'none';
+    }
+
     // ==========================================
-    // 3. EXPENSE LOGGING & FX MATH (V19 SAFE)
+    // 3. PROJECT ENGINE DYNAMICS
     // ==========================================
+    function addProject(type) {
+        let name = prompt(`Name for this new ${type === 'env' ? 'Envelope' : (type === 'mis' ? 'Mission' : 'Goal')}:`); 
+        if(!name) return;
+        
+        let key = 'p_' + Date.now();
+        
+        if(type === 'env') {
+            let limit = parseFloat(prompt("Enter Total Budget Limit (TND):")); 
+            if(isNaN(limit)) return;
+            s.projects.envelopes[key] = { name: '🏖️ ' + name, limit: limit, spent: 0, archived: false };
+        } else if(type === 'mis') {
+            let log = confirm("Will you track separate Shipping/Tax (Dead Money) for this mission?");
+            s.projects.missions[key] = { name: '🎯 ' + name, spent: 0, dead: 0, hasLogistics: log, archived: false };
+        } else if(type === 'goal') {
+            let target = parseFloat(prompt("Enter Target Goal Amount:")); 
+            if(isNaN(target)) return;
+            s.projects.goals.push({ id: Date.now(), name: '🏆 ' + name, target: target, saved: 0, archived: false });
+        }
+        saveState();
+    }
+
+    function archiveProject(type, id) {
+        if(!confirm("Archive this tracker? It will be removed from your active lists but saved in history.")) return;
+        if(type === 'env' && s.projects.envelopes[id]) s.projects.envelopes[id].archived = true;
+        if(type === 'mis' && s.projects.missions[id]) s.projects.missions[id].archived = true;
+        if(type === 'goal') { 
+            let g = s.projects.goals.find(x => x.id === id); 
+            if(g) g.archived = true; 
+        }
+        saveState();
+    }
+
+    function renderProjects() {
+        const envBox = document.getElementById('envelopeContainer'); envBox.innerHTML = '';
+        const misBox = document.getElementById('missionContainer'); misBox.innerHTML = '';
+        const goalBox = document.getElementById('goalsContainer'); goalBox.innerHTML = '';
+        const archBox = document.getElementById('archiveSection'); 
+        archBox.innerHTML = '<div style="font-size:10px; font-weight:bold; margin-bottom:8px;">Archived Trackers</div>';
+
+        // Envelopes
+        Object.keys(s.projects.envelopes).forEach(k => {
+            let e = s.projects.envelopes[k]; 
+            let isOver = e.spent > e.limit; 
+            let pct = Math.min(100, (e.spent / e.limit) * 100);
+            
+            let html = `
+                <div style="background:var(--card-bg); padding:10px; border-radius:8px; border:1px solid ${isOver ? 'var(--danger)' : 'var(--panel-border)'}; opacity:${e.archived?0.6:1};">
+                    <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;">
+                        <strong>${e.name}</strong>
+                        <div>
+                            <span style="color:${isOver ? 'var(--danger)' : 'var(--text)'}; font-weight:bold;">${e.spent.toFixed(2)}</span> / ${e.limit.toFixed(2)} TND
+                            ${e.archived ? '' : `<button onclick="archiveProject('env', '${k}')" style="background:none;border:none;margin-left:5px;cursor:pointer;">📦</button>`}
+                        </div>
+                    </div>
+                    <div class="progress-container" style="height:4px; margin-top:0;">
+                        <div class="progress-bar" style="width:${pct}%; background:${isOver ? 'var(--danger)' : 'var(--accent)'};"></div>
+                    </div>
+                    ${isOver && !e.archived ? `<div style="font-size:9px; color:var(--danger); margin-top:4px;">⚠️ Overbudget: Spillover affecting daily limit</div>` : ''}
+                </div>`;
+            if(!e.archived) envBox.innerHTML += html; else archBox.innerHTML += html;
+        });
+
+        // Missions
+        Object.keys(s.projects.missions).forEach(k => {
+            let m = s.projects.missions[k];
+            let html = `
+                <div style="background:var(--card-bg); padding:10px; border-radius:8px; border:1px solid var(--panel-border); text-align:center; opacity:${m.archived?0.6:1}; position:relative;">
+                    ${m.archived ? '' : `<button onclick="archiveProject('mis', '${k}')" style="position:absolute;top:5px;right:5px;background:none;border:none;font-size:10px;cursor:pointer;">📦</button>`}
+                    <div style="font-size:10px; color:var(--text-muted); font-weight:bold; margin-bottom:4px;">${m.name}</div>
+                    <div style="font-size:16px; font-weight:800; color:var(--text);">$${m.spent.toFixed(2)}</div>
+                    ${m.hasLogistics ? `<div style="font-size:9px; color:var(--danger); margin-top:4px;">Dead Money: $${m.dead.toFixed(2)}</div>` : ''}
+                </div>`;
+            if(!m.archived) misBox.innerHTML += html; else archBox.innerHTML += html;
+        });
+
+        // Goals
+        s.projects.goals.forEach(g => {
+            let pct = Math.min(100, (g.saved / g.target) * 100);
+            let html = `
+                <div style="background:var(--card-bg); padding:10px; border-radius:8px; border:1px solid rgba(74, 222, 128, 0.4); opacity:${g.archived?0.6:1};">
+                    <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;">
+                        <strong>${g.name}</strong>
+                        <div>
+                            <span style="color:var(--success); font-weight:bold;">${g.saved.toFixed(0)} / ${g.target.toFixed(0)}</span>
+                            ${g.archived ? '' : `<button onclick="archiveProject('goal', ${g.id})" style="background:none;border:none;margin-left:5px;cursor:pointer;">📦</button>`}
+                        </div>
+                    </div>
+                    <div class="progress-container" style="height:4px; margin-top:0;">
+                        <div class="progress-bar" style="width:${pct}%;"></div>
+                    </div>
+                    ${g.archived ? '' : `<button class="v-btn" style="width:100%; margin-top:10px; background:#16a34a;" onclick="fundGoal(${g.id})">➕ Add Funds (Virtual Hold)</button>`}
+                </div>`;
+            if(!g.archived) goalBox.innerHTML += html; else archBox.innerHTML += html;
+        });
+        
+        if(archBox.innerHTML === '<div style="font-size:10px; font-weight:bold; margin-bottom:8px;">Archived Trackers</div>') {
+            archBox.innerHTML += '<div style="font-size:11px;color:var(--text-muted);">No archived items.</div>';
+        }
+    }
+
+    function fundGoal(id) { 
+        let amt = parseFloat(prompt("Amount to hold for this goal:")); 
+        if(isNaN(amt) || amt <= 0) return; 
+        let goal = s.projects.goals.find(g => g.id === id); 
+        if(goal) { 
+            goal.saved += amt; 
+            saveState(); 
+            alert(`Assigned ${amt} to ${goal.name}. (This is a virtual hold, money remains physically in your vault).`); 
+        } 
+    }
+
+    // ==========================================
+    // 4. EXPENSE LOGGING & FX MATH (STRICT)
+    // ==========================================
+    function reverseProjectTracking(item, histMode) {
+        if (!item.project || item.project === 'none') return; 
+        let trackingCost = 0;
+        
+        if (item.project.startsWith('env_')) { 
+            let envKey = item.project.replace('env_', ''); 
+            if(s.projects.envelopes[envKey]) { 
+                trackingCost = histMode === 'onboard' ? item.amount * item.fxRate : item.amount; 
+                s.projects.envelopes[envKey].spent -= trackingCost; 
+                if(s.projects.envelopes[envKey].spent < 0) s.projects.envelopes[envKey].spent = 0; 
+            } 
+        } else if (item.project.startsWith('mis_')) { 
+            let misKey = item.project.replace('mis_', ''); 
+            if(s.projects.missions[misKey]) { 
+                trackingCost = histMode === 'vacation' ? item.amount / item.fxRate : item.amount; 
+                s.projects.missions[misKey].spent -= trackingCost; 
+                if(s.projects.missions[misKey].spent < 0) s.projects.missions[misKey].spent = 0; 
+                if(s.projects.missions[misKey].hasLogistics && item.deadMoney) { 
+                    s.projects.missions[misKey].dead -= histMode === 'vacation' ? item.deadMoney / item.fxRate : item.deadMoney; 
+                    if(s.projects.missions[misKey].dead < 0) s.projects.missions[misKey].dead = 0; 
+                } 
+            } 
+        }
+    }
+
     function logExpense() {
         let baseCost = parseFloat(document.getElementById('customAmount').value); 
         if (isNaN(baseCost) || baseCost <= 0) return;
@@ -628,6 +811,7 @@
 
     function editExpense(idx) {
         let item = s.history[s.mode].current[idx]; 
+        
         // Strict Refund Logic
         if(item.walletSource && s.vault[item.walletSource] !== undefined) { 
             let isTargetUSD = ['brightwell', 'wise', 'cash_usd', 'ibkr'].includes(item.walletSource); 
@@ -678,22 +862,21 @@
     }
 
     // ==========================================
-    // 4. TIME MACHINE & CLOSE OUT
+    // 5. TIME MACHINE (FIXED DATE PARSER)
     // ==========================================
     function loadPastDay() {
         let dVal = document.getElementById('tmDate').value; 
         if(!dVal) return; 
         
-        // V19 Timezone Safe Parsing: Split exactly what is selected
-        let [y, m, d] = dVal.split('-');
-        let targetStr = new Date(y, m - 1, d).toDateString();
+        // V20 Timezone Safe Parsing: Split exactly what is selected
+        let [y, month, d] = dVal.split('-');
+        let targetStr = new Date(y, month - 1, d).toDateString();
         
         let listNode = document.getElementById('tmList'); listNode.innerHTML = ''; 
         let found = false;
         
-        ['vacation', 'onboard'].forEach(mode => {
-            // Find by matching the toDateString exactly
-            let dayData = s.history[mode].archive.find(a => new Date(a.date).toDateString() === targetStr);
+        ['vacation', 'onboard'].forEach(m => {
+            let dayData = s.history[m].archive.find(a => new Date(a.date).toDateString() === targetStr);
             if(dayData) { 
                 found = true; 
                 dayData.logs.forEach((item, idx) => { 
@@ -702,11 +885,11 @@
                         <div class="history-item">
                             <div>
                                 <div style="font-weight:600;">${item.tag} <span class="cat-badge">${item.category}</span></div>
-                                <div style="font-size:9px;">[${mode.toUpperCase()}] ${item.walletSource} ${bypassNote}</div>
+                                <div style="font-size:9px;">[${m.toUpperCase()}] ${item.walletSource} ${bypassNote}</div>
                             </div>
                             <div>
                                 <span style="color:var(--danger); font-weight:bold;">-${item.amount.toFixed(2)}</span>
-                                <button class="edit-btn" onclick="deletePastExpense('${mode}', '${dayData.date}', ${idx})">❌</button>
+                                <button class="edit-btn" onclick="deletePastExpense('${m}', '${dayData.date}', ${idx})">❌</button>
                             </div>
                         </div>`; 
                 }); 
@@ -807,17 +990,25 @@
     }
 
     // ==========================================
-    // 5. IOU & DEBT ENGINE (V19 RESTORED)
+    // 6. IOU & DEBT ENGINE (V20 FULLY RESTORED)
     // ==========================================
     function renderIOUs() {
         const pList = document.getElementById('payablesList'); pList.innerHTML = '';
         s.ious.payables.forEach(p => { 
-            pList.innerHTML += `<div class="iou-item"><div><div style="font-weight:bold;">${p.name}</div><div style="color:var(--warning); font-size:11px;">Owe: ${p.amount.toFixed(2)} ${p.currency}</div></div><div><button class="iou-btn" onclick="processIOU('payable', ${p.id})">Pay</button> <button class="iou-del" style="background:none;border:none;color:var(--danger);" onclick="deleteIOU('payable', ${p.id})">❌</button></div></div>`; 
+            pList.innerHTML += `
+                <div class="iou-item">
+                    <div><div style="font-weight:bold;">${p.name}</div><div style="color:var(--warning); font-size:11px;">Owe: ${p.amount.toFixed(2)} ${p.currency}</div></div>
+                    <div><button class="iou-btn" onclick="processIOU('payable', ${p.id})">Pay</button> <button class="iou-del" style="background:none;border:none;color:var(--danger);" onclick="deleteIOU('payable', ${p.id})">❌</button></div>
+                </div>`; 
         });
         
         const rList = document.getElementById('receivablesList'); rList.innerHTML = '';
         s.ious.receivables.forEach(r => { 
-            rList.innerHTML += `<div class="iou-item"><div><div style="font-weight:bold;">${r.name}</div><div style="color:var(--success); font-size:11px;">Owed: ${r.amount.toFixed(2)} ${r.currency}</div></div><div><button class="iou-btn" style="background:var(--success);" onclick="processIOU('receivable', ${r.id})">Collect</button> <button class="iou-del" style="background:none;border:none;color:var(--danger);" onclick="deleteIOU('receivable', ${r.id})">❌</button></div></div>`; 
+            rList.innerHTML += `
+                <div class="iou-item">
+                    <div><div style="font-weight:bold;">${r.name}</div><div style="color:var(--success); font-size:11px;">Owed: ${r.amount.toFixed(2)} ${r.currency}</div></div>
+                    <div><button class="iou-btn" style="background:var(--success);" onclick="processIOU('receivable', ${r.id})">Collect</button> <button class="iou-del" style="background:none;border:none;color:var(--danger);" onclick="deleteIOU('receivable', ${r.id})">❌</button></div>
+                </div>`; 
         });
     }
 
@@ -828,24 +1019,14 @@
         s.ious[type + 's'].push({ id: Date.now(), name: name, amount: amount, currency: currency.toUpperCase() }); 
         saveState(); 
     }
-    let s = JSON.parse(localStorage.getItem('CrewWalletMaster')) || DEFAULT_STATE;
-// --- EMERGENCY RESTORE ---
-s = {"vault":{"ibkr":330,"brightwell":550,"wise":0,"cash_usd":462,"cash_tnd":53,"savings":261,"ibkr_fees":1.13,"lifetime_fees":1.13},"loan":{"arrears":20000,"rate":11.5,"schedule":[]},"ious":{"payables":[{"id":1779300930444,"name":"Adelith","amount":1000,"currency":"USD"},{"id":1779300945128,"name":"Ayoub","amount":1000,"currency":"TND"},{"id":1779300956262,"name":"Haroun","amount":600,"currency":"TND"}],"receivables":[{"id":1779300967539,"name":"Houssem","amount":1400,"currency":"TND"},{"id":1779300977213,"name":"Last","amount":70,"currency":"USD"}]},"history":{"vacation":{"archive":[{"date":"Tue May 19 2026","logs":[{"amount":3,"tag":"Coffee","category":"Coffee & Drinks","location":"VIP Side","items":"Filtre x2","whom":"","walletSource":"cash_tnd","bypassLimit":false,"fxRate":2.93,"ts":1779145200000},{"amount":5,"tag":"Smoothie","category":"Coffee & Drinks","location":"VIP Side","items":"Smoothie Pineapple","whom":"","walletSource":"cash_tnd","bypassLimit":false,"fxRate":2.93,"ts":1779145200000},{"amount":3,"tag":"Boga + Pastry","category":"Coffee & Drinks","location":"Nassim","items":"Boga + Gateau","whom":"","walletSource":"cash_tnd","bypassLimit":false,"fxRate":2.93,"ts":1779145200000}]},{"date":"Wed May 20 2026","logs":[{"amount":2,"tag":"Coffee","category":"Coffee & Drinks","location":"VIP SIDE","items":"Filtre","whom":"","walletSource":"cash_tnd","bypassLimit":false,"fxRate":2.907316,"ts":1779231600000},{"amount":10,"tag":"Mlewi","category":"Dining & Lifestyle","location":"El Kantaoui","items":"Mlewi msammen","whom":"","walletSource":"cash_tnd","bypassLimit":false,"fxRate":2.907316,"ts":1779231600000},{"amount":10,"tag":"Tea","category":"Coffee & Drinks","location":"Rendezvous","items":"2x Tea + Water","whom":"Aziz 1x Tea + Water","walletSource":"cash_tnd","bypassLimit":false,"fxRate":2.907316,"ts":1779231600000},{"amount":7,"tag":"Smoothie","category":"Coffee & Drinks","location":"VIP SIDE","items":"Smoothie + Water","whom":"Houssem  Water","walletSource":"cash_tnd","bypassLimit":false,"fxRate":2.907316,"ts":1779231600000}]},{"date":"Sun May 17 2026","logs":[{"amount":35,"tag":"Vape","category":"💨 Vape","location":"Akouda","items":"Vape","whom":"","walletSource":"cash_tnd","bypassLimit":false,"fxRate":2.908138,"ts":1778972400000}]},{"date":"Thu May 21 2026","logs":[{"amount":35,"tag":"Vape","category":"💨 Vape","location":"Akouda","items":"Vape","whom":"","walletSource":"cash_tnd","bypassLimit":true,"fxRate":2.908138,"ts":1779371790714},{"amount":3,"tag":"Coffee","category":"Coffee & Drinks","location":"VIP SIDE","items":"2 x Filtre","whom":"","walletSource":"cash_tnd","bypassLimit":false,"fxRate":2.908138,"ts":1779380201182},{"amount":5,"tag":"Taxi","category":"Transit & Travel","location":"Akouda - Kantaoui","items":"Taxi Fare","whom":"Aziz","walletSource":"cash_tnd","bypassLimit":false,"fxRate":2.908138,"ts":1779381528582},{"amount":17,"tag":"Coffee","category":"Coffee & Drinks","location":"Cafe Medina - Kantaoui","items":"2 x Direct + Garci + 0.5TND tip","whom":"Aziz","walletSource":"cash_tnd","bypassLimit":false,"fxRate":2.908138,"ts":1779389162912}]}],"current":[],"limit":35,"balance":35},"onboard":{"archive":[],"current":[],"limit":7.25,"balance":7.25}},"capital_saved":40,"fx_rate":2.908138,"mode":"vacation","income_logs":[],"projects":{"envelopes":{"getaway":{"name":"🏖️ Vacation Getaway","limit":300,"spent":0,"archived":false},"groceries":{"name":"🛒 Bulk Groceries","limit":200,"spent":0,"archived":false},"bills":{"name":"🧾 Bills & Admin","limit":150,"spent":0,"archived":false},"travel":{"name":"✈️ Travel Buffer","limit":440,"spent":0,"archived":false}},"missions":{"port":{"name":"⚓ Port of Call","spent":0,"archived":false},"homeport":{"name":"🏢 Homeport Logistics","spent":0,"archived":false},"online":{"name":"📦 Online Ordering","spent":0,"dead":0,"archived":false,"hasLogistics":true}},"goals":[{"id":1,"name":"💻 MacBook Fund","target":3000,"saved":0,"archived":false}]}};
-localStorage.setItem('CrewWalletMaster', JSON.stringify(s));
-// -------------------------
-
 
     function processIOU(type, id) { 
         let list = s.ious[type + 's']; let idx = list.findIndex(i => i.id === id); if(idx === -1) return; 
         let item = list[idx]; 
-        
         let reduceAmount = parseFloat(prompt(`Clear how much of ${item.amount}?`)); if(isNaN(reduceAmount) || reduceAmount <= 0) return; 
-        
-        let w = prompt(`Wallet?\n1: Brightwell\n2: Cash(USD)\n3: Wise\n4: Cash(TND)\n5: Savings`); 
+        let w = prompt(`Wallet to process this transaction?\n1: Brightwell\n2: Cash(USD)\n3: Wise\n4: Cash(TND)\n5: Savings`); 
         let key = ""; if(w==='1') key='brightwell'; else if(w==='2') key='cash_usd'; else if(w==='3') key='wise'; else if(w==='4') key='cash_tnd'; else if(w==='5') key='savings'; else return; 
-        
-        let walletDeduct = parseFloat(prompt(`Amount deducted/added to ${key}:`, reduceAmount)); if(isNaN(walletDeduct)) return; 
-        
+        let walletDeduct = parseFloat(prompt(`Amount mathematically deducted/added to ${key}:`, reduceAmount)); if(isNaN(walletDeduct)) return; 
         if(type === 'payable') s.vault[key] -= walletDeduct; else s.vault[key] += walletDeduct; 
         item.amount -= reduceAmount; if(item.amount <= 0) list.splice(idx, 1); 
         saveState(); 
@@ -865,8 +1046,13 @@ localStorage.setItem('CrewWalletMaster', JSON.stringify(s));
     function renderSchedule() {
         let html = ''; let pending = s.loan.schedule.filter(x => !x.paid); let paid = s.loan.schedule.filter(x => x.paid);
         if(pending.length === 0 && paid.length === 0) html = '<div style="font-size:11px;color:var(--text-muted);text-align:center;">No installments logged.</div>';
-        pending.forEach(p => { html += `<div class="iou-item" style="border-color:var(--danger);"><div><strong style="font-size:12px;">🗓️ ${p.date}</strong><div style="font-size:11px;color:var(--danger); font-weight:bold;">${p.amount.toFixed(2)} TND</div></div><div><button class="iou-btn" onclick="payInstallment(${p.id})">Pay</button> <button class="iou-del" style="background:none;border:none;color:var(--text-muted);" onclick="deleteInstallment(${p.id})">❌</button></div></div>`; });
-        if(paid.length > 0) { html += `<div style="font-size:10px; color:var(--text-muted); margin:10px 0 5px 0; text-align:center;">Archived Payments</div>`; paid.forEach(p => { html += `<div class="iou-item" style="opacity:0.5; border-color:var(--success);"><div><strike style="font-size:12px;">${p.date}</strike><div style="font-size:11px;color:var(--success); font-weight:bold;">${p.amount.toFixed(2)} TND (Paid)</div></div></div>`; }); }
+        pending.forEach(p => { 
+            html += `<div class="iou-item" style="border-color:var(--danger);"><div><strong style="font-size:12px;">🗓️ ${p.date}</strong><div style="font-size:11px;color:var(--danger); font-weight:bold;">${p.amount.toFixed(2)} TND</div></div><div><button class="iou-btn" onclick="payInstallment(${p.id})">Pay</button> <button class="iou-del" style="background:none;border:none;color:var(--text-muted);" onclick="deleteInstallment(${p.id})">❌</button></div></div>`; 
+        });
+        if(paid.length > 0) { 
+            html += `<div style="font-size:10px; color:var(--text-muted); margin:10px 0 5px 0; text-align:center;">Archived Payments</div>`; 
+            paid.forEach(p => { html += `<div class="iou-item" style="opacity:0.5; border-color:var(--success);"><div><strike style="font-size:12px;">${p.date}</strike><div style="font-size:11px;color:var(--success); font-weight:bold;">${p.amount.toFixed(2)} TND (Paid)</div></div></div>`; }); 
+        }
         document.getElementById('loanScheduleList').innerHTML = html;
     }
 
@@ -881,27 +1067,7 @@ localStorage.setItem('CrewWalletMaster', JSON.stringify(s));
     function deleteInstallment(id) { if(confirm("Delete this scheduled payment?")) { s.loan.schedule = s.loan.schedule.filter(x => x.id !== id); saveState(); } }
 
     /* ==========================================
-       6. PROJECTS, MISSIONS & ENVELOPES 
-       ========================================== */
-    function toggleOnlineFields(prefix) { let val = document.getElementById(prefix + 'Project').value; let show = false; if(val.startsWith('mis_')) { let key = val.replace('mis_', ''); if(s.projects.missions[key] && s.projects.missions[key].hasLogistics) show = true; } document.getElementById(prefix + 'OnlineBox').style.display = show ? 'flex' : 'none'; }
-    function addProject(type) { let name = prompt(`Name for this new ${type === 'env' ? 'Envelope' : (type === 'mis' ? 'Mission' : 'Goal')}:`); if(!name) return; let key = 'p_' + Date.now(); if(type === 'env') { let limit = parseFloat(prompt("Enter Total Budget Limit (TND):")); if(isNaN(limit)) return; s.projects.envelopes[key] = { name: '🏖️ ' + name, limit: limit, spent: 0, archived: false }; } else if(type === 'mis') { let log = confirm("Will you track separate Shipping/Tax (Dead Money) for this mission?"); s.projects.missions[key] = { name: '🎯 ' + name, spent: 0, dead: 0, hasLogistics: log, archived: false }; } else if(type === 'goal') { let target = parseFloat(prompt("Enter Target Goal Amount:")); if(isNaN(target)) return; s.projects.goals.push({ id: Date.now(), name: '🏆 ' + name, target: target, saved: 0, archived: false }); } saveState(); }
-    function archiveProject(type, id) { if(!confirm("Archive this tracker? It will be removed from your active lists but saved in history.")) return; if(type === 'env' && s.projects.envelopes[id]) s.projects.envelopes[id].archived = true; if(type === 'mis' && s.projects.missions[id]) s.projects.missions[id].archived = true; if(type === 'goal') { let g = s.projects.goals.find(x => x.id === id); if(g) g.archived = true; } saveState(); }
-    function renderProjects() {
-        const envBox = document.getElementById('envelopeContainer'); envBox.innerHTML = '';
-        const misBox = document.getElementById('missionContainer'); misBox.innerHTML = '';
-        const goalBox = document.getElementById('goalsContainer'); goalBox.innerHTML = '';
-        const archBox = document.getElementById('archiveSection'); archBox.innerHTML = '<div style="font-size:10px; font-weight:bold; margin-bottom:8px;">Archived Trackers</div>';
-
-        Object.keys(s.projects.envelopes).forEach(k => { let e = s.projects.envelopes[k]; let isOver = e.spent > e.limit; let pct = Math.min(100, (e.spent / e.limit) * 100); let html = `<div style="background:var(--card-bg); padding:10px; border-radius:8px; border:1px solid ${isOver ? 'var(--danger)' : 'var(--panel-border)'}; opacity:${e.archived?0.6:1};"><div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;"><strong>${e.name}</strong><div><span style="color:${isOver ? 'var(--danger)' : 'var(--text)'}; font-weight:bold;">${e.spent.toFixed(2)}</span> / ${e.limit.toFixed(2)} TND ${e.archived ? '' : `<button onclick="archiveProject('env', '${k}')" style="background:none;border:none;margin-left:5px;cursor:pointer;">📦</button>`}</div></div><div class="progress-container" style="height:4px; margin-top:0;"><div class="progress-bar" style="width:${pct}%; background:${isOver ? 'var(--danger)' : 'var(--accent)'};"></div></div>${isOver && !e.archived ? `<div style="font-size:9px; color:var(--danger); margin-top:4px;">⚠️ Overbudget: Spillover affecting daily limit</div>` : ''}</div>`; if(!e.archived) envBox.innerHTML += html; else archBox.innerHTML += html; });
-        Object.keys(s.projects.missions).forEach(k => { let m = s.projects.missions[k]; let html = `<div style="background:var(--card-bg); padding:10px; border-radius:8px; border:1px solid var(--panel-border); text-align:center; opacity:${m.archived?0.6:1}; position:relative;">${m.archived ? '' : `<button onclick="archiveProject('mis', '${k}')" style="position:absolute;top:5px;right:5px;background:none;border:none;font-size:10px;cursor:pointer;">📦</button>`}<div style="font-size:10px; color:var(--text-muted); font-weight:bold; margin-bottom:4px;">${m.name}</div><div style="font-size:16px; font-weight:800; color:var(--text);">$${m.spent.toFixed(2)}</div>${m.hasLogistics ? `<div style="font-size:9px; color:var(--danger); margin-top:4px;">Dead Money: $${m.dead.toFixed(2)}</div>` : ''}</div>`; if(!m.archived) misBox.innerHTML += html; else archBox.innerHTML += html; });
-        s.projects.goals.forEach(g => { let pct = Math.min(100, (g.saved / g.target) * 100); let html = `<div style="background:var(--card-bg); padding:10px; border-radius:8px; border:1px solid rgba(74, 222, 128, 0.4); opacity:${g.archived?0.6:1};"><div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;"><strong>${g.name}</strong><div><span style="color:var(--success); font-weight:bold;">${g.saved.toFixed(0)} / ${g.target.toFixed(0)}</span> ${g.archived ? '' : `<button onclick="archiveProject('goal', ${g.id})" style="background:none;border:none;margin-left:5px;cursor:pointer;">📦</button>`}</div></div><div class="progress-container" style="height:4px; margin-top:0;"><div class="progress-bar" style="width:${pct}%;"></div></div>${g.archived ? '' : `<button class="v-btn" style="width:100%; margin-top:10px; background:#16a34a;" onclick="fundGoal(${g.id})">➕ Add Funds (Virtual Hold)</button>`}</div>`; if(!g.archived) goalBox.innerHTML += html; else archBox.innerHTML += html; });
-        if(archBox.innerHTML === '<div style="font-size:10px; font-weight:bold; margin-bottom:8px;">Archived Trackers</div>') { archBox.innerHTML += '<div style="font-size:11px;color:var(--text-muted);">No archived items.</div>'; }
-    }
-    function fundGoal(id) { let amt = parseFloat(prompt("Amount to hold for this goal:")); if(isNaN(amt) || amt <= 0) return; let goal = s.projects.goals.find(g => g.id === id); if(goal) { goal.saved += amt; saveState(); alert(`Assigned ${amt} to ${goal.name}.`); } }
-    function reverseProjectTracking(item, histMode) { if (!item.project || item.project === 'none') return; let trackingCost = 0; if (item.project.startsWith('env_')) { let envKey = item.project.replace('env_', ''); if(s.projects.envelopes[envKey]) { trackingCost = histMode === 'onboard' ? item.amount * item.fxRate : item.amount; s.projects.envelopes[envKey].spent -= trackingCost; if(s.projects.envelopes[envKey].spent < 0) s.projects.envelopes[envKey].spent = 0; } } else if (item.project.startsWith('mis_')) { let misKey = item.project.replace('mis_', ''); if(s.projects.missions[misKey]) { trackingCost = histMode === 'vacation' ? item.amount / item.fxRate : item.amount; s.projects.missions[misKey].spent -= trackingCost; if(s.projects.missions[misKey].spent < 0) s.projects.missions[misKey].spent = 0; if(s.projects.missions[misKey].hasLogistics && item.deadMoney) { s.projects.missions[misKey].dead -= histMode === 'vacation' ? item.deadMoney / item.fxRate : item.deadMoney; if(s.projects.missions[misKey].dead < 0) s.projects.missions[misKey].dead = 0; } } } }
-
-    /* ==========================================
-       7. ATM, INCOME, SETTINGS & UTILS
+       7. ATM, SETTINGS & UTILITIES
        ========================================== */
     function openATMModal() { document.getElementById('atmAmt').value = ''; document.getElementById('atmAmt').placeholder = s.mode === 'vacation' ? "Withdrawal Amount (TND)" : "Withdrawal Amount (USD)"; document.getElementById('atmLoc').value = s.mode === 'vacation' ? 'tunisia' : 'intl'; toggleATMFee(); document.getElementById('atmFee').value = ''; document.getElementById('atmModal').style.display = 'flex'; }
     function toggleATMFee() { document.getElementById('atmFeeGroup').style.display = document.getElementById('atmLoc').value === 'intl' ? 'flex' : 'none'; }
@@ -923,7 +1089,19 @@ localStorage.setItem('CrewWalletMaster', JSON.stringify(s));
     function openSTBModal() { document.getElementById('stb_arrearsModal').innerText = s.loan.arrears.toFixed(2) + " TND"; document.getElementById('stbModal').style.display = 'flex'; }
     function editSTBRate() { let r = parseFloat(prompt("New Rate:", s.loan.rate)); if(!isNaN(r)) { s.loan.rate = r; saveState(); } }
     
-    function renderChart(days) { let vol = 0; let cats = {}; let cutoff = Date.now() - (days * 86400000); ['vacation', 'onboard'].forEach(m => { s.history[m].archive.forEach(d => d.logs.forEach(l => { if(l.ts >= cutoff || days === 9999) { let amtTND = m === 'onboard' ? l.amount * l.fxRate : l.amount; vol += amtTND; cats[l.category] = (cats[l.category] || 0) + amtTND; } })); s.history[m].current.forEach(l => { if(l.ts >= cutoff || days === 9999) { let amtTND = m === 'onboard' ? l.amount * l.fxRate : l.amount; vol += amtTND; cats[l.category] = (cats[l.category] || 0) + amtTND; } }); }); const bd = document.getElementById('catGraphContainer'); bd.innerHTML = ''; if (vol === 0) { bd.innerHTML = '<div style="font-size:11px;color:var(--text-muted);text-align:center;">No data.</div>'; return; } Object.keys(cats).sort((a,b) => cats[b] - cats[a]).forEach(tag => { let pct = (cats[tag] / vol) * 100; bd.innerHTML += `<div class="chart-row"><span style="width:110px; font-weight:bold; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;">${tag}</span><div class="chart-bar-bg"><div class="chart-bar-fill" style="width:${pct}%"></div></div><span style="font-weight:bold;width:80px;text-align:right;">${cats[tag].toFixed(1)} TND</span></div>`; }); }
+    function renderChart(days) { 
+        let vol = 0; let cats = {}; let cutoff = Date.now() - (days * 86400000); 
+        ['vacation', 'onboard'].forEach(m => { 
+            s.history[m].archive.forEach(d => d.logs.forEach(l => { if(l.ts >= cutoff || days === 9999) { let amtTND = m === 'onboard' ? l.amount * l.fxRate : l.amount; vol += amtTND; cats[l.category] = (cats[l.category] || 0) + amtTND; } })); 
+            s.history[m].current.forEach(l => { if(l.ts >= cutoff || days === 9999) { let amtTND = m === 'onboard' ? l.amount * l.fxRate : l.amount; vol += amtTND; cats[l.category] = (cats[l.category] || 0) + amtTND; } }); 
+        }); 
+        const bd = document.getElementById('catGraphContainer'); bd.innerHTML = ''; 
+        if (vol === 0) { bd.innerHTML = '<div style="font-size:11px;color:var(--text-muted);text-align:center;">No data.</div>'; return; } 
+        Object.keys(cats).sort((a,b) => cats[b] - cats[a]).forEach(tag => { 
+            let pct = (cats[tag] / vol) * 100; 
+            bd.innerHTML += `<div class="chart-row"><span style="width:110px; font-weight:bold; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;">${tag}</span><div class="chart-bar-bg"><div class="chart-bar-fill" style="width:${pct}%"></div></div><span style="font-weight:bold;width:80px;text-align:right;">${cats[tag].toFixed(1)} TND</span></div>`; 
+        }); 
+    }
     
     function populateSettings() { 
         document.getElementById('setMode').value = s.mode; 
@@ -957,8 +1135,7 @@ localStorage.setItem('CrewWalletMaster', JSON.stringify(s));
                 let day = s.history[m].archive[i]; 
                 if (day.logs.length === 0) { s.history[m].archive.splice(i, 1); } 
                 else { 
-                    // Normalize the date string to fix older JSON data
-                    day.date = new Date(day.date).toDateString();
+                    day.date = new Date(day.date).toDateString(); // V20 Date Normalization
                     let spent = day.logs.reduce((sum, item) => sum + ((item.category === "🏦 Financial & Fees") ? 0 : (item.bypassLimit ? (item.spillover||0) : item.amount)), 0); 
                     let surplus = s.history[m].limit - spent; 
                     cap += (m === 'onboard' ? surplus * s.fx_rate : surplus); 
@@ -972,7 +1149,9 @@ localStorage.setItem('CrewWalletMaster', JSON.stringify(s));
     function importData(event) { const file = event.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = function(e) { try { const imported = JSON.parse(e.target.result); if(imported.vault && imported.history) { s = imported; saveState(); alert("✅ Backup Restored!"); } else alert("Invalid Backup File"); } catch(err) { alert("Error reading file"); } }; reader.readAsText(file); }
     function factoryReset() { if (prompt("Type RESET to wipe everything:") === "RESET") { localStorage.clear(); location.reload(); } }
 
-    /* A4 PDF ENGINE */
+    /* ==========================================
+       8. A4 PDF ENGINE
+       ========================================== */
     function exportPDFReport() { let now = new Date().toLocaleString(); let fx = s.fx_rate; let mode = s.mode.charAt(0).toUpperCase() + s.mode.slice(1); let totUSD = s.vault.ibkr + s.vault.brightwell + s.vault.wise + s.vault.cash_usd; let totalLiquid = (totUSD * fx) + s.vault.cash_tnd + s.vault.savings; let liquidRunway = s.history[s.mode].limit > 0 ? Math.floor(totalLiquid / s.history[s.mode].limit) : 0; let misHtml = `<div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">`; Object.keys(s.projects.missions).forEach(k => { let m = s.projects.missions[k]; if(!m.archived) misHtml += `<div style="flex:1; min-width:120px; border:1px solid #cbd5e1; padding:8px; border-radius:4px; text-align:center; background:#f8fafc;"><strong style="font-size:11px; color:#475569;">${m.name}</strong><div style="font-size:14px; font-weight:bold;">$${m.spent.toFixed(2)}</div>${m.hasLogistics?`<div style="font-size:9px; color:#dc2626;">Dead: $${m.dead.toFixed(2)}</div>`:''}</div>`; }); misHtml += `</div>`; let vol = 0; let cats = {}; let cutoff = Date.now() - (30 * 86400000); ['vacation', 'onboard'].forEach(m => { s.history[m].archive.forEach(d => d.logs.forEach(l => { if(l.ts >= cutoff) { let amtTND = m === 'onboard' ? l.amount * l.fxRate : l.amount; vol += amtTND; cats[l.category] = (cats[l.category] || 0) + amtTND; } })); s.history[m].current.forEach(l => { if(l.ts >= cutoff) { let amtTND = m === 'onboard' ? l.amount * l.fxRate : l.amount; vol += amtTND; cats[l.category] = (cats[l.category] || 0) + amtTND; } }); }); let catHtml = `<table style="width:100%; border-collapse:collapse; margin-bottom:20px; font-size:12px;"><tr><th style="border-bottom:2px solid #cbd5e1; text-align:left; padding:8px;">Category</th><th style="border-bottom:2px solid #cbd5e1; text-align:right; padding:8px;">Amount</th><th style="border-bottom:2px solid #cbd5e1; text-align:right; padding:8px;">%</th><th style="border-bottom:2px solid #cbd5e1; text-align:left; padding:8px;">Visual Indicator</th></tr>`; Object.keys(cats).sort((a,b) => cats[b] - cats[a]).forEach(tag => { let pct = vol > 0 ? ((cats[tag] / vol) * 100).toFixed(1) : 0; let filledBlocks = Math.min(20, Math.round(pct / 5)); let emptyBlocks = Math.max(0, 20 - filledBlocks); let bars = "█".repeat(filledBlocks) + "░".repeat(emptyBlocks); catHtml += `<tr><td style="padding:8px; border-bottom:1px solid #e2e8f0; font-weight:bold;">${tag}</td><td style="padding:8px; border-bottom:1px solid #e2e8f0; text-align:right;">${cats[tag].toFixed(2)} TND</td><td style="padding:8px; border-bottom:1px solid #e2e8f0; text-align:right;">${pct}%</td><td style="padding:8px; border-bottom:1px solid #e2e8f0; font-family:monospace; color:#38bdf8; letter-spacing:1px;">${bars}</td></tr>`; }); catHtml += `</table>`; let logHtml = `<table style="width:100%; border-collapse:collapse; margin-bottom:20px; font-size:10px;"><tr><th style="background:#f1f5f9; border:1px solid #cbd5e1; padding:6px; text-align:left;">Date</th><th style="background:#f1f5f9; border:1px solid #cbd5e1; padding:6px; text-align:left;">Description</th><th style="background:#f1f5f9; border:1px solid #cbd5e1; padding:6px; text-align:left;">Category</th><th style="background:#f1f5f9; border:1px solid #cbd5e1; padding:6px; text-align:left;">Source</th><th style="background:#f1f5f9; border:1px solid #cbd5e1; padding:6px; text-align:right;">Impact</th><th style="background:#f1f5f9; border:1px solid #cbd5e1; padding:6px; text-align:center;">Status</th></tr>`; let allLogs = []; ['vacation','onboard'].forEach(m => { s.history[m].archive.forEach(a => allLogs.push(...a.logs.map(l => ({...l, d: a.date, m: m})))); allLogs.push(...s.history[m].current.map(l => ({...l, d: 'Today', m: m}))); }); allLogs.sort((a,b) => b.ts - a.ts).slice(0, 35).forEach((log, i) => { let status = (log.bypassLimit || log.category === "🏦 Financial & Fees") ? "Bypassed" : "Logged"; if(log.spillover > 0) status = "Spillover"; let sym = log.m === 'vacation' ? 'TND' : 'USD'; let bg = i % 2 === 0 ? "#ffffff" : "#f8fafc"; logHtml += `<tr style="background:${bg};"><td style="border:1px solid #cbd5e1; padding:4px;">${log.d}</td><td style="border:1px solid #cbd5e1; padding:4px; font-weight:600;">${log.tag}</td><td style="border:1px solid #cbd5e1; padding:4px;">${log.category}</td><td style="border:1px solid #cbd5e1; padding:4px; color:#64748b;">${log.walletSource}</td><td style="border:1px solid #cbd5e1; padding:4px; text-align:right; font-weight:bold;">-${log.amount.toFixed(2)} ${sym}</td><td style="border:1px solid #cbd5e1; padding:4px; text-align:center; color:${status==='Bypassed'?'#f59e0b':(status==='Spillover'?'#ef4444':'#10b981')}; font-weight:bold;">${status}</td></tr>`; }); logHtml += `</table>`; let html = `<div style="font-family:'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color:#0f172a; max-width:800px; margin:0 auto; padding:20px;"><div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:4px solid #0f172a; padding-bottom:15px; margin-bottom:20px;"><div><h1 style="margin:0; font-size:24px; text-transform:uppercase; letter-spacing:1.5px;">Global Wealth Vault</h1><div style="font-size:11px; font-weight:700; color:#64748b; letter-spacing:2px; margin-top:4px;">FINANCIAL INTELLIGENCE REPORT</div></div><div style="text-align:right; font-size:11px; color:#475569; line-height:1.6;"><div>Generated: <strong>${now}</strong></div><div>Live FX Rate: <strong>${fx} TND</strong></div></div></div><h3 style="color:#0f172a; border-bottom:2px solid #cbd5e1; padding-bottom:5px; margin-top:0; font-size:13px; text-transform:uppercase;">I. Executive Vault Summary</h3><div style="display:flex; gap:15px; margin-bottom:20px;"><div style="flex:1; background:#f8fafc; padding:12px; border-radius:6px; border:1px solid #e2e8f0;"><div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:12px; border-bottom:1px dashed #e2e8f0;"><span>Total USD Assets:</span> <strong>$${totUSD.toFixed(2)}</strong></div><div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:12px; border-bottom:1px dashed #e2e8f0;"><span>Physical TND:</span> <strong>${s.vault.cash_tnd.toFixed(2)} TND</strong></div><div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:12px;"><span>Savings TND:</span> <strong>${s.vault.savings.toFixed(2)} TND</strong></div></div><div style="flex:1; background:#f8fafc; padding:12px; border-radius:6px; border:1px solid #e2e8f0;"><div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:12px; border-bottom:1px dashed #e2e8f0;"><span>STB Arrears:</span> <strong style="color:#ef4444;">${s.loan.arrears.toFixed(2)} TND</strong></div><div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:13px; margin-top:8px; border-top:2px solid #cbd5e1; padding-top:8px;"><span>Total Liquid Power:</span> <strong style="color:#10b981;">${totalLiquid.toFixed(2)} TND</strong></div><div style="display:flex; justify-content:space-between; font-size:12px;"><span>Liquid Runway:</span> <strong style="color:#38bdf8;">${liquidRunway} Days</strong></div></div></div><h3 style="color:#0f172a; border-bottom:2px solid #cbd5e1; padding-bottom:5px; font-size:13px; text-transform:uppercase;">II. Project Trackers</h3>${misHtml}<h3 style="color:#0f172a; border-bottom:2px solid #cbd5e1; padding-bottom:5px; font-size:13px; text-transform:uppercase;">III. 30-Day Category Flow</h3><div style="margin-bottom:10px; font-size:12px; font-weight:bold;">Total Surplus: <span style="color:#10b981;">+${s.capital_saved.toFixed(2)} TND</span></div>${catHtml}<h3 style="color:#0f172a; border-bottom:2px solid #cbd5e1; padding-bottom:5px; font-size:13px; text-transform:uppercase;">IV. Master Ledger</h3>${logHtml}</div>`; document.getElementById('printArea').innerHTML = html; window.print(); }
 
     // Init
