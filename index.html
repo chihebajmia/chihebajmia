@@ -5,32 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Crew Wallet">
     <meta name="theme-color" content="#0f172a">
     <link rel="manifest" href="manifest.json">
-    <title>Crew Wallet Master V27</title>
+    <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Globe_icon.svg/512px-Globe_icon.svg.png">
+    <title>Crew Wallet Master V28</title>
     <style>
         :root { --bg-color: #0f172a; --card-bg: #1e293b; --accent: #fbbf24; --text: #f8fafc; --text-muted: #94a3b8; --success: #4ade80; --warning: #facc15; --danger: #f87171; --panel-border: #334155; --vault-bg: rgba(15, 23, 42, 0.5); }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-color); color: var(--text); margin: 0; padding: 16px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; -webkit-tap-highlight-color: transparent; padding-bottom: 90px; }
         .app-container { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 14px; }
-        .page-section { display: none; flex-direction: column; gap: 14px; } 
+        .page-section { display: none; flex-direction: column; gap: 14px; animation: fadeIn 0.3s ease; } 
         .page-section.active { display: flex; }
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card-bg); border-top: 1px solid var(--panel-border); display: flex; justify-content: space-around; padding: 10px 0; padding-bottom: calc(10px + env(safe-area-inset-bottom)); z-index: 50; }
-        .nav-btn { background: none; border: none; color: var(--text-muted); font-size: 10px; font-weight: bold; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; flex: 1; transition: color 0.2s;}
-        .nav-btn.active { color: var(--accent); } 
-        .nav-icon { font-size: 22px; }
-        .vault-card { background-color: var(--card-bg); border-radius: 16px; padding: 16px; border: 1px solid var(--panel-border); transition: transform 0.1s;}
-        .vault-card.clickable:active { transform: scale(0.98); border-color: var(--accent); }
+        .nav-btn { background: none; border: none; color: var(--text-muted); font-size: 10px; font-weight: bold; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; flex: 1; transition: color 0.2s, transform 0.1s;}
+        .nav-btn.active { color: var(--accent); transform: scale(1.05); } 
+        .nav-icon { font-size: 22px; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .nav-btn.active .nav-icon { transform: translateY(-3px); }
+        .vault-card { background-color: var(--card-bg); border-radius: 16px; padding: 16px; border: 1px solid var(--panel-border); transition: transform 0.1s ease-out;}
+        .vault-card.clickable:active { transform: scale(0.97); border-color: var(--accent); }
         .vault-header { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); margin-bottom: 12px; text-align: center; display: flex; justify-content: space-between; align-items: center;}
         .vault-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-        .vault-item { background-color: var(--vault-bg); padding: 10px 4px; border-radius: 10px; text-align: center; border: 1px solid var(--panel-border); position: relative; cursor: pointer;}
+        .vault-item { background-color: var(--vault-bg); padding: 10px 4px; border-radius: 10px; text-align: center; border: 1px solid var(--panel-border); position: relative; cursor: pointer; transition: transform 0.1s;}
+        .vault-item:active { transform: scale(0.95); }
         .v-lbl { font-size: 9px; color: var(--text-muted); display: block; margin-bottom: 3px; font-weight: bold;}
         .v-val { font-size: 13px; font-weight: 800; color: var(--text); } 
         .v-sub { font-size: 8px; color: var(--danger); margin-top: 2px; }
         .vault-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 12px; }
-        .v-btn { background-color: #334155; color: white; border: none; border-radius: 8px; padding: 10px 4px; font-size: 10px; font-weight: bold; cursor: pointer; } 
-        .v-btn:active { background-color: var(--accent); color: #000; }
+        .v-btn { background-color: #334155; color: white; border: none; border-radius: 8px; padding: 10px 4px; font-size: 10px; font-weight: bold; cursor: pointer; transition: transform 0.1s ease, filter 0.1s ease; } 
+        .v-btn:active { filter: brightness(1.2); transform: scale(0.95); }
         .scoreboard-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        .score-box { background-color: var(--card-bg); border: 1px solid var(--panel-border); border-radius: 12px; padding: 10px; text-align: center; cursor: pointer; transition: transform 0.1s;}
+        .score-box { background-color: var(--card-bg); border: 1px solid var(--panel-border); border-radius: 12px; padding: 10px; text-align: center; cursor: pointer; transition: transform 0.1s ease;}
         .score-box:active { transform: scale(0.95); }
         .score-num { font-size: 18px; font-weight: 800; margin-top: 2px; } 
         .score-box.green-box .score-num { color: var(--success); } 
@@ -38,36 +42,43 @@
         .balance-card { background-color: var(--card-bg); border-radius: 16px; padding: 18px 20px; text-align: center; border: 1px solid var(--panel-border); position: relative;}
         .title { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); margin-bottom: 6px; display:flex; justify-content:space-between; align-items:center;}
         .balance { font-size: 34px; font-weight: 800; margin: 0; color: var(--success); transition: color 0.3s ease; }
-        .surplus-badge { position: absolute; top: 12px; right: 12px; font-size: 10px; font-weight: bold; padding: 4px 8px; border-radius: 8px; background: rgba(74, 222, 128, 0.1); color: var(--success); }
+        .surplus-badge { position: absolute; top: 12px; right: 12px; font-size: 10px; font-weight: bold; padding: 4px 8px; border-radius: 8px; background: rgba(74, 222, 128, 0.1); color: var(--success); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .progress-container { width: 100%; background-color: #334155; height: 6px; border-radius: 3px; margin-top: 12px; overflow: hidden; }
-        .progress-bar { height: 100%; width: 100%; background-color: var(--success); transition: width 0.4s ease; }
+        .progress-bar { height: 100%; width: 100%; background-color: var(--success); transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
         .form-panel { background-color: var(--card-bg); border-radius: 16px; padding: 14px; border: 1px solid var(--panel-border); display: flex; flex-direction: column; gap: 10px; }
         .input-row { display: flex; gap: 8px; align-items: center; }
-        input, select { background-color: #0f172a; border: 1px solid var(--panel-border); border-radius: 10px; padding: 12px; color: var(--text); font-size: 14px; outline: none; box-sizing: border-box; width: 100%; -webkit-appearance: none;}
+        input, select { background-color: #0f172a; border: 1px solid var(--panel-border); border-radius: 10px; padding: 12px; color: var(--text); font-size: 14px; outline: none; box-sizing: border-box; width: 100%; -webkit-appearance: none; transition: border-color 0.2s ease;}
+        input:focus, select:focus { border-color: var(--accent); }
         .flex-main { flex: 2; width: 50%; } 
         .flex-side { flex: 1; width: 25%; text-align: center; }
-        .btn-action { background-color: var(--accent); color: #0f172a; border: none; border-radius: 10px; padding: 12px; font-size: 14px; font-weight: 700; cursor: pointer; transition: background-color 0.3s ease; }
-        .expand-btn { background: none; border: 1px solid var(--panel-border); color: var(--text-muted); border-radius: 10px; padding: 12px; cursor: pointer; font-size: 14px; }
-        .advanced-context-box { display: none; flex-direction: column; gap: 8px; background-color: var(--vault-bg); padding: 12px; border-radius: 10px; border: 1px dashed var(--panel-border); }
+        .btn-action { background-color: var(--accent); color: #0f172a; border: none; border-radius: 10px; padding: 12px; font-size: 14px; font-weight: 700; cursor: pointer; transition: transform 0.1s ease, filter 0.1s ease; }
+        .btn-action:active { transform: scale(0.95); filter: brightness(0.9); }
+        .expand-btn { background: none; border: 1px solid var(--panel-border); color: var(--text-muted); border-radius: 10px; padding: 12px; cursor: pointer; font-size: 14px; transition: background-color 0.2s; }
+        .advanced-context-box { display: none; flex-direction: column; gap: 8px; background-color: var(--vault-bg); padding: 12px; border-radius: 10px; border: 1px dashed var(--panel-border); animation: fadeIn 0.2s ease; }
         .history-card { background-color: var(--card-bg); border-radius: 16px; padding: 16px; max-height: 280px; overflow-y: auto; border: 1px solid var(--panel-border); }
-        .history-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--panel-border); font-size: 13px; animation: fadeIn 0.3s ease;} 
+        .history-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--panel-border); font-size: 13px; animation: slideInLeft 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);} 
         .history-item:last-child { border-bottom: none; }
         .history-details { font-size: 10px; color: var(--text-muted); margin-top: 4px; line-height: 1.3; }
         .edit-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 0 4px; font-size: 14px; transition: transform 0.1s; } 
-        .edit-btn:active { transform: scale(0.8); }
+        .edit-btn:active { transform: scale(0.7); }
         .cat-badge { background: #334155; color: white; padding: 2px 6px; border-radius: 4px; font-size: 8px; margin-left: 6px; vertical-align: middle; }
         .project-badge { font-size:9px; color:var(--accent); display:block; margin-top:2px; font-weight:bold; }
         .chart-row { display: flex; align-items: center; justify-content: space-between; font-size: 11px; margin: 6px 0; }
         .chart-bar-bg { flex: 1; background-color: #0f172a; height: 6px; border-radius: 3px; margin: 0 8px; overflow: hidden; }
-        .chart-bar-fill { background-color: var(--accent); height: 100%; width: 0%; transition: width 0.4s ease; }
-        .btn-secondary { background-color: var(--card-bg); color: var(--text-muted); border: 1px solid var(--panel-border); border-radius: 12px; padding: 10px; font-size: 12px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 5px; }
-        .iou-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--vault-bg); border-radius: 8px; margin-bottom: 8px; border: 1px solid var(--panel-border); }
-        .iou-btn { background: var(--accent); color: #000; border: none; border-radius: 6px; padding: 6px 12px; font-size: 10px; font-weight: bold; cursor: pointer; }
+        .chart-bar-fill { background-color: var(--accent); height: 100%; width: 0%; transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
+        .btn-secondary { background-color: var(--card-bg); color: var(--text-muted); border: 1px solid var(--panel-border); border-radius: 12px; padding: 10px; font-size: 12px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 5px; transition: transform 0.1s ease;}
+        .btn-secondary:active { transform: scale(0.98); }
+        .iou-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--vault-bg); border-radius: 8px; margin-bottom: 8px; border: 1px solid var(--panel-border); animation: fadeIn 0.3s ease; }
+        .iou-btn { background: var(--accent); color: #000; border: none; border-radius: 6px; padding: 6px 12px; font-size: 10px; font-weight: bold; cursor: pointer; transition: transform 0.1s; }
+        .iou-btn:active { transform: scale(0.9); }
         
-        /* Modal Engine */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 100; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; backdrop-filter: blur(5px); }
+        .scrollable-list { max-height: 200px; overflow-y: auto; padding-right: 5px; }
+        .scrollable-list::-webkit-scrollbar { width: 4px; }
+        .scrollable-list::-webkit-scrollbar-thumb { background: var(--panel-border); border-radius: 4px; }
+
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 100; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; backdrop-filter: blur(5px); animation: fadeIn 0.2s ease;}
         .modal-overlay.high-z { z-index: 200; }
-        .modal-content { background-color: var(--card-bg); border-radius: 16px; padding: 20px; width: 100%; max-width: 350px; border: 1px solid var(--panel-border); max-height: 85vh; overflow-y: auto; animation: slideUp 0.3s ease; }
+        .modal-content { background-color: var(--card-bg); border-radius: 16px; padding: 20px; width: 100%; max-width: 350px; border: 1px solid var(--panel-border); max-height: 85vh; overflow-y: auto; animation: slideUpModal 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;}
         .modal-input-group { display: flex; flex-direction: column; gap: 4px; }
         .modal-input-group label { font-size: 10px; color: var(--text-muted); font-weight: bold;}
@@ -77,8 +88,9 @@
         .pnl-positive { color: var(--success) !important; }
         .pnl-negative { color: var(--danger) !important; }
         
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideInLeft { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes slideUpModal { from { opacity: 0; transform: translateY(40px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
         
         #printArea { display: none; }
         @media print { 
@@ -94,11 +106,17 @@
     <div id="tab-dash" class="page-section active">
         <div class="vault-card" style="border-color: var(--accent); position: relative; overflow: hidden;">
             <div style="position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: var(--accent);"></div>
-            <div class="vault-header" style="margin-top: 8px;"><span>🏦 Global Wealth Vault</span></div>
+            <div class="vault-header" style="margin-top: 8px;">
+                <span>🏦 Global Wealth Vault</span>
+                <span id="offlineBadge" style="display:none; color:var(--danger); font-weight:bold; font-size:9px;">⚠️ OFFLINE</span>
+            </div>
             
             <div style="text-align: center; margin-bottom: 15px; padding: 10px; background: var(--vault-bg); border-radius: 12px; border: 1px solid var(--panel-border);">
-                <div class="title" style="color:var(--accent); font-size: 9px;">Liquid Runway (Remaining Power)</div>
-                <div style="font-size:22px; font-weight:800; color: var(--text);" id="uiRunway">0 Days</div>
+                <div class="title" style="color:var(--accent); font-size: 9px; justify-content: center;">Liquid Runway</div>
+                <div style="font-size:22px; font-weight:800; color: var(--text);">
+                    <span id="uiRunway">0 Days</span> 
+                    <span id="uiRunwayBudget" style="font-size:10px; color:var(--text-muted); font-weight:normal; margin-left:4px;"></span>
+                </div>
                 <div style="display:flex; justify-content:space-between; margin-top:10px; border-top:1px dashed var(--panel-border); padding-top:8px;">
                     <div style="font-size:10px; color:var(--text-muted); text-align:left;">Total USD Assets:<br><strong id="totUSD" style="color:var(--text); font-size:13px;">$0.00</strong></div>
                     <div style="font-size:10px; color:var(--text-muted); text-align:right;">Total Wealth:<br><strong id="totTND" style="color:var(--success); font-size:13px;">0.00 TND</strong></div>
@@ -249,7 +267,7 @@
 
         <div class="vault-card" style="margin-top:15px; border-color: rgba(251, 191, 36, 0.4);">
             <div class="title" style="color:var(--accent);">📍 Top Hubs & Vendors (All Time)</div>
-            <div id="leaderboardHtml" style="margin-top:10px;"></div>
+            <div id="leaderboardHtml" class="scrollable-list" style="margin-top:10px;"></div>
         </div>
 
         <div class="vault-card" style="margin-top:15px;">
@@ -275,6 +293,12 @@
 
             <div style="margin-top:10px; border-top:1px dashed var(--panel-border); padding-top:10px;">
                 <div class="title" style="font-size:9px;">Log item to selected date</div>
+                
+                <div id="tmEditBanner" style="display:none; background:rgba(250, 204, 21, 0.2); color:var(--warning); padding:8px; border-radius:8px; margin-bottom:10px; font-weight:bold; font-size:11px; text-align:center; border: 1px solid var(--warning);">
+                    ✏️ Editing Past Record 
+                    <button onclick="cancelTMEdit()" style="margin-left:10px; background:#000; color:var(--warning); border:1px solid var(--warning); border-radius:4px; padding:4px 8px; font-weight:bold;">Cancel</button>
+                </div>
+
                 <div class="input-row" style="margin-top:6px;">
                     <input type="text" id="tmTag" class="flex-main" placeholder="What?">
                     <input type="number" id="tmAmount" class="flex-side" placeholder="Cost" oninput="toggleFXOverride('tm')">
@@ -563,9 +587,28 @@
 <div class="modal-overlay" id="behaviorModal">
     <div class="modal-content">
         <div class="title" style="text-align:center; font-size:12px; color:white;">Behavioral Insights</div>
-        <div class="b-stat">Current Safe Streak <span id="b_curStreak" style="color:var(--success);">0 Days</span></div>
-        <div class="b-stat">Max Safe Streak <span id="b_maxStreak" style="color:var(--accent);">0 Days</span></div>
-        <div class="b-stat" style="border-color:rgba(248,113,113,0.3);">Average Overage <span id="b_avgOver" style="color:var(--danger);">0.00</span></div>
+        
+        <div style="display:flex; justify-content:space-between; gap:10px; margin-bottom:10px;">
+            <div class="b-stat" style="flex:1; margin-bottom:0; text-align:center;">
+                <div style="font-size:10px; color:var(--text-muted);">Current Streak</div>
+                <div id="b_curStreak" style="color:var(--success); font-size:16px;">0 Days</div>
+            </div>
+            <div class="b-stat" style="flex:1; margin-bottom:0; text-align:center;">
+                <div style="font-size:10px; color:var(--text-muted);">Max Streak</div>
+                <div id="b_maxStreak" style="color:var(--accent); font-size:16px;">0 Days</div>
+            </div>
+        </div>
+
+        <div class="b-stat" style="border-color:rgba(74, 222, 128, 0.3);">
+            <div style="font-size:10px; color:var(--success); margin-bottom:4px;">🟢 Safe Days Breakdown</div>
+            Average Safe Days Spend: <span id="b_avgSafe" style="color:var(--success);">0.00</span>
+        </div>
+
+        <div class="b-stat" style="border-color:rgba(248, 113, 113, 0.3);">
+            <div style="font-size:10px; color:var(--danger); margin-bottom:4px;">🔴 Over Days Breakdown</div>
+            Average Overage Spikes: <span id="b_avgOver" style="color:var(--danger);">0.00</span>
+        </div>
+
         <button class="btn-secondary" style="margin-top:20px;" onclick="document.getElementById('behaviorModal').style.display='none'">Close</button>
     </div>
 </div>
@@ -623,9 +666,27 @@
     <button class="nav-btn" id="nav-time" onclick="switchTab('time')"><span class="nav-icon">⏳</span>Logs</button>
     <button class="nav-btn" id="nav-settings" onclick="switchTab('settings')"><span class="nav-icon">⚙️</span>Setup</button>
 </div>
+
 <script>
+    // To enable offline functionality, register the service worker
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js').then((registration) => {
+                console.log('ServiceWorker registered with scope:', registration.scope);
+            }, (err) => {
+                console.log('ServiceWorker registration failed:', err);
+            });
+        });
+    }
+
+    // Network Status Tracker
+    window.addEventListener('online', () => document.getElementById('offlineBadge').style.display = 'none');
+    window.addEventListener('offline', () => document.getElementById('offlineBadge').style.display = 'inline');
+    if (!navigator.onLine) document.getElementById('offlineBadge').style.display = 'inline';
+</script>
+    <script>
     // ==========================================
-    // 1. DATA INJECTION & ASYNC UI ENGINE (V27)
+    // 1. DATA, INDEXED-DB & ASYNC UI ENGINE (V28)
     // ==========================================
     const USER_PRISTINE_DATA = {
         "vault":{"ibkr":0,"brightwell":550,"wise":0,"cash_usd":462,"cash_tnd":53,"savings":261,"ibkr_fees":1.13,"lifetime_fees":1.13, "ibkr_cash":3.99, "ibkr_shares":0.4074, "ibkr_cost":331.60, "ibkr_price":805.79},
@@ -639,43 +700,86 @@
     };
 
     let s = null;
-    try { s = JSON.parse(localStorage.getItem('CrewWalletMaster')); } catch(e) {}
-    if (!s || !s.vault || !s.history) s = USER_PRISTINE_DATA;
-    
-    // Auto-Repair & Migrations
-    if (!s.loan.schedule) s.loan.schedule = [];
-    if (!s.projects) s.projects = USER_PRISTINE_DATA.projects;
-    if (!s.projects.envelopes) s.projects.envelopes = {};
-    if (!s.projects.missions) s.projects.missions = {};
-    if (!s.projects.goals) s.projects.goals = [];
-    if (!s.income_logs) s.income_logs = [];
-    if (!s.fx_rate || isNaN(s.fx_rate)) s.fx_rate = 2.93;
-    if (!s.settings) s.settings = {"contractStart":"2026-08-03","contractEnd":"2027-02-01"};
-    if (!s.vape_stash) s.vape_stash = {"count":0, "empty_logs":[]};
+    const DB_NAME = 'CrewWalletDB';
+    const STORE_NAME = 'stateStore';
 
-    if(s.vault.ibkr_cash === undefined) s.vault.ibkr_cash = s.vault.ibkr || 0;
-    if(s.vault.ibkr_shares === undefined) s.vault.ibkr_shares = 0;
-    if(s.vault.ibkr_cost === undefined) s.vault.ibkr_cost = 0;
-    if(s.vault.ibkr_price === undefined) s.vault.ibkr_price = 805.79;
-
-    Object.keys(s.projects.envelopes).forEach(k => { 
-        if(s.projects.envelopes[k].archived === undefined) s.projects.envelopes[k].archived = false; 
-        if(s.projects.envelopes[k].bypass === undefined) s.projects.envelopes[k].bypass = true;
-    });
-    Object.keys(s.projects.missions).forEach(k => { 
-        if(s.projects.missions[k].archived === undefined) s.projects.missions[k].archived = false; 
-        if(s.projects.missions[k].bypass === undefined) s.projects.missions[k].bypass = false;
-    });
-
-    // V27 SURGICAL PATCH: Fix the Double-Dip Bug instantly on load
-    if (Math.abs(s.capital_saved - 103.2) < 0.01) {
-        s.capital_saved = 68.2; 
-        localStorage.setItem('CrewWalletMaster', JSON.stringify(s));
+    // IndexedDB Implementation for Data Safety
+    function initDB() {
+        return new Promise((resolve, reject) => {
+            let request = indexedDB.open(DB_NAME, 1);
+            request.onupgradeneeded = (e) => {
+                let db = e.target.result;
+                if (!db.objectStoreNames.contains(STORE_NAME)) db.createObjectStore(STORE_NAME);
+            };
+            request.onsuccess = (e) => resolve(e.target.result);
+            request.onerror = (e) => reject(e.target.error);
+        });
     }
 
-    function saveState() { localStorage.setItem('CrewWalletMaster', JSON.stringify(s)); renderApp(); }
+    async function loadState() {
+        try {
+            let db = await initDB();
+            let tx = db.transaction(STORE_NAME, 'readonly');
+            let store = tx.objectStore(STORE_NAME);
+            let request = store.get('master_data');
+            request.onsuccess = () => {
+                if (request.result) {
+                    s = JSON.parse(request.result);
+                    migrateData();
+                } else fallbackLoad();
+            };
+            request.onerror = fallbackLoad;
+        } catch (e) { fallbackLoad(); }
+    }
 
-    // --- Async Modals (Replacing prompt & confirm) ---
+    function fallbackLoad() {
+        try { s = JSON.parse(localStorage.getItem('CrewWalletMaster')); } catch(e) {}
+        migrateData();
+    }
+
+    function migrateData() {
+        if (!s || !s.vault || !s.history) s = USER_PRISTINE_DATA;
+        if (!s.loan.schedule) s.loan.schedule = [];
+        if (!s.projects) s.projects = USER_PRISTINE_DATA.projects;
+        if (!s.projects.envelopes) s.projects.envelopes = {};
+        if (!s.projects.missions) s.projects.missions = {};
+        if (!s.projects.goals) s.projects.goals = [];
+        if (!s.income_logs) s.income_logs = [];
+        if (!s.fx_rate || isNaN(s.fx_rate)) s.fx_rate = 2.93;
+        if (!s.settings) s.settings = {"contractStart":"2026-08-03","contractEnd":"2027-02-01"};
+        if (!s.vape_stash) s.vape_stash = {"count":0, "empty_logs":[]};
+
+        if(s.vault.ibkr_cash === undefined) s.vault.ibkr_cash = s.vault.ibkr || 0;
+        if(s.vault.ibkr_shares === undefined) s.vault.ibkr_shares = 0;
+        if(s.vault.ibkr_cost === undefined) s.vault.ibkr_cost = 0;
+        if(s.vault.ibkr_price === undefined) s.vault.ibkr_price = 805.79;
+
+        Object.keys(s.projects.envelopes).forEach(k => { 
+            if(s.projects.envelopes[k].archived === undefined) s.projects.envelopes[k].archived = false; 
+            if(s.projects.envelopes[k].bypass === undefined) s.projects.envelopes[k].bypass = true;
+        });
+        Object.keys(s.projects.missions).forEach(k => { 
+            if(s.projects.missions[k].archived === undefined) s.projects.missions[k].archived = false; 
+            if(s.projects.missions[k].bypass === undefined) s.projects.missions[k].bypass = false;
+        });
+
+        if (Math.abs(s.capital_saved - 103.2) < 0.01) s.capital_saved = 68.2; 
+        renderApp();
+    }
+
+    async function saveState() {
+        let dataStr = JSON.stringify(s);
+        localStorage.setItem('CrewWalletMaster', dataStr); // Fast mirror
+        try {
+            let db = await initDB();
+            let tx = db.transaction(STORE_NAME, 'readwrite');
+            let store = tx.objectStore(STORE_NAME);
+            store.put(dataStr, 'master_data');
+        } catch (e) { console.error("IndexedDB save failed"); }
+        renderApp(); 
+    }
+
+    // --- Async Modals ---
     let resolvePrompt = null;
     let resolveConfirm = null;
 
@@ -717,13 +821,7 @@
         document.getElementById('nav-' + tabId).classList.add('active');
         
         if(tabId === 'dash') calculateBehavioralStreaks();
-        if(tabId === 'analytics') { 
-            renderChart(30); 
-            renderProjects(); 
-            renderPredictor(); 
-            renderLeaderboard(); 
-            renderVapeStats(); 
-        }
+        if(tabId === 'analytics') { renderChart(30); renderProjects(); renderPredictor(); renderLeaderboard(); renderVapeStats(); }
         if(tabId === 'time') { loadPastDay(); renderIncomeLogs(); document.getElementById('tmSearch').value = ''; searchLogs(); }
         if(tabId === 'settings') populateSettings();
     }
@@ -735,14 +833,12 @@
 
     function populateProjectDropdowns() {
         let html = `<option value="none">📌 General Daily Spend (No Project)</option>`;
-        
         let actEnv = [], archEnv = [], actMis = [], archMis = [];
         Object.keys(s.projects.envelopes).forEach(k => { if(s.projects.envelopes[k].archived) archEnv.push(k); else actEnv.push(k); });
         Object.keys(s.projects.missions).forEach(k => { if(s.projects.missions[k].archived) archMis.push(k); else actMis.push(k); });
 
         if(actEnv.length > 0) { html += `<optgroup label="Active Envelopes">`; actEnv.forEach(k => html += `<option value="env_${k}">${s.projects.envelopes[k].name}</option>`); html += `</optgroup>`; }
         if(actMis.length > 0) { html += `<optgroup label="Active Missions">`; actMis.forEach(k => html += `<option value="mis_${k}">${s.projects.missions[k].name}</option>`); html += `</optgroup>`; }
-        
         if(archEnv.length > 0) { html += `<optgroup label="Archived Envelopes">`; archEnv.forEach(k => html += `<option value="env_${k}">[Archived] ${s.projects.envelopes[k].name}</option>`); html += `</optgroup>`; }
         if(archMis.length > 0) { html += `<optgroup label="Archived Missions">`; archMis.forEach(k => html += `<option value="mis_${k}">[Archived] ${s.projects.missions[k].name}</option>`); html += `</optgroup>`; }
 
@@ -751,20 +847,18 @@
     }
 
     function calculateBehavioralStreaks() {
-        let curStreak = 0; let maxStreak = 0; let safeDays = 0; let overDays = 0; let totalOver = 0;
+        let curStreak = 0; let maxStreak = 0; let safeDays = 0; let overDays = 0; 
+        let totalOver = 0; let totalSafe = 0;
         let combined = [...s.history.vacation.archive.map(a=>({d:a.date, l:a.limit, logs:a.logs, m:'vacation'})), ...s.history.onboard.archive.map(a=>({d:a.date, l:a.limit, logs:a.logs, m:'onboard'}))].sort((a,b) => new Date(a.d) - new Date(b.d));
         
         combined.forEach(day => {
             let activeLimit = day.l || s.history[day.m].limit;
             let spent = day.logs.reduce((sum, item) => sum + ((item.category === "🏦 Financial & Fees") ? 0 : (item.bypassLimit ? (item.spillover||0) : item.amount)), 0);
             if(spent <= activeLimit) {
-                safeDays++;
-                curStreak++;
+                safeDays++; curStreak++; totalSafe += spent;
                 if(curStreak > maxStreak) maxStreak = curStreak;
             } else {
-                overDays++;
-                totalOver += (spent - activeLimit);
-                curStreak = 0;
+                overDays++; totalOver += spent; curStreak = 0;
             }
         });
 
@@ -775,23 +869,21 @@
 
         document.getElementById('b_curStreak').innerText = curStreak + " Days";
         document.getElementById('b_maxStreak').innerText = maxStreak + " Days";
+        
+        // V28 Average Breakdown
+        document.getElementById('b_avgSafe').innerText = safeDays > 0 ? (totalSafe / safeDays).toFixed(2) : "0.00";
         document.getElementById('b_avgOver').innerText = overDays > 0 ? (totalOver / overDays).toFixed(2) : "0.00";
 
         let modeArch = s.history[s.mode].archive;
-        let totalModeSpend = 0;
-        let validModeDays = 0;
+        let totalModeSpend = 0; let validModeDays = 0;
         
         modeArch.forEach(day => {
             let spent = day.logs.reduce((sum, item) => sum + ((item.category === "🏦 Financial & Fees") ? 0 : (item.bypassLimit ? (item.spillover||0) : item.amount)), 0);
-            totalModeSpend += spent;
-            validModeDays++;
+            totalModeSpend += spent; validModeDays++;
         });
 
         let spentToday = s.history[s.mode].current.reduce((sum, item) => sum + ((item.category === "🏦 Financial & Fees") ? 0 : (item.bypassLimit ? (item.spillover||0) : item.amount)), 0);
-        if (s.history[s.mode].current.length > 0) {
-            totalModeSpend += spentToday;
-            validModeDays++;
-        }
+        if (s.history[s.mode].current.length > 0) { totalModeSpend += spentToday; validModeDays++; }
 
         let avgSpend = validModeDays > 0 ? (totalModeSpend / validModeDays) : 0;
         let sym = s.mode === 'vacation' ? ' TND' : ' USD';
@@ -806,19 +898,15 @@
     function checkVapeField(prefix) {
         let cat = document.getElementById(prefix + 'Category').value;
         let box = document.getElementById(prefix + 'VapeQtyBox');
-        if (cat === '💨 Vape' && s.mode === 'onboard') {
-            box.style.display = 'block';
-        } else {
-            box.style.display = 'none';
-        }
+        if (cat === '💨 Vape' && s.mode === 'onboard') box.style.display = 'block';
+        else box.style.display = 'none';
     }
 
     function renderApp() {
         applyTheme(); 
         populateProjectDropdowns();
         calculateBehavioralStreaks();
-        checkVapeField('adv');
-        checkVapeField('tm');
+        checkVapeField('adv'); checkVapeField('tm');
         
         let ibkrMktValue = s.vault.ibkr_shares * s.vault.ibkr_price;
         let ibkrUnrealized = ibkrMktValue - s.vault.ibkr_cost;
@@ -826,17 +914,9 @@
         
         document.getElementById('v_ibkr_total').innerText = '$' + ibkrTotal.toFixed(2);
         let pnlEl = document.getElementById('v_ibkr_pnl');
-        if(ibkrUnrealized > 0) {
-            pnlEl.innerText = '+$' + ibkrUnrealized.toFixed(2);
-            pnlEl.className = 'v-sub pnl-positive';
-        } else if (ibkrUnrealized < 0) {
-            pnlEl.innerText = '-$' + Math.abs(ibkrUnrealized).toFixed(2);
-            pnlEl.className = 'v-sub pnl-negative';
-        } else {
-            pnlEl.innerText = '$0.00';
-            pnlEl.className = 'v-sub';
-            pnlEl.style.color = 'var(--text-muted)';
-        }
+        if(ibkrUnrealized > 0) { pnlEl.innerText = '+$' + ibkrUnrealized.toFixed(2); pnlEl.className = 'v-sub pnl-positive'; } 
+        else if (ibkrUnrealized < 0) { pnlEl.innerText = '-$' + Math.abs(ibkrUnrealized).toFixed(2); pnlEl.className = 'v-sub pnl-negative'; } 
+        else { pnlEl.innerText = '$0.00'; pnlEl.className = 'v-sub'; pnlEl.style.color = 'var(--text-muted)'; }
 
         document.getElementById('v_brightwell').innerText = '$' + s.vault.brightwell.toFixed(2); 
         document.getElementById('v_wise').innerText = '$' + s.vault.wise.toFixed(2);
@@ -856,6 +936,8 @@
         let totalLiquid = (s.vault.cash_usd * s.fx_rate) + s.vault.cash_tnd + s.vault.savings + (s.vault.brightwell * s.fx_rate) + (s.vault.wise * s.fx_rate);
         let daily = s.history[s.mode].limit; 
         document.getElementById('uiRunway').innerText = daily > 0 ? Math.floor(totalLiquid / daily) + " Days" : "N/A";
+        let rBudget = document.getElementById('uiRunwayBudget');
+        if(rBudget) rBudget.innerText = daily > 0 ? `(at ${daily.toFixed(2)} ${s.mode==='vacation'?'TND':'USD'}/day)` : '';
 
         let curHist = s.history[s.mode]; 
         let sym = s.mode === 'vacation' ? ' TND' : ' USD'; 
@@ -865,10 +947,7 @@
         let spilloverActive = false;
         let spentToday = curHist.current.reduce((sum, item) => {
             if (item.category === "🏦 Financial & Fees") return sum;
-            if (item.bypassLimit) { 
-                if (item.spillover && item.spillover > 0) spilloverActive = true; 
-                return sum + (item.spillover || 0); 
-            }
+            if (item.bypassLimit) { if (item.spillover && item.spillover > 0) spilloverActive = true; return sum + (item.spillover || 0); }
             return sum + item.amount;
         }, 0);
         
@@ -945,10 +1024,11 @@
                     </div>`;
             });
         }
-        
         renderIOUs(); 
         renderSchedule();
-    }    // ==========================================
+    }
+
+    // ==========================================
     // 3. INTERNAL TRANSFERS & PROJECT ENGINE
     // ==========================================
     function openTransferModal() { 
@@ -961,16 +1041,11 @@
         let fromW = document.getElementById('trfFrom').value;
         let toW = document.getElementById('trfTo').value;
         if(isNaN(amt) || amt <= 0) return;
-        if(fromW === toW) { 
-            await openUConfirm("Error", "Cannot transfer to the same wallet."); 
-            return; 
-        }
+        if(fromW === toW) { await openUConfirm("Error", "Cannot transfer to the same wallet."); return; }
         
         let fromUSD = ['brightwell','wise','cash_usd','ibkr_cash'].includes(fromW);
         let toUSD = ['brightwell','wise','cash_usd','ibkr_cash'].includes(toW);
-        
-        let amountToSubtract = amt;
-        let amountToAdd = amt;
+        let amountToSubtract = amt; let amountToAdd = amt;
         
         if(fromUSD && !toUSD) amountToAdd = amt * s.fx_rate;
         else if(!fromUSD && toUSD) amountToAdd = amt / s.fx_rate;
@@ -980,9 +1055,7 @@
             if(!ok) return;
         }
 
-        s.vault[fromW] -= amountToSubtract;
-        s.vault[toW] += amountToAdd;
-        
+        s.vault[fromW] -= amountToSubtract; s.vault[toW] += amountToAdd;
         document.getElementById('transferModal').style.display = 'none';
         saveState();
     }
@@ -1006,9 +1079,7 @@
         } else if (type === 'mis') {
             document.getElementById('npLimit').placeholder = "Estimated Cap (Optional)";
             document.getElementById('npBypass').checked = false;
-        } else {
-            document.getElementById('npLimit').placeholder = "Target Goal Amount";
-        }
+        } else { document.getElementById('npLimit').placeholder = "Target Goal Amount"; }
     }
 
     async function submitNewProject() {
@@ -1019,7 +1090,6 @@
         let limitVal = parseFloat(document.getElementById('npLimit').value) || 0;
         let bypass = document.getElementById('npBypass').checked;
         let logistics = document.getElementById('npLogistics').checked;
-        
         let key = 'p_' + Date.now();
         
         if(type === 'env') {
@@ -1062,23 +1132,18 @@
 
         Object.keys(s.projects.envelopes).forEach(k => {
             let e = s.projects.envelopes[k]; 
-            let isOver = e.spent > e.limit; 
-            let pct = Math.min(100, (e.spent / e.limit) * 100);
+            let isOver = e.spent > e.limit; let pct = Math.min(100, (e.spent / e.limit) * 100);
             let actionIcon = e.spent > 0 ? '📦' : '❌';
             let bypassTag = e.bypass ? '' : '<span style="color:var(--danger);font-size:8px;">(Hits Limit)</span>';
-            
             let html = `
                 <div style="background:var(--card-bg); padding:10px; border-radius:8px; border:1px solid ${isOver ? 'var(--danger)' : 'var(--panel-border)'}; opacity:${e.archived?0.6:1};">
                     <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;">
                         <strong>${e.name} ${bypassTag}</strong>
-                        <div>
-                            <span style="color:${isOver ? 'var(--danger)' : 'var(--text)'}; font-weight:bold;">${e.spent.toFixed(2)}</span> / ${e.limit.toFixed(2)}
+                        <div><span style="color:${isOver ? 'var(--danger)' : 'var(--text)'}; font-weight:bold;">${e.spent.toFixed(2)}</span> / ${e.limit.toFixed(2)}
                             ${e.archived ? '' : `<button onclick="processProjectAction('env', '${k}', ${e.spent})" style="background:none;border:none;margin-left:5px;cursor:pointer;">${actionIcon}</button>`}
                         </div>
                     </div>
-                    <div class="progress-container" style="height:4px; margin-top:0;">
-                        <div class="progress-bar" style="width:${pct}%; background:${isOver ? 'var(--danger)' : 'var(--accent)'};"></div>
-                    </div>
+                    <div class="progress-container" style="height:4px; margin-top:0;"><div class="progress-bar" style="width:${pct}%; background:${isOver ? 'var(--danger)' : 'var(--accent)'};"></div></div>
                     ${isOver && !e.archived ? `<div style="font-size:9px; color:var(--danger); margin-top:4px;">⚠️ Overbudget: Spillover affecting daily limit</div>` : ''}
                 </div>`;
             if(!e.archived) envBox.innerHTML += html; else archBox.innerHTML += html;
@@ -1089,7 +1154,6 @@
             let actionIcon = m.spent > 0 ? '📦' : '❌';
             let bypassTag = m.bypass ? '<span style="color:var(--warning);font-size:8px;display:block;">(Bypass Active)</span>' : '';
             let displayTND = m.spent * s.fx_rate; 
-
             let html = `
                 <div style="background:var(--card-bg); padding:10px; border-radius:8px; border:1px solid var(--panel-border); text-align:center; opacity:${m.archived?0.6:1}; position:relative;">
                     ${m.archived ? '' : `<button onclick="processProjectAction('mis', '${k}', ${m.spent})" style="position:absolute;top:5px;right:5px;background:none;border:none;font-size:10px;cursor:pointer;">${actionIcon}</button>`}
@@ -1108,38 +1172,28 @@
                 <div style="background:var(--card-bg); padding:10px; border-radius:8px; border:1px solid rgba(74, 222, 128, 0.4); opacity:${g.archived?0.6:1};">
                     <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;">
                         <strong>${g.name}</strong>
-                        <div>
-                            <span style="color:var(--success); font-weight:bold;">${g.saved.toFixed(0)} / ${g.target.toFixed(0)}</span>
+                        <div><span style="color:var(--success); font-weight:bold;">${g.saved.toFixed(0)} / ${g.target.toFixed(0)}</span>
                             ${g.archived ? '' : `<button onclick="processProjectAction('goal', ${g.id}, ${g.saved})" style="background:none;border:none;margin-left:5px;cursor:pointer;">${actionIcon}</button>`}
                         </div>
                     </div>
-                    <div class="progress-container" style="height:4px; margin-top:0;">
-                        <div class="progress-bar" style="width:${pct}%;"></div>
-                    </div>
+                    <div class="progress-container" style="height:4px; margin-top:0;"><div class="progress-bar" style="width:${pct}%;"></div></div>
                     ${g.archived ? '' : `<button class="v-btn" style="width:100%; margin-top:10px; background:#16a34a;" onclick="fundGoal(${g.id})">➕ Add Funds (Virtual Hold)</button>`}
                 </div>`;
             if(!g.archived) goalBox.innerHTML += html; else archBox.innerHTML += html;
         });
         
-        if(archBox.innerHTML === '<div style="font-size:10px; font-weight:bold; margin-bottom:8px;">Archived Trackers</div>') {
-            archBox.innerHTML += '<div style="font-size:11px;color:var(--text-muted);">No archived items.</div>';
-        }
+        if(archBox.innerHTML === '<div style="font-size:10px; font-weight:bold; margin-bottom:8px;">Archived Trackers</div>') archBox.innerHTML += '<div style="font-size:11px;color:var(--text-muted);">No archived items.</div>';
     }
 
     async function fundGoal(id) { 
         let amtStr = await openUPrompt("Fund Goal", "Amount to hold for this goal:");
-        let amt = parseFloat(amtStr); 
-        if(isNaN(amt) || amt <= 0) return; 
+        let amt = parseFloat(amtStr); if(isNaN(amt) || amt <= 0) return; 
         let goal = s.projects.goals.find(g => g.id == id); 
-        if(goal) { 
-            goal.saved += amt; 
-            saveState(); 
-            await openUConfirm("Success", `Assigned ${amt} to ${goal.name}. (Virtual hold).`); 
-        } 
+        if(goal) { goal.saved += amt; saveState(); await openUConfirm("Success", `Assigned ${amt} to ${goal.name}. (Virtual hold).`); } 
     }
 
     // ==========================================
-    // 4. EXPENSE & FX ENGINE
+    // 4. EXPENSE LOGGING & V28 TIME MACHINE UX
     // ==========================================
     function toggleOnlineFields(prefix) { 
         let val = document.getElementById(prefix + 'Project').value; 
@@ -1172,10 +1226,7 @@
                 let est = m === 'vacation' ? cost / s.fx_rate : cost * s.fx_rate;
                 if(cost > 0) input.placeholder = `Est: ${est.toFixed(2)}`;
                 else input.placeholder = "Exact bank charge";
-            } else {
-                box.style.display = 'none';
-                input.value = '';
-            }
+            } else { box.style.display = 'none'; input.value = ''; }
         } catch (error) {}
     }
 
@@ -1216,7 +1267,6 @@
         let bypass = (src !== 'default'); 
         let shipping = 0, tax = 0, vapeQty = 0; 
         
-        // V27 Vape Logic
         if (cat === '💨 Vape' && s.mode === 'onboard') {
             vapeQty = parseInt(document.getElementById('advVapeQty').value) || 1;
             s.vape_stash.count += vapeQty;
@@ -1242,8 +1292,7 @@
         
         let spillover = 0;
         if (project.startsWith('env_')) { 
-            let envKey = project.replace('env_', ''); let env = s.projects.envelopes[envKey]; 
-            bypass = env.bypass; 
+            let envKey = project.replace('env_', ''); let env = s.projects.envelopes[envKey]; bypass = env.bypass; 
             let trackingCost = s.mode === 'onboard' ? totalCost * s.fx_rate : totalCost; 
             if (env.spent + trackingCost > env.limit) { 
                 spillover = s.mode === 'onboard' ? ((env.spent + trackingCost) - env.limit) / s.fx_rate : (env.spent + trackingCost) - env.limit; 
@@ -1251,8 +1300,7 @@
             } 
             env.spent += trackingCost; 
         } else if (project.startsWith('mis_')) { 
-            let misKey = project.replace('mis_', ''); let mis = s.projects.missions[misKey]; 
-            bypass = mis.bypass; 
+            let misKey = project.replace('mis_', ''); let mis = s.projects.missions[misKey]; bypass = mis.bypass; 
             let trackingCost = s.mode === 'vacation' ? totalCost / s.fx_rate : totalCost; 
             mis.spent += trackingCost; 
             if(mis.hasLogistics) mis.dead += s.mode === 'vacation' ? (shipping+tax) / s.fx_rate : (shipping+tax); 
@@ -1263,24 +1311,20 @@
         
         s.history[s.mode].current.push({ amount: totalCost, tag: logDesc, category: cat, location: document.getElementById('advLocation').value.trim(), items: document.getElementById('advItems').value.trim(), whom: document.getElementById('advWhom').value.trim(), walletSource: targetWallet, bypassLimit: bypass, spillover: spillover, project: project, deadMoney: (shipping+tax), deductedAmount: deductAmount, fxRate: s.fx_rate, ts: Date.now(), vapeQty: vapeQty });
         
-        // Reset Logic
         document.getElementById('customDescription').value = ''; document.getElementById('customAmount').value = ''; 
         document.getElementById('advLocation').value = ''; document.getElementById('advItems').value = ''; 
         document.getElementById('advWhom').value = ''; document.getElementById('advShipping').value = ''; 
         document.getElementById('advTax').value = ''; document.getElementById('advMain').style.display = 'none'; 
         document.getElementById('advProject').value = 'none'; document.getElementById('advSourceWallet').value = 'default'; 
         document.getElementById('advActualDeduct').value = ''; document.getElementById('advFXOverrideBox').style.display = 'none';
-        document.getElementById('advVapeQty').value = '';
-        toggleOnlineFields('adv'); 
+        document.getElementById('advVapeQty').value = ''; toggleOnlineFields('adv'); 
         saveState();
     }
 
     function editExpense(idx) {
         let item = s.history[s.mode].current[idx]; 
         
-        if(item.category === '💨 Vape' && item.vapeQty) {
-            s.vape_stash.count = Math.max(0, s.vape_stash.count - item.vapeQty);
-        }
+        if(item.category === '💨 Vape' && item.vapeQty) s.vape_stash.count = Math.max(0, s.vape_stash.count - item.vapeQty);
 
         if(item.walletSource && s.vault[item.walletSource] !== undefined) { 
             let refundAmount = item.amount; 
@@ -1301,18 +1345,14 @@
         document.getElementById('advProject').value = item.project || 'none'; toggleOnlineFields('adv'); 
         document.getElementById('advSourceWallet').value = item.walletSource; 
         
-        toggleFXOverride('adv');
-        checkVapeField('adv');
+        toggleFXOverride('adv'); checkVapeField('adv');
         
         if (item.deductedAmount !== undefined) document.getElementById('advActualDeduct').value = item.deductedAmount;
         if (item.vapeQty) document.getElementById('advVapeQty').value = item.vapeQty;
-
         if(item.project && item.project.startsWith('mis_') && s.projects.missions[item.project.replace('mis_','')].hasLogistics) { 
             document.getElementById('advShipping').value = item.deadMoney || 0; document.getElementById('advTax').value = ''; 
         } 
-        document.getElementById('advLocation').value = item.location || ''; 
-        document.getElementById('advItems').value = item.items || ''; 
-        document.getElementById('advWhom').value = item.whom || ''; 
+        document.getElementById('advLocation').value = item.location || ''; document.getElementById('advItems').value = item.items || ''; document.getElementById('advWhom').value = item.whom || ''; 
         document.getElementById('advMain').style.display = 'flex'; 
         
         s.history[s.mode].current.splice(idx, 1); 
@@ -1324,9 +1364,7 @@
         if(!ok) return; 
         let item = s.history[s.mode].current[idx]; 
         
-        if(item.category === '💨 Vape' && item.vapeQty) {
-            s.vape_stash.count = Math.max(0, s.vape_stash.count - item.vapeQty);
-        }
+        if(item.category === '💨 Vape' && item.vapeQty) s.vape_stash.count = Math.max(0, s.vape_stash.count - item.vapeQty);
 
         if(item.walletSource && s.vault[item.walletSource] !== undefined) { 
             let refundAmount = item.amount; 
@@ -1344,17 +1382,16 @@
         saveState(); 
     }
 
-    // ==========================================
-    // 5. TIME MACHINE & SEARCH LOGIC
-    // ==========================================
+    // --- V28 Time Machine UX Engine ---
+    let tmEditingIdx = -1;
+    let tmEditingMode = null;
+    let tmEditingDate = null;
+
     function searchLogs() {
         let q = document.getElementById('tmSearch').value.toLowerCase();
         let res = document.getElementById('tmSearchResults');
-        if (!q) { 
-            res.style.display = 'none'; document.getElementById('tmNormalView').style.display = 'block'; return; 
-        }
-        res.style.display = 'block'; res.innerHTML = '';
-        document.getElementById('tmNormalView').style.display = 'none';
+        if (!q) { res.style.display = 'none'; document.getElementById('tmNormalView').style.display = 'block'; return; }
+        res.style.display = 'block'; res.innerHTML = ''; document.getElementById('tmNormalView').style.display = 'none';
         
         let allLogs = [];
         ['vacation', 'onboard'].forEach(m => {
@@ -1362,24 +1399,17 @@
             allLogs.push(...s.history[m].current.map(l => ({...l, d: 'Today', m: m})));
         });
 
-        let filtered = allLogs.filter(l => 
-            l.tag.toLowerCase().includes(q) || l.category.toLowerCase().includes(q) || (l.location && l.location.toLowerCase().includes(q))
-        );
-
+        let filtered = allLogs.filter(l => l.tag.toLowerCase().includes(q) || l.category.toLowerCase().includes(q) || (l.location && l.location.toLowerCase().includes(q)));
         filtered.forEach(l => {
-            res.innerHTML += `<div style="border-bottom:1px solid #334155; padding:8px 0; font-size:12px;">
-                <strong>${l.d}</strong>: ${l.tag} <span style="color:var(--danger);">-${l.amount.toFixed(2)}</span>
-            </div>`;
+            res.innerHTML += `<div style="border-bottom:1px solid #334155; padding:8px 0; font-size:12px;"><strong>${l.d}</strong>: ${l.tag} <span style="color:var(--danger);">-${l.amount.toFixed(2)}</span></div>`;
         });
         if(filtered.length === 0) res.innerHTML = '<div style="font-size:11px; color:var(--text-muted);">No matches found.</div>';
     }
 
     function loadPastDay() {
         let dVal = document.getElementById('tmDate').value; if(!dVal) return; 
-        let [y, month, d] = dVal.split('-');
-        let targetStr = new Date(y, month - 1, d).toDateString();
-        let listNode = document.getElementById('tmList'); listNode.innerHTML = ''; 
-        let found = false;
+        let [y, month, d] = dVal.split('-'); let targetStr = new Date(y, month - 1, d).toDateString();
+        let listNode = document.getElementById('tmList'); listNode.innerHTML = ''; let found = false;
         
         ['vacation', 'onboard'].forEach(m => {
             let dayData = s.history[m].archive.find(a => new Date(a.date).toDateString() === targetStr);
@@ -1389,10 +1419,7 @@
                     let bypassNote = (item.bypassLimit || item.category === "🏦 Financial & Fees") ? `<span style="color:var(--warning); font-size:9px;">(Bypass)</span>` : ''; 
                     listNode.innerHTML += `
                         <div class="history-item">
-                            <div>
-                                <div style="font-weight:600;">${item.tag} <span class="cat-badge">${item.category}</span></div>
-                                <div style="font-size:9px;">[${m.toUpperCase()}] ${item.walletSource} ${bypassNote}</div>
-                            </div>
+                            <div><div style="font-weight:600;">${item.tag} <span class="cat-badge">${item.category}</span></div><div style="font-size:9px;">[${m.toUpperCase()}] ${item.walletSource} ${bypassNote}</div></div>
                             <div style="display:flex; align-items:center; gap:8px;">
                                 <span style="color:var(--danger); font-weight:bold;">-${item.amount.toFixed(2)}</span>
                                 <button class="edit-btn" onclick="editPastExpense('${m}', '${dayData.date}', ${idx})">✏️</button>
@@ -1402,13 +1429,53 @@
                 }); 
             }
         });
-        if(!found) listNode.innerHTML = '<div style="font-size:11px;text-align:center; color:var(--text-muted);">No logs found for this specific date.</div>';
+        if(!found) listNode.innerHTML = '<div style="font-size:11px;text-align:center; color:var(--text-muted);">No logs found for this date.</div>';
     }
 
-    function logPastExpense() {
+    function editPastExpense(m, dateStr, idx) {
+        let dayIdx = s.history[m].archive.findIndex(a => a.date === dateStr);
+        if(dayIdx === -1) return;
+        let item = s.history[m].archive[dayIdx].logs[idx];
+
+        tmEditingIdx = idx; tmEditingMode = m; tmEditingDate = dateStr;
+        document.getElementById('tmEditBanner').style.display = 'block';
+
+        let dObj = new Date(dateStr);
+        document.getElementById('tmDate').value = `${dObj.getFullYear()}-${String(dObj.getMonth() + 1).padStart(2, '0')}-${String(dObj.getDate()).padStart(2, '0')}`;
+        document.getElementById('setMode').value = m;
+
+        document.getElementById('tmTag').value = item.tag.split(' [Incl.')[0]; 
+        document.getElementById('tmAmount').value = item.amount - (item.deadMoney||0); 
+        document.getElementById('tmCategory').value = item.category; 
+        document.getElementById('tmProject').value = item.project || 'none'; toggleOnlineFields('tm'); 
+        document.getElementById('tmSourceWallet').value = item.walletSource; 
+        
+        toggleFXOverride('tm'); checkVapeField('tm');
+
+        if (item.deductedAmount !== undefined) document.getElementById('tmActualDeduct').value = item.deductedAmount;
+        if (item.vapeQty) document.getElementById('tmVapeQty').value = item.vapeQty;
+
+        if(item.project && item.project.startsWith('mis_') && s.projects.missions[item.project.replace('mis_','')].hasLogistics) { 
+            document.getElementById('tmShipping').value = item.deadMoney || 0; document.getElementById('tmTax').value = ''; 
+        } 
+        document.getElementById('tmLocation').value = item.location || ''; document.getElementById('tmItems').value = item.items || ''; document.getElementById('tmWhom').value = item.whom || ''; 
+        document.getElementById('advTM').style.display = 'flex'; 
+        
+        window.scrollTo({ top: document.getElementById('advTM').offsetTop - 50, behavior: 'smooth' });
+    }
+
+    function cancelTMEdit() {
+        tmEditingIdx = -1; tmEditingMode = null; tmEditingDate = null;
+        document.getElementById('tmEditBanner').style.display = 'none';
+        document.getElementById('tmAmount').value = ''; document.getElementById('tmTag').value = '';
+        document.getElementById('tmShipping').value = ''; document.getElementById('tmTax').value = '';
+        document.getElementById('tmActualDeduct').value = ''; document.getElementById('tmVapeQty').value = '';
+        document.getElementById('advTM').style.display = 'none';
+    }
+
+    async function logPastExpense() {
         let dVal = document.getElementById('tmDate').value; if(!dVal) return; 
-        let [y, month, d] = dVal.split('-');
-        let targetStr = new Date(y, month - 1, d).toDateString(); 
+        let [y, month, d] = dVal.split('-'); let targetStr = new Date(y, month - 1, d).toDateString(); 
         
         let baseCost = parseFloat(document.getElementById('tmAmount').value); 
         let tag = document.getElementById('tmTag').value.trim() || '💸 Past Item'; 
@@ -1423,10 +1490,7 @@
         let bypass = (src !== 'default'); 
         let shipping = 0, tax = 0, vapeQty = 0; 
         
-        if (cat === '💨 Vape' && m === 'onboard') {
-            vapeQty = parseInt(document.getElementById('tmVapeQty').value) || 1;
-            s.vape_stash.count += vapeQty;
-        }
+        if (cat === '💨 Vape' && m === 'onboard') { vapeQty = parseInt(document.getElementById('tmVapeQty').value) || 1; s.vape_stash.count += vapeQty; }
 
         if(project.startsWith('mis_') && s.projects.missions[project.replace('mis_','')]?.hasLogistics) { 
             shipping = parseFloat(document.getElementById('tmShipping').value) || 0; tax = parseFloat(document.getElementById('tmTax').value) || 0; 
@@ -1442,6 +1506,30 @@
             if (actualInput && parseFloat(actualInput) > 0) deductAmount = parseFloat(actualInput);
             else deductAmount = m === 'vacation' ? totalCost / s.fx_rate : totalCost * s.fx_rate;
         }
+
+        // V28 Edit Refund Logic (Refund old BEFORE applying new)
+        if (tmEditingIdx > -1) {
+            let dayIdxOld = s.history[tmEditingMode].archive.findIndex(a => a.date === tmEditingDate);
+            let oldItem = s.history[tmEditingMode].archive[dayIdxOld].logs[tmEditingIdx];
+            
+            if(oldItem.category === '💨 Vape' && oldItem.vapeQty) s.vape_stash.count = Math.max(0, s.vape_stash.count - oldItem.vapeQty);
+
+            if(oldItem.walletSource && s.vault[oldItem.walletSource] !== undefined) { 
+                let isOldTargetUSD = ['brightwell', 'wise', 'cash_usd', 'ibkr_cash'].includes(oldItem.walletSource); 
+                let refundAmount = oldItem.amount; 
+                if (oldItem.deductedAmount !== undefined) refundAmount = oldItem.deductedAmount;
+                else { let rate = oldItem.fxRate && !isNaN(oldItem.fxRate) ? oldItem.fxRate : s.fx_rate; if (tmEditingMode === 'vacation' && isOldTargetUSD) { refundAmount = oldItem.amount / rate; } else if (tmEditingMode === 'onboard' && !isOldTargetUSD) { refundAmount = oldItem.amount * rate; } }
+                s.vault[oldItem.walletSource] += refundAmount; 
+            } 
+            reverseProjectTracking(oldItem, tmEditingMode); 
+            s.history[tmEditingMode].archive[dayIdxOld].logs.splice(tmEditingIdx, 1);
+            if (s.history[tmEditingMode].archive[dayIdxOld].logs.length === 0) s.history[tmEditingMode].archive.splice(dayIdxOld, 1);
+            
+            tmEditingIdx = -1; tmEditingMode = null; tmEditingDate = null;
+            document.getElementById('tmEditBanner').style.display = 'none';
+        }
+
+        // Apply new logic
         s.vault[targetWallet] -= deductAmount; 
         
         let spillover = 0; 
@@ -1463,59 +1551,7 @@
         
         if(dayIdx === -1) s.history[m].archive.push({ date: targetStr, limit: s.history[m].limit, logs: [newLog] }); else s.history[m].archive[dayIdx].logs.push(newLog); 
         
-        document.getElementById('tmAmount').value = ''; document.getElementById('tmShipping').value=''; document.getElementById('tmTax').value=''; document.getElementById('advTM').style.display = 'none'; document.getElementById('tmProject').value='none'; document.getElementById('tmActualDeduct').value=''; document.getElementById('tmFXOverrideBox').style.display = 'none'; document.getElementById('tmVapeQty').value=''; toggleOnlineFields('tm'); saveState(); loadPastDay();
-    }
-
-    function editPastExpense(m, dateStr, idx) {
-        let dayIdx = s.history[m].archive.findIndex(a => a.date === dateStr);
-        if(dayIdx === -1) return;
-        let item = s.history[m].archive[dayIdx].logs[idx];
-
-        if(item.category === '💨 Vape' && item.vapeQty) {
-            s.vape_stash.count = Math.max(0, s.vape_stash.count - item.vapeQty);
-        }
-
-        if(item.walletSource && s.vault[item.walletSource] !== undefined) { 
-            let isTargetUSD = ['brightwell', 'wise', 'cash_usd', 'ibkr_cash'].includes(item.walletSource); 
-            let refundAmount = item.amount; 
-            if (item.deductedAmount !== undefined) refundAmount = item.deductedAmount;
-            else { 
-                let rate = item.fxRate && !isNaN(item.fxRate) ? item.fxRate : s.fx_rate; 
-                if (m === 'vacation' && isTargetUSD) { refundAmount = item.amount / rate; } 
-                else if (m === 'onboard' && !isTargetUSD) { refundAmount = item.amount * rate; } 
-            }
-            s.vault[item.walletSource] += refundAmount; 
-        } 
-        reverseProjectTracking(item, m);
-
-        let dObj = new Date(dateStr);
-        let yyyy = dObj.getFullYear();
-        let mm = String(dObj.getMonth() + 1).padStart(2, '0');
-        let dd = String(dObj.getDate()).padStart(2, '0');
-        document.getElementById('tmDate').value = `${yyyy}-${mm}-${dd}`;
-        document.getElementById('setMode').value = m;
-
-        document.getElementById('tmTag').value = item.tag.split(' [Incl.')[0]; 
-        document.getElementById('tmAmount').value = item.amount - (item.deadMoney||0); 
-        document.getElementById('tmCategory').value = item.category; 
-        document.getElementById('tmProject').value = item.project || 'none'; toggleOnlineFields('tm'); 
-        document.getElementById('tmSourceWallet').value = item.walletSource; 
-        
-        toggleFXOverride('tm');
-        checkVapeField('tm');
-
-        if (item.deductedAmount !== undefined) document.getElementById('tmActualDeduct').value = item.deductedAmount;
-        if (item.vapeQty) document.getElementById('tmVapeQty').value = item.vapeQty;
-
-        if(item.project && item.project.startsWith('mis_') && s.projects.missions[item.project.replace('mis_','')].hasLogistics) { 
-            document.getElementById('tmShipping').value = item.deadMoney || 0; document.getElementById('tmTax').value = ''; 
-        } 
-        document.getElementById('tmLocation').value = item.location || ''; document.getElementById('tmItems').value = item.items || ''; document.getElementById('tmWhom').value = item.whom || ''; document.getElementById('advTM').style.display = 'flex'; 
-        
-        s.history[m].archive[dayIdx].logs.splice(idx, 1); 
-        if(s.history[m].archive[dayIdx].logs.length === 0) s.history[m].archive.splice(dayIdx, 1); 
-        saveState(); loadPastDay(); 
-        document.getElementById('tmAmount').focus();
+        cancelTMEdit(); saveState(); loadPastDay();
     }
 
     async function deletePastExpense(m, dateStr, idx) { 
@@ -1524,11 +1560,7 @@
         let dayIdx = s.history[m].archive.findIndex(a => a.date === dateStr); 
         if(dayIdx > -1) { 
             let item = s.history[m].archive[dayIdx].logs[idx]; 
-            
-            if(item.category === '💨 Vape' && item.vapeQty) {
-                s.vape_stash.count = Math.max(0, s.vape_stash.count - item.vapeQty);
-            }
-
+            if(item.category === '💨 Vape' && item.vapeQty) s.vape_stash.count = Math.max(0, s.vape_stash.count - item.vapeQty);
             if(item.walletSource && s.vault[item.walletSource] !== undefined) { 
                 let isTargetUSD = ['brightwell', 'wise', 'cash_usd', 'ibkr_cash'].includes(item.walletSource); 
                 let refundAmount = item.amount; 
@@ -1560,11 +1592,9 @@
         let existingIdx = curHist.archive.findIndex(a => a.date === archiveDate); 
         
         if (existingIdx > -1) { 
-            // Do not double-reward surplus for a day that already exists. Just correct the capital.
             curHist.archive[existingIdx].logs.push(...curHist.current); 
             s.capital_saved -= spentTND;
         } else { 
-            // New day entirely. Award limit surplus minus spent.
             let limitTND = s.mode === 'onboard' ? curHist.limit * s.fx_rate : curHist.limit;
             s.capital_saved += (limitTND - spentTND);
             curHist.archive.push({ date: archiveDate, limit: curHist.limit, logs: [...curHist.current] }); 
@@ -1578,19 +1608,26 @@
     // ==========================================
     function renderIOUs() {
         const pList = document.getElementById('payablesList'); pList.innerHTML = '';
-        s.ious.payables.forEach(p => { 
-            pList.innerHTML += `<div class="iou-item"><div><div style="font-weight:bold;">${p.name}</div><div style="color:var(--warning); font-size:11px;">Owe: ${p.amount.toFixed(2)} ${p.currency}</div></div><div><button class="iou-btn" onclick="processIOU('payable', ${p.id})">Pay</button> <button class="iou-del" style="background:none;border:none;color:var(--danger);" onclick="deleteIOU('payable', ${p.id})">❌</button></div></div>`; 
-        });
+        s.ious.payables.forEach(p => { pList.innerHTML += `<div class="iou-item"><div><div style="font-weight:bold;">${p.name}</div><div style="color:var(--warning); font-size:11px;">Owe: ${p.amount.toFixed(2)} ${p.currency}</div></div><div><button class="iou-btn" onclick="processIOU('payable', ${p.id})">Pay</button> <button class="iou-del" style="background:none;border:none;color:var(--danger);" onclick="deleteIOU('payable', ${p.id})">❌</button></div></div>`; });
         const rList = document.getElementById('receivablesList'); rList.innerHTML = '';
-        s.ious.receivables.forEach(r => { 
-            rList.innerHTML += `<div class="iou-item"><div><div style="font-weight:bold;">${r.name}</div><div style="color:var(--success); font-size:11px;">Owed: ${r.amount.toFixed(2)} ${r.currency}</div></div><div><button class="iou-btn" style="background:var(--success);" onclick="processIOU('receivable', ${r.id})">Collect</button> <button class="iou-del" style="background:none;border:none;color:var(--danger);" onclick="deleteIOU('receivable', ${r.id})">❌</button></div></div>`; 
-        });
+        s.ious.receivables.forEach(r => { rList.innerHTML += `<div class="iou-item"><div><div style="font-weight:bold;">${r.name}</div><div style="color:var(--success); font-size:11px;">Owed: ${r.amount.toFixed(2)} ${r.currency}</div></div><div><button class="iou-btn" style="background:var(--success);" onclick="processIOU('receivable', ${r.id})">Collect</button> <button class="iou-del" style="background:none;border:none;color:var(--danger);" onclick="deleteIOU('receivable', ${r.id})">❌</button></div></div>`; });
     }
 
     async function addIOU(type) { 
         let name = await openUPrompt("New IOU", "Entity Name:"); if(!name) return; 
         let amtStr = await openUPrompt("Amount", "Enter Amount:"); let amount = parseFloat(amtStr); if(isNaN(amount) || amount <= 0) return; 
         let currency = await openUPrompt("Currency", "Currency (USD/TND):", "USD"); if(!currency) return; 
+        
+        let actionWord = type === 'payable' ? 'added to' : 'deducted from';
+        let w = await openUPrompt("Wallet Transfer", `Map this IOU to a wallet? (Money was ${actionWord}):\n1: Brightwell\n2: Cash(USD)\n3: Wise\n4: Cash(TND)\n5: Savings\n6: Skip`); 
+        if (w && w !== '6') {
+            let key = ""; if(w==='1') key='brightwell'; else if(w==='2') key='cash_usd'; else if(w==='3') key='wise'; else if(w==='4') key='cash_tnd'; else if(w==='5') key='savings';
+            if (key) {
+                if (type === 'payable') s.vault[key] += amount; 
+                else s.vault[key] -= amount; 
+            }
+        }
+        
         s.ious[type + 's'].push({ id: Date.now(), name: name, amount: amount, currency: currency.toUpperCase() }); 
         saveState(); 
     }
@@ -1607,24 +1644,18 @@
         saveState(); 
     }
 
-    async function deleteIOU(type, id) { 
-        let ok = await openUConfirm("Delete", "Delete record without affecting vaults?");
-        if(ok) { s.ious[type + 's'] = s.ious[type + 's'].filter(i => i.id !== id); saveState(); } 
-    }
+    async function deleteIOU(type, id) { let ok = await openUConfirm("Delete", "Delete record without affecting vaults?"); if(ok) { s.ious[type + 's'] = s.ious[type + 's'].filter(i => i.id !== id); saveState(); } }
 
     async function addInstallment() {
         let date = await openUPrompt("New Installment", "Installment Date (e.g., Nov 2026):"); if(!date) return;
         let amtStr = await openUPrompt("Amount", "Amount (TND):"); let amt = parseFloat(amtStr); if(isNaN(amt) || amt <= 0) return;
-        s.loan.schedule.push({ id: Date.now(), date: date, amount: amt, paid: false }); 
-        saveState();
+        s.loan.schedule.push({ id: Date.now(), date: date, amount: amt, paid: false }); saveState();
     }
     
     function renderSchedule() {
         let html = ''; let pending = s.loan.schedule.filter(x => !x.paid); let paid = s.loan.schedule.filter(x => x.paid);
         if(pending.length === 0 && paid.length === 0) html = '<div style="font-size:11px;color:var(--text-muted);text-align:center;">No installments logged.</div>';
-        pending.forEach(p => { 
-            html += `<div class="iou-item" style="border-color:var(--danger);"><div><strong style="font-size:12px;">🗓️ ${p.date}</strong><div style="font-size:11px;color:var(--danger); font-weight:bold;">${p.amount.toFixed(2)} TND</div></div><div><button class="iou-btn" onclick="payInstallment(${p.id})">Pay</button> <button class="iou-del" style="background:none;border:none;color:var(--text-muted);" onclick="deleteInstallment(${p.id})">❌</button></div></div>`; 
-        });
+        pending.forEach(p => { html += `<div class="iou-item" style="border-color:var(--danger);"><div><strong style="font-size:12px;">🗓️ ${p.date}</strong><div style="font-size:11px;color:var(--danger); font-weight:bold;">${p.amount.toFixed(2)} TND</div></div><div><button class="iou-btn" onclick="payInstallment(${p.id})">Pay</button> <button class="iou-del" style="background:none;border:none;color:var(--text-muted);" onclick="deleteInstallment(${p.id})">❌</button></div></div>`; });
         if(paid.length > 0) { 
             html += `<div style="font-size:10px; color:var(--text-muted); margin:10px 0 5px 0; text-align:center;">Archived Payments</div>`; 
             paid.forEach(p => { html += `<div class="iou-item" style="opacity:0.5; border-color:var(--success);"><div><strike style="font-size:12px;">${p.date}</strike><div style="font-size:11px;color:var(--success); font-weight:bold;">${p.amount.toFixed(2)} TND (Paid)</div></div></div>`; }); 
@@ -1642,101 +1673,30 @@
         saveState();
     }
 
-    async function deleteInstallment(id) { 
-        let ok = await openUConfirm("Delete", "Delete this scheduled payment?");
-        if(ok) { s.loan.schedule = s.loan.schedule.filter(x => x.id !== id); saveState(); } 
-    }
+    async function deleteInstallment(id) { let ok = await openUConfirm("Delete", "Delete this scheduled payment?"); if(ok) { s.loan.schedule = s.loan.schedule.filter(x => x.id !== id); saveState(); } }
 
     // ==========================================
     // 7. WIZARDS & UTILITIES
     // ==========================================
-    function openPaycheckModal() {
-        document.getElementById('pwGross').value = '';
-        document.getElementById('pwLoanVal').innerText = '$0.00';
-        document.getElementById('pwSavVal').innerText = '$0.00';
-        document.getElementById('pwOpVal').innerText = '$0.00';
-        document.getElementById('pwLoanPct').value = 40;
-        document.getElementById('pwSavPct').value = 15;
-        document.getElementById('pwOpPct').value = 45;
-        document.getElementById('paycheckModal').style.display = 'flex';
-    }
-
-    function calcPaycheck() {
-        let gross = parseFloat(document.getElementById('pwGross').value) || 0;
-        let pLoan = parseFloat(document.getElementById('pwLoanPct').value) || 0;
-        let pSav = parseFloat(document.getElementById('pwSavPct').value) || 0;
-        let pOp = parseFloat(document.getElementById('pwOpPct').value) || 0;
-        
-        document.getElementById('pwLoanVal').innerText = '$' + (gross * (pLoan/100)).toFixed(2);
-        document.getElementById('pwSavVal').innerText = '$' + (gross * (pSav/100)).toFixed(2);
-        document.getElementById('pwOpVal').innerText = '$' + (gross * (pOp/100)).toFixed(2);
-    }
-
+    function openPaycheckModal() { document.getElementById('pwGross').value = ''; document.getElementById('pwLoanVal').innerText = '$0.00'; document.getElementById('pwSavVal').innerText = '$0.00'; document.getElementById('pwOpVal').innerText = '$0.00'; document.getElementById('pwLoanPct').value = 40; document.getElementById('pwSavPct').value = 15; document.getElementById('pwOpPct').value = 45; document.getElementById('paycheckModal').style.display = 'flex'; }
+    function calcPaycheck() { let gross = parseFloat(document.getElementById('pwGross').value) || 0; let pLoan = parseFloat(document.getElementById('pwLoanPct').value) || 0; let pSav = parseFloat(document.getElementById('pwSavPct').value) || 0; let pOp = parseFloat(document.getElementById('pwOpPct').value) || 0; document.getElementById('pwLoanVal').innerText = '$' + (gross * (pLoan/100)).toFixed(2); document.getElementById('pwSavVal').innerText = '$' + (gross * (pSav/100)).toFixed(2); document.getElementById('pwOpVal').innerText = '$' + (gross * (pOp/100)).toFixed(2); }
     async function processPaycheck() {
-        let gross = parseFloat(document.getElementById('pwGross').value);
-        if(isNaN(gross) || gross <= 0) return;
-        let pLoan = parseFloat(document.getElementById('pwLoanPct').value) || 0;
-        let pSav = parseFloat(document.getElementById('pwSavPct').value) || 0;
-        let pOp = parseFloat(document.getElementById('pwOpPct').value) || 0;
-        
-        let toLoanUSD = gross * (pLoan/100);
-        let toSavUSD = gross * (pSav/100);
-        let toOpUSD = gross * (pOp/100);
-        
-        let toLoanTND = toLoanUSD * s.fx_rate;
-        s.loan.arrears -= toLoanTND; if(s.loan.arrears < 0) s.loan.arrears = 0; 
-        
-        let savDest = document.getElementById('pwSavDest').value;
-        if(savDest === 'ibkr') s.vault.ibkr_cash += toSavUSD;
-        else s.vault.savings += (toSavUSD * s.fx_rate);
-        
-        s.vault.brightwell += toOpUSD; 
-        document.getElementById('paycheckModal').style.display = 'none';
-        saveState();
+        let gross = parseFloat(document.getElementById('pwGross').value); if(isNaN(gross) || gross <= 0) return;
+        let pLoan = parseFloat(document.getElementById('pwLoanPct').value) || 0; let pSav = parseFloat(document.getElementById('pwSavPct').value) || 0; let pOp = parseFloat(document.getElementById('pwOpPct').value) || 0;
+        let toLoanUSD = gross * (pLoan/100); let toSavUSD = gross * (pSav/100); let toOpUSD = gross * (pOp/100);
+        let toLoanTND = toLoanUSD * s.fx_rate; s.loan.arrears -= toLoanTND; if(s.loan.arrears < 0) s.loan.arrears = 0; 
+        let savDest = document.getElementById('pwSavDest').value; if(savDest === 'ibkr') s.vault.ibkr_cash += toSavUSD; else s.vault.savings += (toSavUSD * s.fx_rate);
+        s.vault.brightwell += toOpUSD; document.getElementById('paycheckModal').style.display = 'none'; saveState();
         await openUConfirm("Success", `Processed: -$${toLoanUSD.toFixed(2)} to Debt, +$${toSavUSD.toFixed(2)} to ${savDest.toUpperCase()}, +$${toOpUSD.toFixed(2)} to Brightwell`);
     }
 
-    function openIBKRModal() {
-        document.getElementById('ibkrIdle').value = s.vault.ibkr_cash.toFixed(2);
-        document.getElementById('ibkrShares').value = s.vault.ibkr_shares.toFixed(4);
-        document.getElementById('ibkrCost').value = s.vault.ibkr_cost.toFixed(2);
-        document.getElementById('ibkrPrice').value = s.vault.ibkr_price.toFixed(2);
-        document.getElementById('ibkrModal').style.display = 'flex';
-    }
-    
-    function saveIBKR() {
-        s.vault.ibkr_cash = parseFloat(document.getElementById('ibkrIdle').value) || 0;
-        s.vault.ibkr_shares = parseFloat(document.getElementById('ibkrShares').value) || 0;
-        s.vault.ibkr_cost = parseFloat(document.getElementById('ibkrCost').value) || 0;
-        s.vault.ibkr_price = parseFloat(document.getElementById('ibkrPrice').value) || 0;
-        saveState();
-    }
-    
-    function openSweepModal() {
-        document.getElementById('swAmount').value = '';
-        document.getElementById('sweepModal').style.display = 'flex';
-    }
-    
-    async function processSweep() {
-        let amt = parseFloat(document.getElementById('swAmount').value); if(isNaN(amt) || amt <= 0) return;
-        let src = document.getElementById('swSource').value;
-        s.vault[src] -= amt;
-        s.vault.ibkr_cash += amt;
-        document.getElementById('sweepModal').style.display = 'none';
-        saveState();
-        await openUConfirm("Success", `Swept $${amt.toFixed(2)} into IBKR Idle Cash.`);
-    }
+    function openIBKRModal() { document.getElementById('ibkrIdle').value = s.vault.ibkr_cash.toFixed(2); document.getElementById('ibkrShares').value = s.vault.ibkr_shares.toFixed(4); document.getElementById('ibkrCost').value = s.vault.ibkr_cost.toFixed(2); document.getElementById('ibkrPrice').value = s.vault.ibkr_price.toFixed(2); document.getElementById('ibkrModal').style.display = 'flex'; }
+    function saveIBKR() { s.vault.ibkr_cash = parseFloat(document.getElementById('ibkrIdle').value) || 0; s.vault.ibkr_shares = parseFloat(document.getElementById('ibkrShares').value) || 0; s.vault.ibkr_cost = parseFloat(document.getElementById('ibkrCost').value) || 0; s.vault.ibkr_price = parseFloat(document.getElementById('ibkrPrice').value) || 0; saveState(); }
+    function openSweepModal() { document.getElementById('swAmount').value = ''; document.getElementById('sweepModal').style.display = 'flex'; }
+    async function processSweep() { let amt = parseFloat(document.getElementById('swAmount').value); if(isNaN(amt) || amt <= 0) return; let src = document.getElementById('swSource').value; s.vault[src] -= amt; s.vault.ibkr_cash += amt; document.getElementById('sweepModal').style.display = 'none'; saveState(); await openUConfirm("Success", `Swept $${amt.toFixed(2)} into IBKR Idle Cash.`); }
 
-    async function vaultWise() { 
-        let aStr = await openUPrompt("Wise Transfer", "Amount to Wise (USD):"); let amount = parseFloat(aStr); if(isNaN(amount) || amount <= 0) return; 
-        let mStr = await openUPrompt("Fee Method", "1: Wire ($1) | 2: Apple Pay ($1.25)"); let fee = mStr === '1' ? 1.00 : (mStr === '2' ? 1.25 : 0); if(fee === 0) return; 
-        s.vault.brightwell -= (amount + fee); s.vault.wise += amount; s.vault.lifetime_fees += fee; saveState(); 
-    }
-    
-    async function vaultExchange() { 
-        let uStr = await openUPrompt("Exchange", "USD given:"); let usdGiven = parseFloat(uStr); if(isNaN(usdGiven) || usdGiven <= 0) return; 
-        let tStr = await openUPrompt("Exchange", "TND received:"); let tndRec = parseFloat(tStr); if(!isNaN(tndRec) && tndRec > 0) { s.vault.cash_usd -= usdGiven; s.vault.cash_tnd += tndRec; saveState(); } 
-    }
+    async function vaultWise() { let aStr = await openUPrompt("Wise Transfer", "Amount to Wise (USD):"); let amount = parseFloat(aStr); if(isNaN(amount) || amount <= 0) return; let mStr = await openUPrompt("Fee Method", "1: Wire ($1) | 2: Apple Pay ($1.25)"); let fee = mStr === '1' ? 1.00 : (mStr === '2' ? 1.25 : 0); if(fee === 0) return; s.vault.brightwell -= (amount + fee); s.vault.wise += amount; s.vault.lifetime_fees += fee; saveState(); }
+    async function vaultExchange() { let uStr = await openUPrompt("Exchange", "USD given:"); let usdGiven = parseFloat(uStr); if(isNaN(usdGiven) || usdGiven <= 0) return; let tStr = await openUPrompt("Exchange", "TND received:"); let tndRec = parseFloat(tStr); if(!isNaN(tndRec) && tndRec > 0) { s.vault.cash_usd -= usdGiven; s.vault.cash_tnd += tndRec; saveState(); } }
 
     function openATMModal() { document.getElementById('atmAmt').value = ''; document.getElementById('atmAmt').placeholder = s.mode === 'vacation' ? "Withdrawal Amount (TND)" : "Withdrawal Amount (USD)"; document.getElementById('atmLoc').value = s.mode === 'vacation' ? 'tunisia' : 'intl'; toggleATMFee(); document.getElementById('atmFee').value = ''; document.getElementById('atmModal').style.display = 'flex'; }
     function toggleATMFee() { document.getElementById('atmFeeGroup').style.display = document.getElementById('atmLoc').value === 'intl' ? 'flex' : 'none'; }
@@ -1745,34 +1705,17 @@
     function openIncomeModal() { document.getElementById('incAmount').value = ''; document.getElementById('incDetails').value = ''; document.getElementById('incSource').value = 'gig'; document.getElementById('incWallet').value = 'cash_tnd'; updateIncPlaceholder(); document.getElementById('incomeModal').style.display = 'flex'; }
     function updateIncPlaceholder() { let src = document.getElementById('incSource').value; document.getElementById('incBorrowWarning').style.display = src === 'borrow' ? 'block' : 'none'; }
     async function processIncome() { let amt = parseFloat(document.getElementById('incAmount').value); if(isNaN(amt) || amt <= 0) return; let source = document.getElementById('incSource').value; let wallet = document.getElementById('incWallet').value; let details = document.getElementById('incDetails').value.trim() || "No details"; 
-        if(wallet === 'ibkr_cash') s.vault.ibkr_cash += amt;
-        else s.vault[wallet] += amt; 
+        if(wallet === 'ibkr_cash') s.vault.ibkr_cash += amt; else s.vault[wallet] += amt; 
         let isUSD = ['brightwell', 'wise', 'cash_usd', 'ibkr_cash'].includes(wallet); let currency = isUSD ? 'USD' : 'TND'; if(source === 'borrow') { s.ious.payables.push({ id: Date.now(), name: details, amount: amt, currency: currency }); await openUConfirm("Success", "Added to vault AND created Payable IOU."); } s.income_logs.push({ id: Date.now(), amount: amt, currency: currency, wallet: wallet, source: source, details: details, ts: Date.now() }); document.getElementById('incomeModal').style.display = 'none'; saveState(); 
     }
     function renderIncomeLogs() { const listNode = document.getElementById('incomeList'); listNode.innerHTML = ''; if(s.income_logs.length === 0) { listNode.innerHTML = '<div style="font-size:11px;text-align:center;color:var(--text-muted);">No income.</div>'; return; } s.income_logs.slice().reverse().forEach((inc, idx) => { let actualIdx = s.income_logs.length - 1 - idx; let srcIcon = inc.source === 'gig' ? '🛠️' : (inc.source === 'sale' ? '🏷️' : (inc.source === 'borrow' ? '🤝' : '✏️')); listNode.innerHTML += `<div class="history-item"><div><div style="font-weight:600;">${srcIcon} ${inc.details}</div><div style="font-size:9px; color:var(--text-muted);">To: ${inc.wallet}</div></div><div style="display:flex; gap:10px; align-items:center;"><span style="color:var(--success); font-weight:bold;">+${inc.amount.toFixed(2)} ${inc.currency}</span><button class="edit-btn" onclick="deleteIncome(${actualIdx})">❌</button></div></div>`; }); }
     async function deleteIncome(idx) { let ok = await openUConfirm("Delete", "Delete this income log?"); if(ok) { s.income_logs.splice(idx, 1); saveState(); renderIncomeLogs(); } }
+    function saveEditModal() { ['brightwell','wise','cash_usd','cash_tnd','savings'].forEach(k => s.vault[k] = parseFloat(document.getElementById('m_'+k).value) || 0); document.getElementById('editModal').style.display='none'; saveState(); }
     
-    function saveEditModal() { 
-        ['brightwell','wise','cash_usd','cash_tnd','savings'].forEach(k => s.vault[k] = parseFloat(document.getElementById('m_'+k).value) || 0); 
-        document.getElementById('editModal').style.display='none'; saveState(); 
-    }
-    
-    function openBehaviorModal() { 
-        document.getElementById('behaviorModal').style.display = 'flex'; 
-    }
-    
+    function openBehaviorModal() { document.getElementById('behaviorModal').style.display = 'flex'; }
     function openSTBModal() { document.getElementById('stb_arrearsModal').innerText = s.loan.arrears.toFixed(2) + " TND"; document.getElementById('stbModal').style.display = 'flex'; }
     async function editSTBRate() { let rStr = await openUPrompt("Rate", "New Rate:", s.loan.rate); let r = parseFloat(rStr); if(!isNaN(r)) { s.loan.rate = r; saveState(); } }
-    
-    function logSTBPayment() {
-        let amt = parseFloat(document.getElementById('stbPayAmt').value);
-        if(isNaN(amt) || amt <= 0) return;
-        let w = document.getElementById('stbPayWallet').value;
-        if(w !== 'none') s.vault[w] -= (w === 'brightwell' ? amt/s.fx_rate : amt);
-        s.loan.arrears -= amt; if(s.loan.arrears < 0) s.loan.arrears = 0;
-        saveState(); 
-        document.getElementById('stbModal').style.display = 'none';
-    }
+    function logSTBPayment() { let amt = parseFloat(document.getElementById('stbPayAmt').value); if(isNaN(amt) || amt <= 0) return; let w = document.getElementById('stbPayWallet').value; if(w !== 'none') s.vault[w] -= (w === 'brightwell' ? amt/s.fx_rate : amt); s.loan.arrears -= amt; if(s.loan.arrears < 0) s.loan.arrears = 0; saveState(); document.getElementById('stbModal').style.display = 'none'; }
 
     // ==========================================
     // 8. ANALYTICS, LEADERBOARD & PREDICTOR
@@ -1785,197 +1728,103 @@
         }); 
         const bd = document.getElementById('catGraphContainer'); bd.innerHTML = ''; 
         if (vol === 0) { bd.innerHTML = '<div style="font-size:11px;color:var(--text-muted);text-align:center;">No data.</div>'; return; } 
-        Object.keys(cats).sort((a,b) => cats[b] - cats[a]).forEach(tag => { 
-            let pct = (cats[tag] / vol) * 100; 
-            bd.innerHTML += `<div class="chart-row"><span style="width:110px; font-weight:bold; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;">${tag}</span><div class="chart-bar-bg"><div class="chart-bar-fill" style="width:${pct}%"></div></div><span style="font-weight:bold;width:80px;text-align:right;">${cats[tag].toFixed(1)} TND</span></div>`; 
-        }); 
+        Object.keys(cats).sort((a,b) => cats[b] - cats[a]).forEach(tag => { let pct = (cats[tag] / vol) * 100; bd.innerHTML += `<div class="chart-row"><span style="width:110px; font-weight:bold; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;">${tag}</span><div class="chart-bar-bg"><div class="chart-bar-fill" style="width:${pct}%"></div></div><span style="font-weight:bold;width:80px;text-align:right;">${cats[tag].toFixed(1)} TND</span></div>`; }); 
     }
 
     function renderPredictor() {
         const bd = document.getElementById('contractPredictorHtml');
-        let start = new Date(s.settings.contractStart).getTime();
-        let end = new Date(s.settings.contractEnd).getTime();
-        let now = Date.now();
-        let daysTotal = Math.floor((end - start) / 86400000);
-        let daysLeft = Math.max(0, Math.floor((end - now) / 86400000));
+        let start = new Date(s.settings.contractStart).getTime(); let end = new Date(s.settings.contractEnd).getTime(); let now = Date.now();
+        let daysTotal = Math.floor((end - start) / 86400000); let daysLeft = Math.max(0, Math.floor((end - now) / 86400000));
         let pctComplete = Math.min(100, Math.max(0, ((now - start) / (end - start)) * 100));
-
         let mLeft = s.loan.arrears > 0 ? (s.loan.arrears / 1000).toFixed(1) : 0;
         bd.innerHTML = `
-            <div style="font-size:11px; display:flex; justify-content:space-between; margin-bottom:4px;">
-                <span>${daysLeft} Days Remaining</span>
-                <span style="color:#38bdf8;">${pctComplete.toFixed(1)}%</span>
-            </div>
+            <div style="font-size:11px; display:flex; justify-content:space-between; margin-bottom:4px;"><span>${daysLeft} Days Remaining</span><span style="color:#38bdf8;">${pctComplete.toFixed(1)}%</span></div>
             <div class="progress-container" style="height:6px; margin-top:0;"><div class="progress-bar" style="width:${pctComplete}%; background:#38bdf8;"></div></div>
-            <div style="font-size:10px; color:var(--text-muted); margin-top:10px;">
-                <div>Est. Debt Months Left: <strong>${mLeft}</strong></div>
-            </div>
-        `;
+            <div style="font-size:10px; color:var(--text-muted); margin-top:10px;"><div>Est. Debt Months Left: <strong>${mLeft}</strong></div></div>`;
     }
 
     function renderLeaderboard() {
-        const bd = document.getElementById('leaderboardHtml');
-        let locs = {};
+        const bd = document.getElementById('leaderboardHtml'); let locs = {};
         ['vacation', 'onboard'].forEach(m => { 
-            s.history[m].archive.forEach(d => d.logs.forEach(l => { 
-                if(l.location) { 
-                    // Normalize the location string (remove leading/trailing spaces, capitalize properly)
-                    let key = l.location.trim().toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
-                    let amt = m === 'onboard' ? l.amount * l.fxRate : l.amount; 
-                    locs[key] = (locs[key] || 0) + amt; 
-                } 
-            })); 
-            s.history[m].current.forEach(l => {
-                if(l.location) { 
-                    let key = l.location.trim().toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
-                    let amt = m === 'onboard' ? l.amount * l.fxRate : l.amount; 
-                    locs[key] = (locs[key] || 0) + amt; 
-                }
-            });
+            s.history[m].archive.forEach(d => d.logs.forEach(l => { if(l.location) { let key = l.location.trim().toUpperCase(); let amt = m === 'onboard' ? l.amount * l.fxRate : l.amount; locs[key] = (locs[key] || 0) + amt; } })); 
+            s.history[m].current.forEach(l => { if(l.location) { let key = l.location.trim().toUpperCase(); let amt = m === 'onboard' ? l.amount * l.fxRate : l.amount; locs[key] = (locs[key] || 0) + amt; } });
         }); 
         
-        let sorted = Object.keys(locs).sort((a,b) => locs[b] - locs[a]).slice(0, 5);
+        let sorted = Object.keys(locs).sort((a,b) => locs[b] - locs[a]); // V28 Uncapped Scrollable
         if(sorted.length === 0) { bd.innerHTML = '<div style="font-size:11px;color:var(--text-muted);text-align:center;">No location data logged.</div>'; return; }
         
         let html = '';
-        sorted.forEach((loc, i) => {
-            html += `<div style="display:flex; justify-content:space-between; font-size:12px; padding:6px 0; border-bottom:1px solid var(--panel-border);">
-                <span><span style="color:var(--text-muted); margin-right:5px;">#${i+1}</span> ${loc}</span>
-                <strong style="color:var(--danger);">${locs[loc].toFixed(2)} TND</strong>
-            </div>`;
-        });
+        sorted.forEach((loc, i) => { html += `<div style="display:flex; justify-content:space-between; font-size:12px; padding:6px 0; border-bottom:1px solid var(--panel-border);"><span><span style="color:var(--text-muted); margin-right:5px;">#${i+1}</span> ${loc}</span><strong style="color:var(--danger);">${locs[loc].toFixed(2)} TND</strong></div>`; });
         bd.innerHTML = html;
     }
 
     function renderVapeStats() {
-        const bd = document.getElementById('vapeStatsHtml');
-        if (!bd) return;
+        const bd = document.getElementById('vapeStatsHtml'); if (!bd) return;
         let vLogs = [];
-        s.history[s.mode].archive.forEach(a => {
-            a.logs.forEach(l => { if (l.category === '💨 Vape') vLogs.push({...l, ts: l.ts}); });
-        });
-        s.history[s.mode].current.forEach(l => {
-            if (l.category === '💨 Vape') vLogs.push({...l, ts: l.ts});
-        });
+        s.history[s.mode].archive.forEach(a => { a.logs.forEach(l => { if (l.category === '💨 Vape') vLogs.push({...l, ts: l.ts}); }); });
+        s.history[s.mode].current.forEach(l => { if (l.category === '💨 Vape') vLogs.push({...l, ts: l.ts}); });
         vLogs.sort((a,b) => a.ts - b.ts);
 
         let html = '';
         if (s.mode === 'vacation') {
-            let count = vLogs.length;
-            let totalSpent = vLogs.reduce((sum, l) => sum + l.amount, 0);
-            let avgCost = count > 0 ? totalSpent / count : 0;
+            let count = vLogs.length; let totalSpent = vLogs.reduce((sum, l) => sum + l.amount, 0); let avgCost = count > 0 ? totalSpent / count : 0;
             let freq = 0; let monthlyProj = 0;
-            if (count > 1) {
-                let days = (vLogs[count-1].ts - vLogs[0].ts) / 86400000;
-                freq = days / (count - 1);
-                if (freq > 0) monthlyProj = (30 / freq) * avgCost;
-            }
-            html = `
-                <div style="display:flex; justify-content:space-between; font-size:11px;">
-                    <span>Total Bought: <strong>${count}</strong></span>
-                    <span>Avg Cost: <strong>${avgCost.toFixed(2)} TND</strong></span>
-                </div>
-                <div style="font-size:11px; margin-top:5px;">Purchase Frequency: <strong style="color:var(--success);">${freq > 0 ? '1 every ' + freq.toFixed(1) + ' days' : 'Need more data'}</strong></div>
-                <div style="font-size:11px; margin-top:5px;">30-Day Trajectory: <strong style="color:var(--danger);">${monthlyProj.toFixed(2)} TND/mo</strong></div>
-            `;
+            if (count > 1) { let days = (vLogs[count-1].ts - vLogs[0].ts) / 86400000; freq = days / (count - 1); if (freq > 0) monthlyProj = (30 / freq) * avgCost; }
+            html = `<div style="display:flex; justify-content:space-between; font-size:11px;"><span>Total Bought: <strong>${count}</strong></span><span>Avg Cost: <strong>${avgCost.toFixed(2)} TND</strong></span></div><div style="font-size:11px; margin-top:5px;">Purchase Frequency: <strong style="color:var(--success);">${freq > 0 ? '1 every ' + freq.toFixed(1) + ' days' : 'Need more data'}</strong></div><div style="font-size:11px; margin-top:5px;">30-Day Trajectory: <strong style="color:var(--danger);">${monthlyProj.toFixed(2)} TND/mo</strong></div>`;
         } else {
-            let stash = s.vape_stash.count;
-            let empties = s.vape_stash.empty_logs;
-            let avgLifespan = 0;
-            if (empties.length > 1) {
-                let totalLife = 0;
-                for (let i = 1; i < empties.length; i++) {
-                    totalLife += (empties[i] - empties[i-1]) / 86400000;
-                }
-                avgLifespan = totalLife / (empties.length - 1);
-            }
+            let stash = s.vape_stash.count; let empties = s.vape_stash.empty_logs; let avgLifespan = 0;
+            if (empties.length > 1) { let totalLife = 0; for (let i = 1; i < empties.length; i++) { totalLife += (empties[i] - empties[i-1]) / 86400000; } avgLifespan = totalLife / (empties.length - 1); }
             let runOut = "Need more data";
-            if (avgLifespan > 0 && stash > 0) {
-                let daysLeft = stash * avgLifespan;
-                let runDate = new Date(Date.now() + (daysLeft * 86400000));
-                runOut = runDate.toDateString();
-            } else if (stash === 0) { runOut = "Stash Empty"; }
-            
-            html = `
-                <div style="display:flex; justify-content:space-between; font-size:11px; align-items:center;">
-                    <div>Active Stash: <strong style="font-size:16px; color:var(--accent);">${stash}</strong></div>
-                    <button class="v-btn" style="background:var(--danger);" onclick="markVapeEmpty()">📉 Mark 1 Empty</button>
-                </div>
-                <div style="font-size:11px; margin-top:10px;">Avg Hardware Lifespan: <strong style="color:var(--success);">${avgLifespan > 0 ? avgLifespan.toFixed(1) + ' Days' : 'Need more data'}</strong></div>
-                <div style="font-size:11px; margin-top:5px;">Stash Depletion Est: <strong style="color:var(--warning);">${runOut}</strong></div>
-            `;
+            if (avgLifespan > 0 && stash > 0) { let daysLeft = stash * avgLifespan; let runDate = new Date(Date.now() + (daysLeft * 86400000)); runOut = runDate.toDateString(); } else if (stash === 0) { runOut = "Stash Empty"; }
+            html = `<div style="display:flex; justify-content:space-between; font-size:11px; align-items:center;"><div>Active Stash: <strong style="font-size:16px; color:var(--accent);">${stash}</strong></div><button class="v-btn" style="background:var(--danger);" onclick="markVapeEmpty()">📉 Mark 1 Empty</button></div><div style="font-size:11px; margin-top:10px;">Avg Hardware Lifespan: <strong style="color:var(--success);">${avgLifespan > 0 ? avgLifespan.toFixed(1) + ' Days' : 'Need more data'}</strong></div><div style="font-size:11px; margin-top:5px;">Stash Depletion Est: <strong style="color:var(--warning);">${runOut}</strong></div>`;
         }
         bd.innerHTML = html;
     }
 
     async function markVapeEmpty() {
-        if (s.vape_stash.count <= 0) {
-            await openUConfirm("Error", "Your stash is already at 0.");
-            return;
-        }
+        if (s.vape_stash.count <= 0) { await openUConfirm("Error", "Your stash is already at 0."); return; }
         let ok = await openUConfirm("Confirm", "Mark 1 vape as fully consumed?");
         if (!ok) return;
-        s.vape_stash.count--;
-        s.vape_stash.empty_logs.push(Date.now());
-        saveState();
+        s.vape_stash.count--; s.vape_stash.empty_logs.push(Date.now()); saveState();
     }
 
     // ==========================================
     // 9. API & MASTER UTILS
     // ==========================================
     async function fetchStockPrice() {
+        if (!navigator.onLine) { await openUConfirm("Offline", "You are currently offline. Manual entry only."); return; }
         try {
             const res = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent('https://query1.finance.yahoo.com/v8/finance/chart/CSPX.L'));
             const data = await res.json();
             const price = JSON.parse(data.contents).chart.result[0].meta.regularMarketPrice;
             document.getElementById('ibkrPrice').value = price.toFixed(2);
-            saveIBKR();
-            await openUConfirm("Success", "Market price updated: $" + price.toFixed(2));
+            saveIBKR(); await openUConfirm("Success", "Market price updated: $" + price.toFixed(2));
         } catch (e) { await openUConfirm("Error", "Network Error: Could not fetch stock price."); }
     }
 
     async function fetchLiveFX() { 
+        if (!navigator.onLine) { await openUConfirm("Offline", "You are offline. Cannot fetch FX."); return; }
         try { 
-            const res = await fetch('https://open.er-api.com/v6/latest/USD'); 
-            const data = await res.json(); 
-            if (data && data.rates && data.rates.TND) { 
-                s.fx_rate = parseFloat(data.rates.TND); 
-                populateSettings(); saveState(); await openUConfirm("Success", "FX updated to " + s.fx_rate); 
-            } 
+            const res = await fetch('https://open.er-api.com/v6/latest/USD'); const data = await res.json(); 
+            if (data && data.rates && data.rates.TND) { s.fx_rate = parseFloat(data.rates.TND); populateSettings(); saveState(); await openUConfirm("Success", "FX updated to " + s.fx_rate); } 
         } catch (e) { await openUConfirm("Error", "Network Error."); } 
     }
 
-    function updateContractDates() {
-        s.settings.contractStart = document.getElementById('setContractStart').value;
-        s.settings.contractEnd = document.getElementById('setContractEnd').value;
-        saveState();
-    }
-
-    function populateSettings() {
-        document.getElementById('setMode').value = s.mode;
-        document.getElementById('setVacLimit').value = s.history.vacation.limit;
-        document.getElementById('setOnbLimit').value = s.history.onboard.limit;
-        document.getElementById('setFX').value = s.fx_rate;
-        document.getElementById('setContractStart').value = s.settings.contractStart;
-        document.getElementById('setContractEnd').value = s.settings.contractEnd;
-    }
-
+    function updateContractDates() { s.settings.contractStart = document.getElementById('setContractStart').value; s.settings.contractEnd = document.getElementById('setContractEnd').value; saveState(); }
+    function populateSettings() { document.getElementById('setMode').value = s.mode; document.getElementById('setVacLimit').value = s.history.vacation.limit; document.getElementById('setOnbLimit').value = s.history.onboard.limit; document.getElementById('setFX').value = s.fx_rate; document.getElementById('setContractStart').value = s.settings.contractStart; document.getElementById('setContractEnd').value = s.settings.contractEnd; }
     function changeMode() { s.mode = document.getElementById('setMode').value; saveState(); }
     function updateLimits() { s.history.vacation.limit = parseFloat(document.getElementById('setVacLimit').value) || 49; s.history.onboard.limit = parseFloat(document.getElementById('setOnbLimit').value) || 7.25; saveState(); }
     function updateFX() { s.fx_rate = parseFloat(document.getElementById('setFX').value) || 2.93; saveState(); }
     
     async function recalibrateMath() { 
-        let ok = await openUConfirm("Recalibrate", "Recalibrate database?");
-        if(!ok) return; 
+        let ok = await openUConfirm("Recalibrate", "Recalibrate database?"); if(!ok) return; 
         let cap = 0; 
         ['vacation', 'onboard'].forEach(m => { 
             for (let i = s.history[m].archive.length - 1; i >= 0; i--) { 
-                let day = s.history[m].archive[i]; 
-                day.date = new Date(day.date).toDateString(); 
+                let day = s.history[m].archive[i]; day.date = new Date(day.date).toDateString(); 
                 let activeLimit = day.limit || s.history[m].limit;
                 let spent = day.logs.reduce((sum, item) => sum + ((item.category === "🏦 Financial & Fees") ? 0 : (item.bypassLimit ? (item.spillover||0) : item.amount)), 0); 
-                let surplus = activeLimit - spent; 
-                cap += (m === 'onboard' ? surplus * s.fx_rate : surplus); 
+                let surplus = activeLimit - spent; cap += (m === 'onboard' ? surplus * s.fx_rate : surplus); 
             } 
         }); 
         s.capital_saved = cap; saveState(); await openUConfirm("Success", "Recalibrated!"); 
@@ -1983,12 +1832,11 @@
     
     function exportData() { const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(s)); const dlAnchorElem = document.createElement('a'); dlAnchorElem.setAttribute("href", dataStr); dlAnchorElem.setAttribute("download", `CrewWallet_Backup_${new Date().toISOString().split('T')[0]}.json`); dlAnchorElem.click(); }
     async function importData(event) { const file = event.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = async function(e) { try { s = JSON.parse(e.target.result); saveState(); await openUConfirm("Success", "Restored!"); } catch(err) { await openUConfirm("Error", "Failed to parse file."); } }; reader.readAsText(file); }
-    async function factoryReset() { let ans = await openUPrompt("Wipe", "Type RESET to wipe everything:"); if (ans === "RESET") { localStorage.clear(); location.reload(); } }
+    async function factoryReset() { let ans = await openUPrompt("Wipe", "Type RESET to wipe everything:"); if (ans === "RESET") { localStorage.clear(); indexedDB.deleteDatabase(DB_NAME); location.reload(); } }
     
     function exportPDFReport() { let now = new Date().toLocaleString(); let fx = s.fx_rate; let mode = s.mode.charAt(0).toUpperCase() + s.mode.slice(1); let totUSD = s.vault.ibkr_cash + (s.vault.ibkr_shares * s.vault.ibkr_price) + s.vault.brightwell + s.vault.wise + s.vault.cash_usd; let totalLiquid = (totUSD * fx) + s.vault.cash_tnd + s.vault.savings; let liquidRunway = s.history[s.mode].limit > 0 ? Math.floor(totalLiquid / s.history[s.mode].limit) : 0; let misHtml = `<div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">`; Object.keys(s.projects.missions).forEach(k => { let m = s.projects.missions[k]; if(!m.archived) misHtml += `<div style="flex:1; min-width:120px; border:1px solid #cbd5e1; padding:8px; border-radius:4px; text-align:center; background:#f8fafc;"><strong style="font-size:11px; color:#475569;">${m.name}</strong><div style="font-size:14px; font-weight:bold;">$${m.spent.toFixed(2)}</div>${m.hasLogistics?`<div style="font-size:9px; color:#dc2626;">Dead: $${m.dead.toFixed(2)}</div>`:''}</div>`; }); misHtml += `</div>`; let vol = 0; let cats = {}; let cutoff = Date.now() - (30 * 86400000); ['vacation', 'onboard'].forEach(m => { s.history[m].archive.forEach(d => d.logs.forEach(l => { if(l.ts >= cutoff) { let amtTND = m === 'onboard' ? l.amount * l.fxRate : l.amount; vol += amtTND; cats[l.category] = (cats[l.category] || 0) + amtTND; } })); s.history[m].current.forEach(l => { if(l.ts >= cutoff) { let amtTND = m === 'onboard' ? l.amount * l.fxRate : l.amount; vol += amtTND; cats[l.category] = (cats[l.category] || 0) + amtTND; } }); }); let catHtml = `<table style="width:100%; border-collapse:collapse; margin-bottom:20px; font-size:12px;"><tr><th style="border-bottom:2px solid #cbd5e1; text-align:left; padding:8px;">Category</th><th style="border-bottom:2px solid #cbd5e1; text-align:right; padding:8px;">Amount</th><th style="border-bottom:2px solid #cbd5e1; text-align:right; padding:8px;">%</th><th style="border-bottom:2px solid #cbd5e1; text-align:left; padding:8px;">Visual Indicator</th></tr>`; Object.keys(cats).sort((a,b) => cats[b] - cats[a]).forEach(tag => { let pct = vol > 0 ? ((cats[tag] / vol) * 100).toFixed(1) : 0; let filledBlocks = Math.min(20, Math.round(pct / 5)); let emptyBlocks = Math.max(0, 20 - filledBlocks); let bars = "█".repeat(filledBlocks) + "░".repeat(emptyBlocks); catHtml += `<tr><td style="padding:8px; border-bottom:1px solid #e2e8f0; font-weight:bold;">${tag}</td><td style="padding:8px; border-bottom:1px solid #e2e8f0; text-align:right;">${cats[tag].toFixed(2)} TND</td><td style="padding:8px; border-bottom:1px solid #e2e8f0; text-align:right;">${pct}%</td><td style="padding:8px; border-bottom:1px solid #e2e8f0; font-family:monospace; color:#38bdf8; letter-spacing:1px;">${bars}</td></tr>`; }); catHtml += `</table>`; let logHtml = `<table style="width:100%; border-collapse:collapse; margin-bottom:20px; font-size:10px;"><tr><th style="background:#f1f5f9; border:1px solid #cbd5e1; padding:6px; text-align:left;">Date</th><th style="background:#f1f5f9; border:1px solid #cbd5e1; padding:6px; text-align:left;">Description</th><th style="background:#f1f5f9; border:1px solid #cbd5e1; padding:6px; text-align:left;">Category</th><th style="background:#f1f5f9; border:1px solid #cbd5e1; padding:6px; text-align:left;">Source</th><th style="background:#f1f5f9; border:1px solid #cbd5e1; padding:6px; text-align:right;">Impact</th><th style="background:#f1f5f9; border:1px solid #cbd5e1; padding:6px; text-align:center;">Status</th></tr>`; let allLogs = []; ['vacation','onboard'].forEach(m => { s.history[m].archive.forEach(a => allLogs.push(...a.logs.map(l => ({...l, d: a.date, m: m})))); allLogs.push(...s.history[m].current.map(l => ({...l, d: 'Today', m: m}))); }); allLogs.sort((a,b) => b.ts - a.ts).slice(0, 35).forEach((log, i) => { let status = (log.bypassLimit || log.category === "🏦 Financial & Fees") ? "Bypassed" : "Logged"; if(log.spillover > 0) status = "Spillover"; let sym = log.m === 'vacation' ? 'TND' : 'USD'; let bg = i % 2 === 0 ? "#ffffff" : "#f8fafc"; logHtml += `<tr style="background:${bg};"><td style="border:1px solid #cbd5e1; padding:4px;">${log.d}</td><td style="border:1px solid #cbd5e1; padding:4px; font-weight:600;">${log.tag}</td><td style="border:1px solid #cbd5e1; padding:4px;">${log.category}</td><td style="border:1px solid #cbd5e1; padding:4px; color:#64748b;">${log.walletSource}</td><td style="border:1px solid #cbd5e1; padding:4px; text-align:right; font-weight:bold;">-${log.amount.toFixed(2)} ${sym}</td><td style="border:1px solid #cbd5e1; padding:4px; text-align:center; color:${status==='Bypassed'?'#f59e0b':(status==='Spillover'?'#ef4444':'#10b981')}; font-weight:bold;">${status}</td></tr>`; }); logHtml += `</table>`; let html = `<div style="font-family:'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color:#0f172a; max-width:800px; margin:0 auto; padding:20px;"><div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:4px solid #0f172a; padding-bottom:15px; margin-bottom:20px;"><div><h1 style="margin:0; font-size:24px; text-transform:uppercase; letter-spacing:1.5px;">Global Wealth Vault</h1><div style="font-size:11px; font-weight:700; color:#64748b; letter-spacing:2px; margin-top:4px;">FINANCIAL INTELLIGENCE REPORT</div></div><div style="text-align:right; font-size:11px; color:#475569; line-height:1.6;"><div>Generated: <strong>${now}</strong></div><div>Live FX Rate: <strong>${fx} TND</strong></div></div></div><h3 style="color:#0f172a; border-bottom:2px solid #cbd5e1; padding-bottom:5px; margin-top:0; font-size:13px; text-transform:uppercase;">I. Executive Vault Summary</h3><div style="display:flex; gap:15px; margin-bottom:20px;"><div style="flex:1; background:#f8fafc; padding:12px; border-radius:6px; border:1px solid #e2e8f0;"><div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:12px; border-bottom:1px dashed #e2e8f0;"><span>Total USD Assets:</span> <strong>$${totUSD.toFixed(2)}</strong></div><div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:12px; border-bottom:1px dashed #e2e8f0;"><span>Physical TND:</span> <strong>${s.vault.cash_tnd.toFixed(2)} TND</strong></div><div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:12px;"><span>Savings TND:</span> <strong>${s.vault.savings.toFixed(2)} TND</strong></div></div><div style="flex:1; background:#f8fafc; padding:12px; border-radius:6px; border:1px solid #e2e8f0;"><div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:12px; border-bottom:1px dashed #e2e8f0;"><span>STB Arrears:</span> <strong style="color:#ef4444;">${s.loan.arrears.toFixed(2)} TND</strong></div><div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:13px; margin-top:8px; border-top:2px solid #cbd5e1; padding-top:8px;"><span>Total Liquid Power:</span> <strong style="color:#10b981;">${totalLiquid.toFixed(2)} TND</strong></div><div style="display:flex; justify-content:space-between; font-size:12px;"><span>Liquid Runway:</span> <strong style="color:#38bdf8;">${liquidRunway} Days</strong></div></div></div><h3 style="color:#0f172a; border-bottom:2px solid #cbd5e1; padding-bottom:5px; font-size:13px; text-transform:uppercase;">II. Project Trackers</h3>${misHtml}<h3 style="color:#0f172a; border-bottom:2px solid #cbd5e1; padding-bottom:5px; font-size:13px; text-transform:uppercase;">III. 30-Day Category Flow</h3><div style="margin-bottom:10px; font-size:12px; font-weight:bold;">Total Surplus: <span style="color:#10b981;">+${s.capital_saved.toFixed(2)} TND</span></div>${catHtml}<h3 style="color:#0f172a; border-bottom:2px solid #cbd5e1; padding-bottom:5px; font-size:13px; text-transform:uppercase;">IV. Master Ledger</h3>${logHtml}</div>`; document.getElementById('printArea').innerHTML = html; window.print(); }
 
     // Init Engine
-    renderApp();
+    loadState();
 </script>
-
 
