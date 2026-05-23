@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0f172a">
     <link rel="manifest" href="manifest.json">
-    <title>Crew Wallet Master V26</title>
+    <title>Crew Wallet Master V27</title>
     <style>
         :root { --bg-color: #0f172a; --card-bg: #1e293b; --accent: #fbbf24; --text: #f8fafc; --text-muted: #94a3b8; --success: #4ade80; --warning: #facc15; --danger: #f87171; --panel-border: #334155; --vault-bg: rgba(15, 23, 42, 0.5); }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-color); color: var(--text); margin: 0; padding: 16px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; -webkit-tap-highlight-color: transparent; padding-bottom: 90px; }
@@ -34,7 +34,7 @@
         .score-box:active { transform: scale(0.95); }
         .score-num { font-size: 18px; font-weight: 800; margin-top: 2px; } 
         .score-box.green-box .score-num { color: var(--success); } 
-        .score-box.red-box .score-num { color: var(--accent); }
+        .score-box.red-box .score-num { color: var(--danger); }
         .balance-card { background-color: var(--card-bg); border-radius: 16px; padding: 18px 20px; text-align: center; border: 1px solid var(--panel-border); position: relative;}
         .title { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); margin-bottom: 6px; display:flex; justify-content:space-between; align-items:center;}
         .balance { font-size: 34px; font-weight: 800; margin: 0; color: var(--success); transition: color 0.3s ease; }
@@ -129,8 +129,10 @@
         </div>
 
         <div class="scoreboard-row">
-            <div class="score-box green-box" onclick="openBehaviorModal()"><div class="title">🔥 Current Streak</div><div class="score-num" id="curStreakCount">0</div></div>
-            <div class="score-box red-box" onclick="openBehaviorModal()"><div class="title">🏆 Max Streak</div><div class="score-num" id="maxStreakCount">0</div></div>
+            <div class="score-box green-box" onclick="openBehaviorModal()"><div class="title">🟢 Safe Days</div><div class="score-num" id="safeDaysCount">0</div></div>
+            <div class="score-box red-box" onclick="openBehaviorModal()"><div class="title">🔴 Over Days</div><div class="score-num" id="overDaysCount">0</div></div>
+            <div class="score-box green-box" style="border-color:rgba(74, 222, 128, 0.3);" onclick="openBehaviorModal()"><div class="title">🔥 Cur Streak</div><div class="score-num" id="curStreakCount">0</div></div>
+            <div class="score-box" style="border-color:rgba(56, 189, 248, 0.3);" onclick="openBehaviorModal()"><div class="title" style="color:#38bdf8;">🏆 Max Streak</div><div class="score-num" id="maxStreakCount" style="color:#38bdf8;">0</div></div>
         </div>
 
         <div class="balance-card">
@@ -167,7 +169,7 @@
                     <div style="font-size:9px; color:var(--text-muted); margin-bottom:2px;">Enter the exact amount your bank deducted.</div>
                     <input type="number" id="advActualDeduct" placeholder="Exact bank charge" inputmode="decimal" style="border-color:var(--warning); background-color: rgba(15, 23, 42, 0.8); color:var(--text);">
                 </div>
-                <select id="advCategory">
+                <select id="advCategory" onchange="checkVapeField('adv')">
                     <option value="Coffee & Drinks">☕ Coffee & Drinks</option>
                     <option value="Dining & Lifestyle">🍔 Dining & Lifestyle</option>
                     <option value="Groceries & Essentials">🛒 Groceries & Essentials</option>
@@ -178,6 +180,9 @@
                     <option value="💨 Vape">💨 Vape</option>
                     <option value="🏦 Financial & Fees">🏦 Financial & Fees</option>
                 </select>
+                <div id="advVapeQtyBox" style="display:none; margin-top:4px;">
+                    <input type="number" id="advVapeQty" placeholder="How many vapes did you buy?" style="border-color:#a855f7;" inputmode="numeric">
+                </div>
                 <input type="text" id="advLocation" placeholder="📍 Location" enterkeyhint="done">
                 <input type="text" id="advItems" placeholder="🛒 Exact items" enterkeyhint="done">
                 <input type="text" id="advWhom" placeholder="👥 Paid for someone else?" enterkeyhint="done">
@@ -213,6 +218,16 @@
             <div class="title" style="color: var(--success);">Total Capital Saved</div>
             <div style="font-size: 38px; font-weight: 800; color: var(--success);" id="uiCapitalSaved">0.00 TND</div>
             <div style="font-size: 10px; color: var(--text-muted); margin-top: 5px;">Surplus accumulated across all modes.</div>
+            
+            <div style="margin-top:15px; padding-top:10px; border-top:1px dashed rgba(74, 222, 128, 0.3);">
+                <div class="title" style="justify-content:center; color:var(--text);">📊 Avg Daily Spend (<span id="uiAvgSpendMode">Vacation</span>)</div>
+                <div style="font-size: 16px; font-weight: bold; color: var(--accent);" id="uiAvgSpend">0.00 TND</div>
+            </div>
+        </div>
+
+        <div class="vault-card" style="border-color: #a855f7;">
+            <div class="title" style="color:#a855f7;">💨 Vape Command Center</div>
+            <div id="vapeStatsHtml" style="margin-top:10px;"></div>
         </div>
         
         <div class="vault-card" style="border-color: #38bdf8;">
@@ -286,7 +301,7 @@
                         <input type="number" id="tmActualDeduct" placeholder="Exact bank charge" inputmode="decimal" style="border-color:var(--warning); background-color: rgba(15, 23, 42, 0.8); color:var(--text);">
                     </div>
 
-                    <select id="tmCategory">
+                    <select id="tmCategory" onchange="checkVapeField('tm')">
                         <option value="Coffee & Drinks">☕ Coffee & Drinks</option>
                         <option value="Dining & Lifestyle">🍔 Dining & Lifestyle</option>
                         <option value="Groceries & Essentials">🛒 Groceries & Essentials</option>
@@ -297,6 +312,11 @@
                         <option value="💨 Vape">💨 Vape</option>
                         <option value="🏦 Financial & Fees">🏦 Financial & Fees</option>
                     </select>
+                    
+                    <div id="tmVapeQtyBox" style="display:none; margin-top:4px;">
+                        <input type="number" id="tmVapeQty" placeholder="How many vapes did you buy?" style="border-color:#a855f7;" inputmode="numeric">
+                    </div>
+
                     <input type="text" id="tmLocation" placeholder="📍 Location"><input type="text" id="tmItems" placeholder="🛒 Exact items"><input type="text" id="tmWhom" placeholder="👥 For whom?">
                 </div>
             </div>
@@ -422,7 +442,7 @@
         </div>
         <div class="modal-btn-row">
             <button class="btn-secondary" onclick="document.getElementById('paycheckModal').style.display='none'">Cancel</button>
-            <button class="v-btn" style="background:var(--success);" onclick="processPaycheck()">Execute Split</button>
+            <button class="v-btn" style="background:var(--success);" onclick="processPaycheck()">Execute</button>
         </div>
     </div>
 </div>
@@ -603,12 +623,9 @@
     <button class="nav-btn" id="nav-time" onclick="switchTab('time')"><span class="nav-icon">⏳</span>Logs</button>
     <button class="nav-btn" id="nav-settings" onclick="switchTab('settings')"><span class="nav-icon">⚙️</span>Setup</button>
 </div>
-
-<div id="printArea"></div>
-
 <script>
     // ==========================================
-    // 1. DATA INJECTION & ASYNC UI ENGINE (V26)
+    // 1. DATA INJECTION & ASYNC UI ENGINE (V27)
     // ==========================================
     const USER_PRISTINE_DATA = {
         "vault":{"ibkr":0,"brightwell":550,"wise":0,"cash_usd":462,"cash_tnd":53,"savings":261,"ibkr_fees":1.13,"lifetime_fees":1.13, "ibkr_cash":3.99, "ibkr_shares":0.4074, "ibkr_cost":331.60, "ibkr_price":805.79},
@@ -617,7 +634,8 @@
         "history":{"vacation":{"archive":[],"current":[],"limit":35,"balance":35},"onboard":{"archive":[],"current":[],"limit":7.25,"balance":7.25}},
         "capital_saved":40,"fx_rate":2.93,"mode":"vacation","income_logs":[],
         "projects":{"envelopes":{},"missions":{},"goals":[]},
-        "settings":{"contractStart":"2026-08-03","contractEnd":"2027-02-01"}
+        "settings":{"contractStart":"2026-08-03","contractEnd":"2027-02-01"},
+        "vape_stash":{"count":0, "empty_logs":[]}
     };
 
     let s = null;
@@ -633,6 +651,7 @@
     if (!s.income_logs) s.income_logs = [];
     if (!s.fx_rate || isNaN(s.fx_rate)) s.fx_rate = 2.93;
     if (!s.settings) s.settings = {"contractStart":"2026-08-03","contractEnd":"2027-02-01"};
+    if (!s.vape_stash) s.vape_stash = {"count":0, "empty_logs":[]};
 
     if(s.vault.ibkr_cash === undefined) s.vault.ibkr_cash = s.vault.ibkr || 0;
     if(s.vault.ibkr_shares === undefined) s.vault.ibkr_shares = 0;
@@ -648,7 +667,7 @@
         if(s.projects.missions[k].bypass === undefined) s.projects.missions[k].bypass = false;
     });
 
-    // V26 SURGICAL PATCH: Fix the 103.2 TND Double-Dip Bug instantly on load
+    // V27 SURGICAL PATCH: Fix the Double-Dip Bug instantly on load
     if (Math.abs(s.capital_saved - 103.2) < 0.01) {
         s.capital_saved = 68.2; 
         localStorage.setItem('CrewWalletMaster', JSON.stringify(s));
@@ -696,8 +715,15 @@
         document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
         document.getElementById('tab-' + tabId).classList.add('active');
         document.getElementById('nav-' + tabId).classList.add('active');
+        
         if(tabId === 'dash') calculateBehavioralStreaks();
-        if(tabId === 'analytics') { renderChart(30); renderProjects(); renderPredictor(); renderLeaderboard(); }
+        if(tabId === 'analytics') { 
+            renderChart(30); 
+            renderProjects(); 
+            renderPredictor(); 
+            renderLeaderboard(); 
+            renderVapeStats(); 
+        }
         if(tabId === 'time') { loadPastDay(); renderIncomeLogs(); document.getElementById('tmSearch').value = ''; searchLogs(); }
         if(tabId === 'settings') populateSettings();
     }
@@ -717,7 +743,6 @@
         if(actEnv.length > 0) { html += `<optgroup label="Active Envelopes">`; actEnv.forEach(k => html += `<option value="env_${k}">${s.projects.envelopes[k].name}</option>`); html += `</optgroup>`; }
         if(actMis.length > 0) { html += `<optgroup label="Active Missions">`; actMis.forEach(k => html += `<option value="mis_${k}">${s.projects.missions[k].name}</option>`); html += `</optgroup>`; }
         
-        // V26 Time Travel Patch: Archived projects must be loadable in Time Machine
         if(archEnv.length > 0) { html += `<optgroup label="Archived Envelopes">`; archEnv.forEach(k => html += `<option value="env_${k}">[Archived] ${s.projects.envelopes[k].name}</option>`); html += `</optgroup>`; }
         if(archMis.length > 0) { html += `<optgroup label="Archived Missions">`; archMis.forEach(k => html += `<option value="mis_${k}">[Archived] ${s.projects.missions[k].name}</option>`); html += `</optgroup>`; }
 
@@ -726,26 +751,74 @@
     }
 
     function calculateBehavioralStreaks() {
-        let curStreak = 0; let maxStreak = 0; 
+        let curStreak = 0; let maxStreak = 0; let safeDays = 0; let overDays = 0; let totalOver = 0;
         let combined = [...s.history.vacation.archive.map(a=>({d:a.date, l:a.limit, logs:a.logs, m:'vacation'})), ...s.history.onboard.archive.map(a=>({d:a.date, l:a.limit, logs:a.logs, m:'onboard'}))].sort((a,b) => new Date(a.d) - new Date(b.d));
+        
         combined.forEach(day => {
-            let activeLimit = day.l || s.history[day.m].limit; // Fallback to current limit if old day has no stamp
+            let activeLimit = day.l || s.history[day.m].limit;
             let spent = day.logs.reduce((sum, item) => sum + ((item.category === "🏦 Financial & Fees") ? 0 : (item.bypassLimit ? (item.spillover||0) : item.amount)), 0);
             if(spent <= activeLimit) {
+                safeDays++;
                 curStreak++;
                 if(curStreak > maxStreak) maxStreak = curStreak;
             } else {
+                overDays++;
+                totalOver += (spent - activeLimit);
                 curStreak = 0;
             }
         });
+
+        document.getElementById('safeDaysCount').innerText = safeDays;
+        document.getElementById('overDaysCount').innerText = overDays;
         document.getElementById('curStreakCount').innerText = curStreak;
         document.getElementById('maxStreakCount').innerText = maxStreak;
+
+        document.getElementById('b_curStreak').innerText = curStreak + " Days";
+        document.getElementById('b_maxStreak').innerText = maxStreak + " Days";
+        document.getElementById('b_avgOver').innerText = overDays > 0 ? (totalOver / overDays).toFixed(2) : "0.00";
+
+        let modeArch = s.history[s.mode].archive;
+        let totalModeSpend = 0;
+        let validModeDays = 0;
+        
+        modeArch.forEach(day => {
+            let spent = day.logs.reduce((sum, item) => sum + ((item.category === "🏦 Financial & Fees") ? 0 : (item.bypassLimit ? (item.spillover||0) : item.amount)), 0);
+            totalModeSpend += spent;
+            validModeDays++;
+        });
+
+        let spentToday = s.history[s.mode].current.reduce((sum, item) => sum + ((item.category === "🏦 Financial & Fees") ? 0 : (item.bypassLimit ? (item.spillover||0) : item.amount)), 0);
+        if (s.history[s.mode].current.length > 0) {
+            totalModeSpend += spentToday;
+            validModeDays++;
+        }
+
+        let avgSpend = validModeDays > 0 ? (totalModeSpend / validModeDays) : 0;
+        let sym = s.mode === 'vacation' ? ' TND' : ' USD';
+        
+        let avgEl = document.getElementById('uiAvgSpend');
+        if (avgEl) {
+            avgEl.innerText = avgSpend.toFixed(2) + sym;
+            document.getElementById('uiAvgSpendMode').innerText = s.mode === 'vacation' ? 'Vacation' : 'Onboard';
+        }
+    }
+
+    function checkVapeField(prefix) {
+        let cat = document.getElementById(prefix + 'Category').value;
+        let box = document.getElementById(prefix + 'VapeQtyBox');
+        if (cat === '💨 Vape' && s.mode === 'onboard') {
+            box.style.display = 'block';
+        } else {
+            box.style.display = 'none';
+        }
     }
 
     function renderApp() {
         applyTheme(); 
         populateProjectDropdowns();
         calculateBehavioralStreaks();
+        checkVapeField('adv');
+        checkVapeField('tm');
         
         let ibkrMktValue = s.vault.ibkr_shares * s.vault.ibkr_price;
         let ibkrUnrealized = ibkrMktValue - s.vault.ibkr_cost;
@@ -875,9 +948,7 @@
         
         renderIOUs(); 
         renderSchedule();
-    }
-
-    // ==========================================
+    }    // ==========================================
     // 3. INTERNAL TRANSFERS & PROJECT ENGINE
     // ==========================================
     function openTransferModal() { 
@@ -967,7 +1038,7 @@
 
     async function processProjectAction(type, id, spentAmount) {
         if (spentAmount > 0) {
-            let ok = await openUConfirm("Archive", "Archive this tracker? It will be hidden from dropdowns but data is saved.");
+            let ok = await openUConfirm("Archive", "Archive this tracker? It will be hidden from active dropdowns but data is saved.");
             if(!ok) return;
             if(type === 'env') s.projects.envelopes[id].archived = true;
             if(type === 'mis') s.projects.missions[id].archived = true;
@@ -1138,11 +1209,19 @@
         
         let src = document.getElementById('advSourceWallet').value; 
         let project = document.getElementById('advProject').value; 
+        let cat = document.getElementById('advCategory').value;
         let targetWallet = s.mode === 'vacation' ? 'cash_tnd' : 'cash_usd'; 
         if (src !== 'default') targetWallet = src;
         
         let bypass = (src !== 'default'); 
-        let shipping = 0, tax = 0; 
+        let shipping = 0, tax = 0, vapeQty = 0; 
+        
+        // V27 Vape Logic
+        if (cat === '💨 Vape' && s.mode === 'onboard') {
+            vapeQty = parseInt(document.getElementById('advVapeQty').value) || 1;
+            s.vape_stash.count += vapeQty;
+        }
+
         if(project.startsWith('mis_') && s.projects.missions[project.replace('mis_','')]?.hasLogistics) { 
             shipping = parseFloat(document.getElementById('advShipping').value) || 0; 
             tax = parseFloat(document.getElementById('advTax').value) || 0; 
@@ -1182,20 +1261,27 @@
         let logDesc = document.getElementById('customDescription').value.trim() || "💸 Expense"; 
         if (shipping > 0 || tax > 0) logDesc += ` [Incl. ${(shipping+tax).toFixed(2)} Dead Money]`;
         
-        s.history[s.mode].current.push({ amount: totalCost, tag: logDesc, category: document.getElementById('advCategory').value, location: document.getElementById('advLocation').value.trim(), items: document.getElementById('advItems').value.trim(), whom: document.getElementById('advWhom').value.trim(), walletSource: targetWallet, bypassLimit: bypass, spillover: spillover, project: project, deadMoney: (shipping+tax), deductedAmount: deductAmount, fxRate: s.fx_rate, ts: Date.now() });
+        s.history[s.mode].current.push({ amount: totalCost, tag: logDesc, category: cat, location: document.getElementById('advLocation').value.trim(), items: document.getElementById('advItems').value.trim(), whom: document.getElementById('advWhom').value.trim(), walletSource: targetWallet, bypassLimit: bypass, spillover: spillover, project: project, deadMoney: (shipping+tax), deductedAmount: deductAmount, fxRate: s.fx_rate, ts: Date.now(), vapeQty: vapeQty });
         
+        // Reset Logic
         document.getElementById('customDescription').value = ''; document.getElementById('customAmount').value = ''; 
         document.getElementById('advLocation').value = ''; document.getElementById('advItems').value = ''; 
         document.getElementById('advWhom').value = ''; document.getElementById('advShipping').value = ''; 
         document.getElementById('advTax').value = ''; document.getElementById('advMain').style.display = 'none'; 
         document.getElementById('advProject').value = 'none'; document.getElementById('advSourceWallet').value = 'default'; 
         document.getElementById('advActualDeduct').value = ''; document.getElementById('advFXOverrideBox').style.display = 'none';
+        document.getElementById('advVapeQty').value = '';
         toggleOnlineFields('adv'); 
         saveState();
     }
 
     function editExpense(idx) {
         let item = s.history[s.mode].current[idx]; 
+        
+        if(item.category === '💨 Vape' && item.vapeQty) {
+            s.vape_stash.count = Math.max(0, s.vape_stash.count - item.vapeQty);
+        }
+
         if(item.walletSource && s.vault[item.walletSource] !== undefined) { 
             let refundAmount = item.amount; 
             let isTargetUSD = ['brightwell', 'wise', 'cash_usd', 'ibkr_cash'].includes(item.walletSource); 
@@ -1216,7 +1302,10 @@
         document.getElementById('advSourceWallet').value = item.walletSource; 
         
         toggleFXOverride('adv');
+        checkVapeField('adv');
+        
         if (item.deductedAmount !== undefined) document.getElementById('advActualDeduct').value = item.deductedAmount;
+        if (item.vapeQty) document.getElementById('advVapeQty').value = item.vapeQty;
 
         if(item.project && item.project.startsWith('mis_') && s.projects.missions[item.project.replace('mis_','')].hasLogistics) { 
             document.getElementById('advShipping').value = item.deadMoney || 0; document.getElementById('advTax').value = ''; 
@@ -1234,6 +1323,11 @@
         let ok = await openUConfirm("Delete", "Delete this expense entirely?");
         if(!ok) return; 
         let item = s.history[s.mode].current[idx]; 
+        
+        if(item.category === '💨 Vape' && item.vapeQty) {
+            s.vape_stash.count = Math.max(0, s.vape_stash.count - item.vapeQty);
+        }
+
         if(item.walletSource && s.vault[item.walletSource] !== undefined) { 
             let refundAmount = item.amount; 
             let isTargetUSD = ['brightwell', 'wise', 'cash_usd', 'ibkr_cash'].includes(item.walletSource); 
@@ -1322,11 +1416,18 @@
         
         let src = document.getElementById('tmSourceWallet').value; 
         let project = document.getElementById('tmProject').value; 
+        let cat = document.getElementById('tmCategory').value;
         let m = document.getElementById('setMode').value; 
         let targetWallet = m === 'vacation' ? 'cash_tnd' : 'cash_usd'; if (src !== 'default') targetWallet = src;
         
         let bypass = (src !== 'default'); 
-        let shipping = 0, tax = 0; 
+        let shipping = 0, tax = 0, vapeQty = 0; 
+        
+        if (cat === '💨 Vape' && m === 'onboard') {
+            vapeQty = parseInt(document.getElementById('tmVapeQty').value) || 1;
+            s.vape_stash.count += vapeQty;
+        }
+
         if(project.startsWith('mis_') && s.projects.missions[project.replace('mis_','')]?.hasLogistics) { 
             shipping = parseFloat(document.getElementById('tmShipping').value) || 0; tax = parseFloat(document.getElementById('tmTax').value) || 0; 
         } 
@@ -1358,17 +1459,21 @@
         if (shipping > 0 || tax > 0) tag += ` [Incl. ${(shipping+tax).toFixed(2)} Dead Money]`; 
         
         let dayIdx = s.history[m].archive.findIndex(a => new Date(a.date).toDateString() === targetStr); 
-        let newLog = { amount: totalCost, tag: tag, category: document.getElementById('tmCategory').value, location: document.getElementById('tmLocation').value.trim(), items: document.getElementById('tmItems').value.trim(), whom: document.getElementById('tmWhom').value.trim(), walletSource: targetWallet, bypassLimit: bypass, spillover: spillover, project: project, deadMoney: (shipping+tax), deductedAmount: deductAmount, fxRate: s.fx_rate, ts: new Date(y, month-1, d).getTime() }; 
+        let newLog = { amount: totalCost, tag: tag, category: cat, location: document.getElementById('tmLocation').value.trim(), items: document.getElementById('tmItems').value.trim(), whom: document.getElementById('tmWhom').value.trim(), walletSource: targetWallet, bypassLimit: bypass, spillover: spillover, project: project, deadMoney: (shipping+tax), deductedAmount: deductAmount, fxRate: s.fx_rate, ts: new Date(y, month-1, d).getTime(), vapeQty: vapeQty }; 
         
         if(dayIdx === -1) s.history[m].archive.push({ date: targetStr, limit: s.history[m].limit, logs: [newLog] }); else s.history[m].archive[dayIdx].logs.push(newLog); 
         
-        document.getElementById('tmAmount').value = ''; document.getElementById('tmShipping').value=''; document.getElementById('tmTax').value=''; document.getElementById('advTM').style.display = 'none'; document.getElementById('tmProject').value='none'; document.getElementById('tmActualDeduct').value=''; document.getElementById('tmFXOverrideBox').style.display = 'none'; toggleOnlineFields('tm'); saveState(); loadPastDay();
+        document.getElementById('tmAmount').value = ''; document.getElementById('tmShipping').value=''; document.getElementById('tmTax').value=''; document.getElementById('advTM').style.display = 'none'; document.getElementById('tmProject').value='none'; document.getElementById('tmActualDeduct').value=''; document.getElementById('tmFXOverrideBox').style.display = 'none'; document.getElementById('tmVapeQty').value=''; toggleOnlineFields('tm'); saveState(); loadPastDay();
     }
 
     function editPastExpense(m, dateStr, idx) {
         let dayIdx = s.history[m].archive.findIndex(a => a.date === dateStr);
         if(dayIdx === -1) return;
         let item = s.history[m].archive[dayIdx].logs[idx];
+
+        if(item.category === '💨 Vape' && item.vapeQty) {
+            s.vape_stash.count = Math.max(0, s.vape_stash.count - item.vapeQty);
+        }
 
         if(item.walletSource && s.vault[item.walletSource] !== undefined) { 
             let isTargetUSD = ['brightwell', 'wise', 'cash_usd', 'ibkr_cash'].includes(item.walletSource); 
@@ -1397,7 +1502,10 @@
         document.getElementById('tmSourceWallet').value = item.walletSource; 
         
         toggleFXOverride('tm');
+        checkVapeField('tm');
+
         if (item.deductedAmount !== undefined) document.getElementById('tmActualDeduct').value = item.deductedAmount;
+        if (item.vapeQty) document.getElementById('tmVapeQty').value = item.vapeQty;
 
         if(item.project && item.project.startsWith('mis_') && s.projects.missions[item.project.replace('mis_','')].hasLogistics) { 
             document.getElementById('tmShipping').value = item.deadMoney || 0; document.getElementById('tmTax').value = ''; 
@@ -1416,6 +1524,11 @@
         let dayIdx = s.history[m].archive.findIndex(a => a.date === dateStr); 
         if(dayIdx > -1) { 
             let item = s.history[m].archive[dayIdx].logs[idx]; 
+            
+            if(item.category === '💨 Vape' && item.vapeQty) {
+                s.vape_stash.count = Math.max(0, s.vape_stash.count - item.vapeQty);
+            }
+
             if(item.walletSource && s.vault[item.walletSource] !== undefined) { 
                 let isTargetUSD = ['brightwell', 'wise', 'cash_usd', 'ibkr_cash'].includes(item.walletSource); 
                 let refundAmount = item.amount; 
@@ -1447,11 +1560,11 @@
         let existingIdx = curHist.archive.findIndex(a => a.date === archiveDate); 
         
         if (existingIdx > -1) { 
-            // If day exists, do not reward the daily limit again. Just deduct the newly spent amount from capital saved.
+            // Do not double-reward surplus for a day that already exists. Just correct the capital.
             curHist.archive[existingIdx].logs.push(...curHist.current); 
             s.capital_saved -= spentTND;
         } else { 
-            // New day. Reward the limit, minus what was spent.
+            // New day entirely. Award limit surplus minus spent.
             let limitTND = s.mode === 'onboard' ? curHist.limit * s.fx_rate : curHist.limit;
             s.capital_saved += (limitTND - spentTND);
             curHist.archive.push({ date: archiveDate, limit: curHist.limit, logs: [...curHist.current] }); 
@@ -1706,14 +1819,15 @@
         ['vacation', 'onboard'].forEach(m => { 
             s.history[m].archive.forEach(d => d.logs.forEach(l => { 
                 if(l.location) { 
-                    let key = l.location.trim().toUpperCase();
+                    // Normalize the location string (remove leading/trailing spaces, capitalize properly)
+                    let key = l.location.trim().toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
                     let amt = m === 'onboard' ? l.amount * l.fxRate : l.amount; 
                     locs[key] = (locs[key] || 0) + amt; 
                 } 
             })); 
             s.history[m].current.forEach(l => {
                 if(l.location) { 
-                    let key = l.location.trim().toUpperCase();
+                    let key = l.location.trim().toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
                     let amt = m === 'onboard' ? l.amount * l.fxRate : l.amount; 
                     locs[key] = (locs[key] || 0) + amt; 
                 }
@@ -1731,6 +1845,79 @@
             </div>`;
         });
         bd.innerHTML = html;
+    }
+
+    function renderVapeStats() {
+        const bd = document.getElementById('vapeStatsHtml');
+        if (!bd) return;
+        let vLogs = [];
+        s.history[s.mode].archive.forEach(a => {
+            a.logs.forEach(l => { if (l.category === '💨 Vape') vLogs.push({...l, ts: l.ts}); });
+        });
+        s.history[s.mode].current.forEach(l => {
+            if (l.category === '💨 Vape') vLogs.push({...l, ts: l.ts});
+        });
+        vLogs.sort((a,b) => a.ts - b.ts);
+
+        let html = '';
+        if (s.mode === 'vacation') {
+            let count = vLogs.length;
+            let totalSpent = vLogs.reduce((sum, l) => sum + l.amount, 0);
+            let avgCost = count > 0 ? totalSpent / count : 0;
+            let freq = 0; let monthlyProj = 0;
+            if (count > 1) {
+                let days = (vLogs[count-1].ts - vLogs[0].ts) / 86400000;
+                freq = days / (count - 1);
+                if (freq > 0) monthlyProj = (30 / freq) * avgCost;
+            }
+            html = `
+                <div style="display:flex; justify-content:space-between; font-size:11px;">
+                    <span>Total Bought: <strong>${count}</strong></span>
+                    <span>Avg Cost: <strong>${avgCost.toFixed(2)} TND</strong></span>
+                </div>
+                <div style="font-size:11px; margin-top:5px;">Purchase Frequency: <strong style="color:var(--success);">${freq > 0 ? '1 every ' + freq.toFixed(1) + ' days' : 'Need more data'}</strong></div>
+                <div style="font-size:11px; margin-top:5px;">30-Day Trajectory: <strong style="color:var(--danger);">${monthlyProj.toFixed(2)} TND/mo</strong></div>
+            `;
+        } else {
+            let stash = s.vape_stash.count;
+            let empties = s.vape_stash.empty_logs;
+            let avgLifespan = 0;
+            if (empties.length > 1) {
+                let totalLife = 0;
+                for (let i = 1; i < empties.length; i++) {
+                    totalLife += (empties[i] - empties[i-1]) / 86400000;
+                }
+                avgLifespan = totalLife / (empties.length - 1);
+            }
+            let runOut = "Need more data";
+            if (avgLifespan > 0 && stash > 0) {
+                let daysLeft = stash * avgLifespan;
+                let runDate = new Date(Date.now() + (daysLeft * 86400000));
+                runOut = runDate.toDateString();
+            } else if (stash === 0) { runOut = "Stash Empty"; }
+            
+            html = `
+                <div style="display:flex; justify-content:space-between; font-size:11px; align-items:center;">
+                    <div>Active Stash: <strong style="font-size:16px; color:var(--accent);">${stash}</strong></div>
+                    <button class="v-btn" style="background:var(--danger);" onclick="markVapeEmpty()">📉 Mark 1 Empty</button>
+                </div>
+                <div style="font-size:11px; margin-top:10px;">Avg Hardware Lifespan: <strong style="color:var(--success);">${avgLifespan > 0 ? avgLifespan.toFixed(1) + ' Days' : 'Need more data'}</strong></div>
+                <div style="font-size:11px; margin-top:5px;">Stash Depletion Est: <strong style="color:var(--warning);">${runOut}</strong></div>
+            `;
+        }
+        bd.innerHTML = html;
+    }
+
+    async function markVapeEmpty() {
+        if (s.vape_stash.count <= 0) {
+            await openUConfirm("Error", "Your stash is already at 0.");
+            return;
+        }
+        let ok = await openUConfirm("Confirm", "Mark 1 vape as fully consumed?");
+        if (!ok) return;
+        s.vape_stash.count--;
+        s.vape_stash.empty_logs.push(Date.now());
+        saveState();
     }
 
     // ==========================================
@@ -1803,5 +1990,5 @@
     // Init Engine
     renderApp();
 </script>
-</body>
-</html>
+
+
