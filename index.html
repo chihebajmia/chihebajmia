@@ -63,7 +63,10 @@
         .btn-secondary { background-color: var(--card-bg); color: var(--text-muted); border: 1px solid var(--panel-border); border-radius: 12px; padding: 10px; font-size: 12px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 5px; }
         .iou-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--vault-bg); border-radius: 8px; margin-bottom: 8px; border: 1px solid var(--panel-border); }
         .iou-btn { background: var(--accent); color: #000; border: none; border-radius: 6px; padding: 6px 12px; font-size: 10px; font-weight: bold; cursor: pointer; }
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; backdrop-filter: blur(4px); }
+        
+        /* Modal Engine */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 100; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; backdrop-filter: blur(5px); }
+        .modal-overlay.high-z { z-index: 200; }
         .modal-content { background-color: var(--card-bg); border-radius: 16px; padding: 20px; width: 100%; max-width: 350px; border: 1px solid var(--panel-border); max-height: 85vh; overflow-y: auto; animation: slideUp 0.3s ease; }
         .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;}
         .modal-input-group { display: flex; flex-direction: column; gap: 4px; }
@@ -71,10 +74,12 @@
         .modal-btn-row { display: flex; gap: 10px; margin-top: 20px; }
         .b-stat { background: var(--vault-bg); padding: 10px; border-radius: 10px; margin-bottom: 10px; border: 1px solid var(--panel-border); font-size: 12px;}
         .b-stat span { color: var(--accent); font-weight: bold; float: right;}
-        .pnl-positive { color: var(--success); }
-        .pnl-negative { color: var(--danger); }
+        .pnl-positive { color: var(--success) !important; }
+        .pnl-negative { color: var(--danger) !important; }
+        
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
         #printArea { display: none; }
         @media print { 
             body > * { display: none !important; } 
@@ -215,13 +220,13 @@
             <div id="contractPredictorHtml" style="margin-top:10px;"></div>
         </div>
 
-        <div class="title"><span>📁 Earmark Envelopes</span><button onclick="openAddProjectModal('env')" style="background:none;border:none;color:var(--text);font-size:14px;cursor:pointer;">➕</button></div>
+        <div class="title"><span>📁 Envelopes</span><button onclick="openAddProjectModal('env')" style="background:none;border:none;color:var(--text);font-size:14px;cursor:pointer;">➕</button></div>
         <div id="envelopeContainer" style="display:flex; flex-direction:column; gap:10px;"></div>
 
-        <div class="title" style="margin-top:15px;"><span>🎯 Mission Cost Centers</span><button onclick="openAddProjectModal('mis')" style="background:none;border:none;color:var(--text);font-size:14px;cursor:pointer;">➕</button></div>
+        <div class="title" style="margin-top:15px;"><span>🎯 Missions</span><button onclick="openAddProjectModal('mis')" style="background:none;border:none;color:var(--text);font-size:14px;cursor:pointer;">➕</button></div>
         <div id="missionContainer" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;"></div>
 
-        <div class="title" style="margin-top:15px;"><span>🏆 Custom Goals</span><button onclick="openAddProjectModal('goal')" style="background:none;border:none;color:var(--text);font-size:14px;cursor:pointer;">➕</button></div>
+        <div class="title" style="margin-top:15px;"><span>🏆 Goals</span><button onclick="openAddProjectModal('goal')" style="background:none;border:none;color:var(--text);font-size:14px;cursor:pointer;">➕</button></div>
         <div id="goalsContainer" style="display:flex; flex-direction:column; gap:10px;"></div>
 
         <button class="btn-secondary" style="margin-top:10px;" onclick="document.getElementById('archiveSection').style.display=document.getElementById('archiveSection').style.display==='none'?'block':'none'">📦 View Archived Trackers</button>
@@ -243,6 +248,7 @@
     <div id="tab-time" class="page-section">
         <div class="vault-card">
             <div class="title" style="border-bottom: 1px solid var(--panel-border); padding-bottom: 4px;">⏳ Time Machine Logbook</div>
+            
             <input type="text" id="tmSearch" placeholder="🔍 Search logs by tag, category, or location..." oninput="searchLogs()" style="margin-top:10px; margin-bottom:10px; width:100%; border-radius:8px; border:1px solid var(--panel-border); padding:10px; background:#0f172a; color:white;">
             
             <div id="tmSearchResults" style="display:none; margin-bottom:15px; max-height:250px; overflow-y:auto; border:1px solid var(--accent); padding:10px; border-radius:8px; background:var(--vault-bg);"></div>
@@ -321,6 +327,7 @@
             <div class="input-row"><span style="font-size:12px; width:100%;">Live USD/TND:</span><input type="number" id="setFX" onchange="updateFX()"></div>
             <button class="btn-secondary" onclick="fetchLiveFX()">🔄 Auto-Fetch from Market</button>
         </div>
+
         <div class="vault-card">
             <div class="title" style="color:var(--success);">Data Sovereignty</div>
             <button class="btn-secondary" onclick="exportData()" style="color:var(--text);">💾 Export JSON Backup</button>
@@ -380,7 +387,7 @@
             <option value="wise">To: Wise (USD)</option>
             <option value="ibkr_cash">To: IBKR Idle (USD)</option>
         </select>
-        <div id="trfWarning" style="font-size:9px; color:var(--warning); margin-top:10px; text-align:center; background:rgba(250, 204, 21, 0.1); padding:8px; border-radius:8px;">
+        <div style="font-size:9px; color:var(--warning); margin-top:10px; text-align:center; background:rgba(250, 204, 21, 0.1); padding:8px; border-radius:8px;">
             If moving between TND and USD, the live FX rate will be applied mathematically.
         </div>
         <div class="modal-btn-row">
@@ -415,7 +422,7 @@
         </div>
         <div class="modal-btn-row">
             <button class="btn-secondary" onclick="document.getElementById('paycheckModal').style.display='none'">Cancel</button>
-            <button class="v-btn" style="background:var(--success);" onclick="processPaycheck()">Execute Split</button>
+            <button class="v-btn" style="background:var(--success);" onclick="processPaycheck()">Execute</button>
         </div>
     </div>
 </div>
@@ -566,7 +573,7 @@
     </div>
 </div>
 
-<div class="modal-overlay" id="uPromptModal" style="z-index: 200;">
+<div class="modal-overlay high-z" id="uPromptModal">
     <div class="modal-content">
         <div class="title" id="uPromptTitle" style="text-align:center; color:var(--accent);">Prompt</div>
         <div style="font-size:11px; text-align:center; color:var(--text-muted); margin-bottom:15px;" id="uPromptMsg"></div>
@@ -578,7 +585,7 @@
     </div>
 </div>
 
-<div class="modal-overlay" id="uConfirmModal" style="z-index: 200;">
+<div class="modal-overlay high-z" id="uConfirmModal">
     <div class="modal-content">
         <div class="title" id="uConfirmTitle" style="text-align:center; color:var(--warning);">Confirm</div>
         <div style="font-size:11px; text-align:center; color:var(--text-muted); margin-bottom:15px;" id="uConfirmMsg"></div>
@@ -589,14 +596,15 @@
     </div>
 </div>
 
-<div id="printArea"></div>
-    <div class="bottom-nav">
+<div class="bottom-nav">
     <button class="nav-btn active" id="nav-dash" onclick="switchTab('dash')"><span class="nav-icon">🏦</span>Dash</button>
     <button class="nav-btn" id="nav-debt" onclick="switchTab('debt')"><span class="nav-icon">⚖️</span>Debt</button>
     <button class="nav-btn" id="nav-analytics" onclick="switchTab('analytics')"><span class="nav-icon">📊</span>Analytics</button>
     <button class="nav-btn" id="nav-time" onclick="switchTab('time')"><span class="nav-icon">⏳</span>Logs</button>
     <button class="nav-btn" id="nav-settings" onclick="switchTab('settings')"><span class="nav-icon">⚙️</span>Setup</button>
 </div>
+
+<div id="printArea"></div>
 
 <script>
     // ==========================================
@@ -840,16 +848,6 @@
             });
         }
         
-        let safe=0; let over=0; 
-        ['vacation', 'onboard'].forEach(m => { 
-            s.history[m].archive.forEach(day => { 
-                let tot = day.logs.reduce((sum, i) => sum + ((i.category==="🏦 Financial & Fees") ? 0 : (i.bypassLimit ? (i.spillover||0) : i.amount)), 0); 
-                if(tot <= s.history[m].limit) safe++; else over++; 
-            }); 
-        });
-        document.getElementById('safeDaysCount').innerText = safe; 
-        document.getElementById('overDaysCount').innerText = over;
-        
         renderIOUs(); 
         renderSchedule();
     }
@@ -917,10 +915,10 @@
         }
     }
 
-    function submitNewProject() {
+    async function submitNewProject() {
         let type = document.getElementById('npType').value;
         let name = document.getElementById('npName').value.trim();
-        if(!name) { openUConfirm("Error", "Please provide a name."); return; }
+        if(!name) { await openUConfirm("Error", "Please provide a name."); return; }
         
         let limitVal = parseFloat(document.getElementById('npLimit').value) || 0;
         let bypass = document.getElementById('npBypass').checked;
@@ -929,12 +927,12 @@
         let key = 'p_' + Date.now();
         
         if(type === 'env') {
-            if(limitVal <= 0) { openUConfirm("Error", "Envelopes require a limit."); return; }
+            if(limitVal <= 0) { await openUConfirm("Error", "Envelopes require a limit."); return; }
             s.projects.envelopes[key] = { name: '🏖️ ' + name, limit: limitVal, spent: 0, archived: false, bypass: bypass };
         } else if(type === 'mis') {
             s.projects.missions[key] = { name: '🎯 ' + name, spent: 0, dead: 0, hasLogistics: logistics, archived: false, bypass: bypass };
         } else if(type === 'goal') {
-            if(limitVal <= 0) { openUConfirm("Error", "Goals require a target."); return; }
+            if(limitVal <= 0) { await openUConfirm("Error", "Goals require a target."); return; }
             s.projects.goals.push({ id: Date.now(), name: '🏆 ' + name, target: limitVal, saved: 0, archived: false });
         }
         
@@ -1040,10 +1038,11 @@
         if(goal) { 
             goal.saved += amt; 
             saveState(); 
-            openUConfirm("Success", `Assigned ${amt} to ${goal.name}. (Virtual hold).`); 
+            await openUConfirm("Success", `Assigned ${amt} to ${goal.name}. (Virtual hold).`); 
         } 
     }
-        // ==========================================
+
+    // ==========================================
     // 4. EXPENSE & FX ENGINE
     // ==========================================
     function toggleOnlineFields(prefix) { 
@@ -1783,4 +1782,3 @@
 
     renderApp();
 </script>
-
