@@ -1,16 +1,17 @@
 {
   "name": "Crew Wallet Master",
-  "short_name": "Vault",
-  "start_url": "/chihebajmia/",
-  "scope": "/chihebajmia/",
+  "short_name": "Crew Wallet",
+  "start_url": "index.html",
   "display": "standalone",
   "background_color": "#0f172a",
-  "theme_color": "#38bdf8",
+  "theme_color": "#0f172a",
+  "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "icon.png",
+      "src": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Globe_icon.svg/512px-Globe_icon.svg.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
