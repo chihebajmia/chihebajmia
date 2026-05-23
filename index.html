@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0f172a">
     <link rel="manifest" href="manifest.json">
-    <title>Crew Wallet Master V25</title>
+    <title>Crew Wallet Master V26</title>
     <style>
         :root { --bg-color: #0f172a; --card-bg: #1e293b; --accent: #fbbf24; --text: #f8fafc; --text-muted: #94a3b8; --success: #4ade80; --warning: #facc15; --danger: #f87171; --panel-border: #334155; --vault-bg: rgba(15, 23, 42, 0.5); }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-color); color: var(--text); margin: 0; padding: 16px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; -webkit-tap-highlight-color: transparent; padding-bottom: 90px; }
@@ -34,7 +34,7 @@
         .score-box:active { transform: scale(0.95); }
         .score-num { font-size: 18px; font-weight: 800; margin-top: 2px; } 
         .score-box.green-box .score-num { color: var(--success); } 
-        .score-box.red-box .score-num { color: var(--danger); }
+        .score-box.red-box .score-num { color: var(--accent); }
         .balance-card { background-color: var(--card-bg); border-radius: 16px; padding: 18px 20px; text-align: center; border: 1px solid var(--panel-border); position: relative;}
         .title { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); margin-bottom: 6px; display:flex; justify-content:space-between; align-items:center;}
         .balance { font-size: 34px; font-weight: 800; margin: 0; color: var(--success); transition: color 0.3s ease; }
@@ -129,8 +129,8 @@
         </div>
 
         <div class="scoreboard-row">
-            <div class="score-box green-box" onclick="openBehaviorModal()"><div class="title">🟢 Safe Days</div><div class="score-num" id="safeDaysCount">0</div></div>
-            <div class="score-box red-box" onclick="openBehaviorModal()"><div class="title">🔴 Over Days</div><div class="score-num" id="overDaysCount">0</div></div>
+            <div class="score-box green-box" onclick="openBehaviorModal()"><div class="title">🔥 Current Streak</div><div class="score-num" id="curStreakCount">0</div></div>
+            <div class="score-box red-box" onclick="openBehaviorModal()"><div class="title">🏆 Max Streak</div><div class="score-num" id="maxStreakCount">0</div></div>
         </div>
 
         <div class="balance-card">
@@ -422,7 +422,7 @@
         </div>
         <div class="modal-btn-row">
             <button class="btn-secondary" onclick="document.getElementById('paycheckModal').style.display='none'">Cancel</button>
-            <button class="v-btn" style="background:var(--success);" onclick="processPaycheck()">Execute</button>
+            <button class="v-btn" style="background:var(--success);" onclick="processPaycheck()">Execute Split</button>
         </div>
     </div>
 </div>
@@ -543,8 +543,8 @@
 <div class="modal-overlay" id="behaviorModal">
     <div class="modal-content">
         <div class="title" style="text-align:center; font-size:12px; color:white;">Behavioral Insights</div>
-        <div class="b-stat">Current Safe Streak <span id="b_curStreak">0 Days</span></div>
-        <div class="b-stat">Max Safe Streak <span id="b_maxStreak">0 Days</span></div>
+        <div class="b-stat">Current Safe Streak <span id="b_curStreak" style="color:var(--success);">0 Days</span></div>
+        <div class="b-stat">Max Safe Streak <span id="b_maxStreak" style="color:var(--accent);">0 Days</span></div>
         <div class="b-stat" style="border-color:rgba(248,113,113,0.3);">Average Overage <span id="b_avgOver" style="color:var(--danger);">0.00</span></div>
         <button class="btn-secondary" style="margin-top:20px;" onclick="document.getElementById('behaviorModal').style.display='none'">Close</button>
     </div>
@@ -608,7 +608,7 @@
 
 <script>
     // ==========================================
-    // 1. DATA INJECTION & ASYNC UI ENGINE (V25)
+    // 1. DATA INJECTION & ASYNC UI ENGINE (V26)
     // ==========================================
     const USER_PRISTINE_DATA = {
         "vault":{"ibkr":0,"brightwell":550,"wise":0,"cash_usd":462,"cash_tnd":53,"savings":261,"ibkr_fees":1.13,"lifetime_fees":1.13, "ibkr_cash":3.99, "ibkr_shares":0.4074, "ibkr_cost":331.60, "ibkr_price":805.79},
@@ -647,6 +647,12 @@
         if(s.projects.missions[k].archived === undefined) s.projects.missions[k].archived = false; 
         if(s.projects.missions[k].bypass === undefined) s.projects.missions[k].bypass = false;
     });
+
+    // V26 SURGICAL PATCH: Fix the 103.2 TND Double-Dip Bug instantly on load
+    if (Math.abs(s.capital_saved - 103.2) < 0.01) {
+        s.capital_saved = 68.2; 
+        localStorage.setItem('CrewWalletMaster', JSON.stringify(s));
+    }
 
     function saveState() { localStorage.setItem('CrewWalletMaster', JSON.stringify(s)); renderApp(); }
 
@@ -690,6 +696,7 @@
         document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
         document.getElementById('tab-' + tabId).classList.add('active');
         document.getElementById('nav-' + tabId).classList.add('active');
+        if(tabId === 'dash') calculateBehavioralStreaks();
         if(tabId === 'analytics') { renderChart(30); renderProjects(); renderPredictor(); renderLeaderboard(); }
         if(tabId === 'time') { loadPastDay(); renderIncomeLogs(); document.getElementById('tmSearch').value = ''; searchLogs(); }
         if(tabId === 'settings') populateSettings();
@@ -702,25 +709,43 @@
 
     function populateProjectDropdowns() {
         let html = `<option value="none">📌 General Daily Spend (No Project)</option>`;
-        let activeEnv = Object.keys(s.projects.envelopes).filter(k => !s.projects.envelopes[k].archived);
-        if(activeEnv.length > 0) { 
-            html += `<optgroup label="Envelopes">`; 
-            activeEnv.forEach(k => html += `<option value="env_${k}">${s.projects.envelopes[k].name}</option>`); 
-            html += `</optgroup>`; 
-        }
-        let activeMis = Object.keys(s.projects.missions).filter(k => !s.projects.missions[k].archived);
-        if(activeMis.length > 0) { 
-            html += `<optgroup label="Missions">`; 
-            activeMis.forEach(k => html += `<option value="mis_${k}">${s.projects.missions[k].name}</option>`); 
-            html += `</optgroup>`; 
-        }
+        
+        let actEnv = [], archEnv = [], actMis = [], archMis = [];
+        Object.keys(s.projects.envelopes).forEach(k => { if(s.projects.envelopes[k].archived) archEnv.push(k); else actEnv.push(k); });
+        Object.keys(s.projects.missions).forEach(k => { if(s.projects.missions[k].archived) archMis.push(k); else actMis.push(k); });
+
+        if(actEnv.length > 0) { html += `<optgroup label="Active Envelopes">`; actEnv.forEach(k => html += `<option value="env_${k}">${s.projects.envelopes[k].name}</option>`); html += `</optgroup>`; }
+        if(actMis.length > 0) { html += `<optgroup label="Active Missions">`; actMis.forEach(k => html += `<option value="mis_${k}">${s.projects.missions[k].name}</option>`); html += `</optgroup>`; }
+        
+        // V26 Time Travel Patch: Archived projects must be loadable in Time Machine
+        if(archEnv.length > 0) { html += `<optgroup label="Archived Envelopes">`; archEnv.forEach(k => html += `<option value="env_${k}">[Archived] ${s.projects.envelopes[k].name}</option>`); html += `</optgroup>`; }
+        if(archMis.length > 0) { html += `<optgroup label="Archived Missions">`; archMis.forEach(k => html += `<option value="mis_${k}">[Archived] ${s.projects.missions[k].name}</option>`); html += `</optgroup>`; }
+
         document.getElementById('advProject').innerHTML = html; 
         document.getElementById('tmProject').innerHTML = html;
+    }
+
+    function calculateBehavioralStreaks() {
+        let curStreak = 0; let maxStreak = 0; 
+        let combined = [...s.history.vacation.archive.map(a=>({d:a.date, l:a.limit, logs:a.logs, m:'vacation'})), ...s.history.onboard.archive.map(a=>({d:a.date, l:a.limit, logs:a.logs, m:'onboard'}))].sort((a,b) => new Date(a.d) - new Date(b.d));
+        combined.forEach(day => {
+            let activeLimit = day.l || s.history[day.m].limit; // Fallback to current limit if old day has no stamp
+            let spent = day.logs.reduce((sum, item) => sum + ((item.category === "🏦 Financial & Fees") ? 0 : (item.bypassLimit ? (item.spillover||0) : item.amount)), 0);
+            if(spent <= activeLimit) {
+                curStreak++;
+                if(curStreak > maxStreak) maxStreak = curStreak;
+            } else {
+                curStreak = 0;
+            }
+        });
+        document.getElementById('curStreakCount').innerText = curStreak;
+        document.getElementById('maxStreakCount').innerText = maxStreak;
     }
 
     function renderApp() {
         applyTheme(); 
         populateProjectDropdowns();
+        calculateBehavioralStreaks();
         
         let ibkrMktValue = s.vault.ibkr_shares * s.vault.ibkr_price;
         let ibkrUnrealized = ibkrMktValue - s.vault.ibkr_cost;
@@ -1335,7 +1360,7 @@
         let dayIdx = s.history[m].archive.findIndex(a => new Date(a.date).toDateString() === targetStr); 
         let newLog = { amount: totalCost, tag: tag, category: document.getElementById('tmCategory').value, location: document.getElementById('tmLocation').value.trim(), items: document.getElementById('tmItems').value.trim(), whom: document.getElementById('tmWhom').value.trim(), walletSource: targetWallet, bypassLimit: bypass, spillover: spillover, project: project, deadMoney: (shipping+tax), deductedAmount: deductAmount, fxRate: s.fx_rate, ts: new Date(y, month-1, d).getTime() }; 
         
-        if(dayIdx === -1) s.history[m].archive.push({ date: targetStr, logs: [newLog] }); else s.history[m].archive[dayIdx].logs.push(newLog); 
+        if(dayIdx === -1) s.history[m].archive.push({ date: targetStr, limit: s.history[m].limit, logs: [newLog] }); else s.history[m].archive[dayIdx].logs.push(newLog); 
         
         document.getElementById('tmAmount').value = ''; document.getElementById('tmShipping').value=''; document.getElementById('tmTax').value=''; document.getElementById('advTM').style.display = 'none'; document.getElementById('tmProject').value='none'; document.getElementById('tmActualDeduct').value=''; document.getElementById('tmFXOverrideBox').style.display = 'none'; toggleOnlineFields('tm'); saveState(); loadPastDay();
     }
@@ -1413,16 +1438,25 @@
         let archiveDate = await openUPrompt("Close Day", "Archive today's logs under which date?", guessDate.toDateString()); 
         if (!archiveDate) return; 
         
+        let spentTND = 0;
         if (curHist.current.length > 0) { 
             let spent = curHist.current.reduce((sum, item) => sum + ((item.category === "🏦 Financial & Fees") ? 0 : (item.bypassLimit ? (item.spillover||0) : item.amount)), 0); 
-            let surplus = curHist.limit - spent; 
-            let surplusTND = s.mode === 'onboard' ? surplus * s.fx_rate : surplus; 
-            s.capital_saved += surplusTND; 
-            
-            let existingIdx = curHist.archive.findIndex(a => a.date === archiveDate); 
-            if (existingIdx > -1) curHist.archive[existingIdx].logs.push(...curHist.current); 
-            else curHist.archive.push({ date: archiveDate, logs: [...curHist.current] }); 
+            spentTND = s.mode === 'onboard' ? spent * s.fx_rate : spent;
+        }
+
+        let existingIdx = curHist.archive.findIndex(a => a.date === archiveDate); 
+        
+        if (existingIdx > -1) { 
+            // If day exists, do not reward the daily limit again. Just deduct the newly spent amount from capital saved.
+            curHist.archive[existingIdx].logs.push(...curHist.current); 
+            s.capital_saved -= spentTND;
+        } else { 
+            // New day. Reward the limit, minus what was spent.
+            let limitTND = s.mode === 'onboard' ? curHist.limit * s.fx_rate : curHist.limit;
+            s.capital_saved += (limitTND - spentTND);
+            curHist.archive.push({ date: archiveDate, limit: curHist.limit, logs: [...curHist.current] }); 
         } 
+        
         curHist.current = []; curHist.balance = curHist.limit; saveState(); 
     }
 
@@ -1611,20 +1645,6 @@
     }
     
     function openBehaviorModal() { 
-        let curStreak = 0; let maxStreak = 0; let overDays = 0; let totalOver = 0; let tempStreak = 0;
-        let combined = [...s.history.vacation.archive.map(a=>({d:a.date, logs:a.logs, m:'vacation'})), ...s.history.onboard.archive.map(a=>({d:a.date, logs:a.logs, m:'onboard'}))].sort((a,b) => new Date(a.d) - new Date(b.d));
-        combined.forEach(day => {
-            let spent = day.logs.reduce((sum, item) => sum + ((item.category === "🏦 Financial & Fees") ? 0 : (item.bypassLimit ? (item.spillover||0) : item.amount)), 0);
-            if(spent <= s.history[day.m].limit) {
-                tempStreak++;
-                if(tempStreak > maxStreak) maxStreak = tempStreak;
-            } else {
-                tempStreak = 0; overDays++; totalOver += (spent - s.history[day.m].limit);
-            }
-        });
-        document.getElementById('b_curStreak').innerText = tempStreak + " Days";
-        document.getElementById('b_maxStreak').innerText = maxStreak + " Days";
-        document.getElementById('b_avgOver').innerText = overDays > 0 ? (totalOver / overDays).toFixed(2) : "0.00";
         document.getElementById('behaviorModal').style.display = 'flex'; 
     }
     
@@ -1686,15 +1706,14 @@
         ['vacation', 'onboard'].forEach(m => { 
             s.history[m].archive.forEach(d => d.logs.forEach(l => { 
                 if(l.location) { 
-                    // Normalize the location string (remove trailing spaces, convert to Title Case)
-                    let key = l.location.trim().toLowerCase().replace(/\w\S*/g, (w) => (w.replace(/^\w/, (c) => c.toUpperCase())));
+                    let key = l.location.trim().toUpperCase();
                     let amt = m === 'onboard' ? l.amount * l.fxRate : l.amount; 
                     locs[key] = (locs[key] || 0) + amt; 
                 } 
             })); 
             s.history[m].current.forEach(l => {
                 if(l.location) { 
-                    let key = l.location.trim().toLowerCase().replace(/\w\S*/g, (w) => (w.replace(/^\w/, (c) => c.toUpperCase())));
+                    let key = l.location.trim().toUpperCase();
                     let amt = m === 'onboard' ? l.amount * l.fxRate : l.amount; 
                     locs[key] = (locs[key] || 0) + amt; 
                 }
@@ -1766,8 +1785,9 @@
             for (let i = s.history[m].archive.length - 1; i >= 0; i--) { 
                 let day = s.history[m].archive[i]; 
                 day.date = new Date(day.date).toDateString(); 
+                let activeLimit = day.limit || s.history[m].limit;
                 let spent = day.logs.reduce((sum, item) => sum + ((item.category === "🏦 Financial & Fees") ? 0 : (item.bypassLimit ? (item.spillover||0) : item.amount)), 0); 
-                let surplus = s.history[m].limit - spent; 
+                let surplus = activeLimit - spent; 
                 cap += (m === 'onboard' ? surplus * s.fx_rate : surplus); 
             } 
         }); 
@@ -1780,5 +1800,8 @@
     
     function exportPDFReport() { let now = new Date().toLocaleString(); let fx = s.fx_rate; let mode = s.mode.charAt(0).toUpperCase() + s.mode.slice(1); let totUSD = s.vault.ibkr_cash + (s.vault.ibkr_shares * s.vault.ibkr_price) + s.vault.brightwell + s.vault.wise + s.vault.cash_usd; let totalLiquid = (totUSD * fx) + s.vault.cash_tnd + s.vault.savings; let liquidRunway = s.history[s.mode].limit > 0 ? Math.floor(totalLiquid / s.history[s.mode].limit) : 0; let misHtml = `<div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">`; Object.keys(s.projects.missions).forEach(k => { let m = s.projects.missions[k]; if(!m.archived) misHtml += `<div style="flex:1; min-width:120px; border:1px solid #cbd5e1; padding:8px; border-radius:4px; text-align:center; background:#f8fafc;"><strong style="font-size:11px; color:#475569;">${m.name}</strong><div style="font-size:14px; font-weight:bold;">$${m.spent.toFixed(2)}</div>${m.hasLogistics?`<div style="font-size:9px; color:#dc2626;">Dead: $${m.dead.toFixed(2)}</div>`:''}</div>`; }); misHtml += `</div>`; let vol = 0; let cats = {}; let cutoff = Date.now() - (30 * 86400000); ['vacation', 'onboard'].forEach(m => { s.history[m].archive.forEach(d => d.logs.forEach(l => { if(l.ts >= cutoff) { let amtTND = m === 'onboard' ? l.amount * l.fxRate : l.amount; vol += amtTND; cats[l.category] = (cats[l.category] || 0) + amtTND; } })); s.history[m].current.forEach(l => { if(l.ts >= cutoff) { let amtTND = m === 'onboard' ? l.amount * l.fxRate : l.amount; vol += amtTND; cats[l.category] = (cats[l.category] || 0) + amtTND; } }); }); let catHtml = `<table style="width:100%; border-collapse:collapse; margin-bottom:20px; font-size:12px;"><tr><th style="border-bottom:2px solid #cbd5e1; text-align:left; padding:8px;">Category</th><th style="border-bottom:2px solid #cbd5e1; text-align:right; padding:8px;">Amount</th><th style="border-bottom:2px solid #cbd5e1; text-align:right; padding:8px;">%</th><th style="border-bottom:2px solid #cbd5e1; text-align:left; padding:8px;">Visual Indicator</th></tr>`; Object.keys(cats).sort((a,b) => cats[b] - cats[a]).forEach(tag => { let pct = vol > 0 ? ((cats[tag] / vol) * 100).toFixed(1) : 0; let filledBlocks = Math.min(20, Math.round(pct / 5)); let emptyBlocks = Math.max(0, 20 - filledBlocks); let bars = "█".repeat(filledBlocks) + "░".repeat(emptyBlocks); catHtml += `<tr><td style="padding:8px; border-bottom:1px solid #e2e8f0; font-weight:bold;">${tag}</td><td style="padding:8px; border-bottom:1px solid #e2e8f0; text-align:right;">${cats[tag].toFixed(2)} TND</td><td style="padding:8px; border-bottom:1px solid #e2e8f0; text-align:right;">${pct}%</td><td style="padding:8px; border-bottom:1px solid #e2e8f0; font-family:monospace; color:#38bdf8; letter-spacing:1px;">${bars}</td></tr>`; }); catHtml += `</table>`; let logHtml = `<table style="width:100%; border-collapse:collapse; margin-bottom:20px; font-size:10px;"><tr><th style="background:#f1f5f9; border:1px solid #cbd5e1; padding:6px; text-align:left;">Date</th><th style="background:#f1f5f9; border:1px solid #cbd5e1; padding:6px; text-align:left;">Description</th><th style="background:#f1f5f9; border:1px solid #cbd5e1; padding:6px; text-align:left;">Category</th><th style="background:#f1f5f9; border:1px solid #cbd5e1; padding:6px; text-align:left;">Source</th><th style="background:#f1f5f9; border:1px solid #cbd5e1; padding:6px; text-align:right;">Impact</th><th style="background:#f1f5f9; border:1px solid #cbd5e1; padding:6px; text-align:center;">Status</th></tr>`; let allLogs = []; ['vacation','onboard'].forEach(m => { s.history[m].archive.forEach(a => allLogs.push(...a.logs.map(l => ({...l, d: a.date, m: m})))); allLogs.push(...s.history[m].current.map(l => ({...l, d: 'Today', m: m}))); }); allLogs.sort((a,b) => b.ts - a.ts).slice(0, 35).forEach((log, i) => { let status = (log.bypassLimit || log.category === "🏦 Financial & Fees") ? "Bypassed" : "Logged"; if(log.spillover > 0) status = "Spillover"; let sym = log.m === 'vacation' ? 'TND' : 'USD'; let bg = i % 2 === 0 ? "#ffffff" : "#f8fafc"; logHtml += `<tr style="background:${bg};"><td style="border:1px solid #cbd5e1; padding:4px;">${log.d}</td><td style="border:1px solid #cbd5e1; padding:4px; font-weight:600;">${log.tag}</td><td style="border:1px solid #cbd5e1; padding:4px;">${log.category}</td><td style="border:1px solid #cbd5e1; padding:4px; color:#64748b;">${log.walletSource}</td><td style="border:1px solid #cbd5e1; padding:4px; text-align:right; font-weight:bold;">-${log.amount.toFixed(2)} ${sym}</td><td style="border:1px solid #cbd5e1; padding:4px; text-align:center; color:${status==='Bypassed'?'#f59e0b':(status==='Spillover'?'#ef4444':'#10b981')}; font-weight:bold;">${status}</td></tr>`; }); logHtml += `</table>`; let html = `<div style="font-family:'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color:#0f172a; max-width:800px; margin:0 auto; padding:20px;"><div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:4px solid #0f172a; padding-bottom:15px; margin-bottom:20px;"><div><h1 style="margin:0; font-size:24px; text-transform:uppercase; letter-spacing:1.5px;">Global Wealth Vault</h1><div style="font-size:11px; font-weight:700; color:#64748b; letter-spacing:2px; margin-top:4px;">FINANCIAL INTELLIGENCE REPORT</div></div><div style="text-align:right; font-size:11px; color:#475569; line-height:1.6;"><div>Generated: <strong>${now}</strong></div><div>Live FX Rate: <strong>${fx} TND</strong></div></div></div><h3 style="color:#0f172a; border-bottom:2px solid #cbd5e1; padding-bottom:5px; margin-top:0; font-size:13px; text-transform:uppercase;">I. Executive Vault Summary</h3><div style="display:flex; gap:15px; margin-bottom:20px;"><div style="flex:1; background:#f8fafc; padding:12px; border-radius:6px; border:1px solid #e2e8f0;"><div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:12px; border-bottom:1px dashed #e2e8f0;"><span>Total USD Assets:</span> <strong>$${totUSD.toFixed(2)}</strong></div><div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:12px; border-bottom:1px dashed #e2e8f0;"><span>Physical TND:</span> <strong>${s.vault.cash_tnd.toFixed(2)} TND</strong></div><div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:12px;"><span>Savings TND:</span> <strong>${s.vault.savings.toFixed(2)} TND</strong></div></div><div style="flex:1; background:#f8fafc; padding:12px; border-radius:6px; border:1px solid #e2e8f0;"><div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:12px; border-bottom:1px dashed #e2e8f0;"><span>STB Arrears:</span> <strong style="color:#ef4444;">${s.loan.arrears.toFixed(2)} TND</strong></div><div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:13px; margin-top:8px; border-top:2px solid #cbd5e1; padding-top:8px;"><span>Total Liquid Power:</span> <strong style="color:#10b981;">${totalLiquid.toFixed(2)} TND</strong></div><div style="display:flex; justify-content:space-between; font-size:12px;"><span>Liquid Runway:</span> <strong style="color:#38bdf8;">${liquidRunway} Days</strong></div></div></div><h3 style="color:#0f172a; border-bottom:2px solid #cbd5e1; padding-bottom:5px; font-size:13px; text-transform:uppercase;">II. Project Trackers</h3>${misHtml}<h3 style="color:#0f172a; border-bottom:2px solid #cbd5e1; padding-bottom:5px; font-size:13px; text-transform:uppercase;">III. 30-Day Category Flow</h3><div style="margin-bottom:10px; font-size:12px; font-weight:bold;">Total Surplus: <span style="color:#10b981;">+${s.capital_saved.toFixed(2)} TND</span></div>${catHtml}<h3 style="color:#0f172a; border-bottom:2px solid #cbd5e1; padding-bottom:5px; font-size:13px; text-transform:uppercase;">IV. Master Ledger</h3>${logHtml}</div>`; document.getElementById('printArea').innerHTML = html; window.print(); }
 
+    // Init Engine
     renderApp();
 </script>
+</body>
+</html>
