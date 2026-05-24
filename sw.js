@@ -1,16 +1,16 @@
-const CACHE_NAME = 'crew-wallet-v30-offline';
+const CACHE_NAME = 'crew-wallet-v31-offline';
 const FILES_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/icon.png'
+  './',
+  './index.html',
+  './manifest.json',
+  './icon.png'
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => cache.addAll(FILES_TO_CACHE))
-      .then(() => self.skipWaiting()) // FIXED: Now inside the promise chain
+      .then(() => self.skipWaiting())
   );
 });
 
@@ -20,9 +20,8 @@ self.addEventListener('activate', (event) => {
       return Promise.all(keyList.map((key) => {
         if (key !== CACHE_NAME) return caches.delete(key);
       }));
-    })
+    }).then(() => self.clients.claim())
   );
-  return self.clients.claim();
 });
 
 self.addEventListener('fetch', (event) => {
