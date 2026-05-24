@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#0f172a">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon.png">
-    <title>Crew Wallet Master V30</title>
+    <title>Crew Wallet Master V31</title>
     <style>
         :root { --bg-color: #0f172a; --card-bg: #1e293b; --accent: #fbbf24; --text: #f8fafc; --text-muted: #94a3b8; --success: #4ade80; --warning: #facc15; --danger: #f87171; --panel-border: #334155; --vault-bg: rgba(15, 23, 42, 0.5); }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-color); color: var(--text); margin: 0; padding: 16px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; -webkit-tap-highlight-color: transparent; padding-bottom: 90px; }
@@ -361,12 +361,6 @@
             <div class="input-row"><span style="font-size:12px; width:100%;">Vacation Limit:</span><input type="number" id="setVacLimit" onchange="updateLimits()"></div>
             <div class="input-row"><span style="font-size:12px; width:100%;">Onboard Limit:</span><input type="number" id="setOnbLimit" onchange="updateLimits()"></div>
         </div>
-        
-        <div class="vault-card">
-            <div class="title" style="color:#38bdf8;">Contract Settings</div>
-            <div class="input-row"><span style="font-size:12px; width:100%;">Start Date:</span><input type="date" id="setContractStart" onchange="updateContractDates()"></div>
-            <div class="input-row"><span style="font-size:12px; width:100%;">End Date:</span><input type="date" id="setContractEnd" onchange="updateContractDates()"></div>
-        </div>
 
         <div class="vault-card">
             <div class="title">Custom Categories</div>
@@ -680,11 +674,14 @@
     <button class="nav-btn" id="nav-settings" onclick="switchTab('settings')"><span class="nav-icon">⚙️</span>Setup</button>
 </div>
 
+<div id="printArea"></div>
 <script>
-    // To enable offline functionality, register the service worker
+    // ==========================================
+    // 0. SERVICE WORKER & NETWORK TRACKER
+    // ==========================================
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js').then((registration) => {
+            navigator.serviceWorker.register('./sw.js').then((registration) => {
                 console.log('ServiceWorker registered with scope:', registration.scope);
             }, (err) => {
                 console.log('ServiceWorker registration failed:', err);
@@ -692,13 +689,18 @@
         });
     }
 
-    // Network Status Tracker
     window.addEventListener('online', () => document.getElementById('offlineBadge').style.display = 'none');
     window.addEventListener('offline', () => document.getElementById('offlineBadge').style.display = 'inline');
     if (!navigator.onLine) document.getElementById('offlineBadge').style.display = 'inline';
+
     // ==========================================
-    // 1. DATA, INDEXED-DB & ASYNC UI ENGINE (V30)
+    // 1. DATA, INDEXED-DB & CRYPTO ENGINE (V31)
     // ==========================================
+    async function hashPin(pin) {
+        const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pin));
+        return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
     const USER_PRISTINE_DATA = {
         "vault":{"ibkr":0,"brightwell":0,"wise":0,"cash_usd":0,"cash_tnd":0,"savings":0,"ibkr_fees":0,"lifetime_fees":0, "ibkr_cash":0, "ibkr_shares":0, "ibkr_cost":0, "ibkr_price":0},
         "loan":{"arrears":0,"rate":11.5,"schedule":[]},
@@ -706,7 +708,7 @@
         "history":{"vacation":{"archive":[],"current":[],"limit":35,"balance":35},"onboard":{"archive":[],"current":[],"limit":7.25,"balance":7.25}},
         "capital_saved_tnd":0, "capital_saved_usd":0, "fx_rate":2.93,"mode":"vacation","income_logs":[],
         "projects":{"envelopes":{},"missions":{},"goals":[]},
-        "settings":{"contractStart":"2026-08-03","contractEnd":"2027-02-01", "pin": ""},
+        "settings":{"contractStart":"","contractEnd":"", "pin": ""},
         "vape_stash":{"count":0, "empty_logs":[]},
         "custom_categories":[]
     };
@@ -747,7 +749,7 @@
         migrateData();
     }
 
-    function migrateData() {
+    async function migrateData() {
         if (!s || !s.vault || !s.history) s = USER_PRISTINE_DATA;
         if (!s.loan.schedule) s.loan.schedule = [];
         if (!s.projects) s.projects = USER_PRISTINE_DATA.projects;
@@ -758,6 +760,7 @@
         if (!s.fx_rate || isNaN(s.fx_rate)) s.fx_rate = 2.93;
         if (!s.settings) s.settings = USER_PRISTINE_DATA.settings;
         if (!s.vape_stash) s.vape_stash = {"count":0, "empty_logs":[]};
+        if (!s.vape_stash.empty_logs) s.vape_stash.empty_logs = []; 
         if (!s.custom_categories) s.custom_categories = [];
         
         // Capital Saved Isolation Migration
@@ -773,6 +776,12 @@
         if(s.vault.ibkr_cost === undefined) s.vault.ibkr_cost = 0;
         if(s.vault.ibkr_price === undefined) s.vault.ibkr_price = 805.79;
 
+        // V31 PIN Security Migration: Silently upgrade plain text PIN to SHA-256 Hash
+        if (s.settings.pin && s.settings.pin.length === 4) {
+            s.settings.pin = await hashPin(s.settings.pin);
+            await forceSaveState();
+        }
+
         Object.keys(s.projects.envelopes).forEach(k => { 
             if(s.projects.envelopes[k].archived === undefined) s.projects.envelopes[k].archived = false; 
             if(s.projects.envelopes[k].bypass === undefined) s.projects.envelopes[k].bypass = true;
@@ -785,7 +794,7 @@
         checkLock();
     }
 
-    async function saveState() {
+    async function forceSaveState() {
         let dataStr = JSON.stringify(s);
         localStorage.setItem('CrewWalletMaster', dataStr); // Fast mirror
         try {
@@ -794,6 +803,10 @@
             let store = tx.objectStore(STORE_NAME);
             store.put(dataStr, 'master_data');
         } catch (e) { console.error("IndexedDB save failed"); }
+    }
+
+    async function saveState() {
+        await forceSaveState();
         renderApp(); 
     }
 
@@ -815,7 +828,7 @@
     function closeUConfirm(isOk) { document.getElementById('uConfirmModal').style.display = 'none'; if(resolveConfirm) resolveConfirm(isOk); }
 
     // ==========================================
-    // 2. SECURITY & APP LOCK (V30)
+    // 2. SECURITY & APP LOCK (V31)
     // ==========================================
     let pinBuffer = "";
     let bioAttempts = 0;
@@ -887,11 +900,12 @@
         document.getElementById('pinDots').style.display = "flex";
     }
 
-    function enterPin(num) {
+    async function enterPin(num) {
         if(pinBuffer.length < 4) pinBuffer += num;
         updatePinDots();
         if(pinBuffer.length === 4) {
-            if(pinBuffer === s.settings.pin) unlockApp();
+            let hashed = await hashPin(pinBuffer);
+            if(hashed === s.settings.pin) unlockApp();
             else {
                 document.getElementById('lockMessage').innerText = "Incorrect PIN. Try again.";
                 document.getElementById('lockMessage').style.color = "var(--danger)";
@@ -932,7 +946,7 @@
         document.getElementById('nav-' + tabId).classList.add('active');
         
         if(tabId === 'dash') calculateBehavioralStreaks();
-        if(tabId === 'analytics') { renderChart(30); renderProjects(); renderPredictor(); renderLeaderboard(); renderVapeStats(); }
+        if(tabId === 'analytics') { renderChart(30); renderProjects(); renderLeaderboard(); renderVapeStats(); }
         if(tabId === 'time') { loadPastDay(); renderIncomeLogs(); document.getElementById('tmSearch').value = ''; searchLogs(); }
         if(tabId === 'settings') populateSettings();
     }
@@ -1169,6 +1183,7 @@
         if(!ok) return;
         if(type === 'env') delete s.projects.envelopes[id];
         if(type === 'mis') delete s.projects.missions[id];
+        if(type === 'goal') s.projects.goals = s.projects.goals.filter(g => g.id == id);
         saveState();
     }
     async function restoreTracker(type, id) {
@@ -1176,6 +1191,7 @@
         if(!ok) return;
         if(type === 'env') s.projects.envelopes[id].archived = false;
         if(type === 'mis') s.projects.missions[id].archived = false;
+        if(type === 'goal') s.projects.goals.find(g => g.id == id).archived = false;
         saveState();
     }
 
@@ -1200,16 +1216,17 @@
 
         s.projects.goals.forEach(g => {
             let pct = Math.min(100, (g.saved / g.target) * 100); let actionIcon = g.saved > 0 ? '📦' : '❌';
-            let html = `<div style="background:var(--card-bg); padding:10px; border-radius:8px; border:1px solid rgba(74, 222, 128, 0.4); opacity:${g.archived?0.6:1};"><div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;"><strong>${g.name}</strong><div><span style="color:var(--success); font-weight:bold;">${g.saved.toFixed(0)} / ${g.target.toFixed(0)}</span>${g.archived ? '' : `<button onclick="processProjectAction('goal', ${g.id}, ${g.saved})" style="background:none;border:none;margin-left:5px;cursor:pointer;">${actionIcon}</button>`}</div></div><div class="progress-container" style="height:4px; margin-top:0;"><div class="progress-bar" style="width:${pct}%;"></div></div>${g.archived ? '' : `<button class="v-btn" style="width:100%; margin-top:10px; background:#16a34a;" onclick="fundGoal(${g.id})">➕ Add Funds (Virtual Hold)</button>`}</div>`;
+            let html = `<div style="background:var(--card-bg); padding:10px; border-radius:8px; border:1px solid rgba(74, 222, 128, 0.4); opacity:${g.archived?0.6:1};"><div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;"><strong>${g.name}</strong><div><span style="color:var(--success); font-weight:bold;">${g.saved.toFixed(0)} / ${g.target.toFixed(0)}</span>${g.archived ? `<button onclick="restoreTracker('goal', ${g.id})" style="background:none;border:none;margin-left:5px;cursor:pointer;">🔙</button><button onclick="hardDeleteTracker('goal', ${g.id})" style="background:none;border:none;margin-left:5px;cursor:pointer;">🗑️</button>` : `<button onclick="processProjectAction('goal', ${g.id}, ${g.saved})" style="background:none;border:none;margin-left:5px;cursor:pointer;">${actionIcon}</button>`}</div></div><div class="progress-container" style="height:4px; margin-top:0;"><div class="progress-bar" style="width:${pct}%;"></div></div>${g.archived ? '' : `<button class="v-btn" style="width:100%; margin-top:10px; background:#16a34a;" onclick="fundGoal(${g.id})">➕ Add Funds (Virtual Hold)</button>`}</div>`;
             if(!g.archived) goalBox.innerHTML += html; else archBox.innerHTML += html;
         });
+
         if(archBox.innerHTML === '<div style="font-size:10px; font-weight:bold; margin-bottom:8px;">Archived Trackers</div>') archBox.innerHTML += '<div style="font-size:11px;color:var(--text-muted);">No archived items.</div>';
     }
 
     async function fundGoal(id) { let amtStr = await openUPrompt("Fund Goal", "Amount to hold for this goal:"); let amt = parseFloat(amtStr); if(isNaN(amt) || amt <= 0) return; let goal = s.projects.goals.find(g => g.id == id); if(goal) { goal.saved += amt; saveState(); await openUConfirm("Success", `Assigned ${amt} to ${goal.name}. (Virtual hold).`); } }
 
     // ==========================================
-    // 4. EXPENSE LOGGING & V28 TIME MACHINE UX
+    // 4. EXPENSE LOGGING & V31 TIME MACHINE UX
     // ==========================================
     function toggleOnlineFields(prefix) { let val = document.getElementById(prefix + 'Project').value; let show = false; if(val.startsWith('mis_')) { let key = val.replace('mis_', ''); if(s.projects.missions[key] && s.projects.missions[key].hasLogistics) show = true; } document.getElementById(prefix + 'OnlineBox').style.display = show ? 'flex' : 'none'; }
     function toggleFXOverride(prefix) {
@@ -1512,7 +1529,7 @@
     function logSTBPayment() { let amt = parseFloat(document.getElementById('stbPayAmt').value); if(isNaN(amt) || amt <= 0) return; let w = document.getElementById('stbPayWallet').value; if(w !== 'none') s.vault[w] -= (w === 'brightwell' ? amt/s.fx_rate : amt); s.loan.arrears -= amt; if(s.loan.arrears < 0) s.loan.arrears = 0; saveState(); document.getElementById('stbModal').style.display = 'none'; }
 
     // ==========================================
-    // 8. ANALYTICS, LEADERBOARD & PREDICTOR
+    // 8. ANALYTICS & PREDICTOR
     // ==========================================
     function renderChart(days) { 
         let vol = 0; let cats = {}; let cutoff = Date.now() - (days * 86400000); 
@@ -1556,8 +1573,9 @@
             let firstPurchaseTs = vLogs[0].ts;
             let latestEmptyTs = empties[empties.length - 1];
             let totalLifespanDays = (latestEmptyTs - firstPurchaseTs) / 86400000;
-            // The number of empty vapes consumed represents the total lifespan
-            avgLifespan = totalLifespanDays / empties.length;
+            if (totalLifespanDays > 0) {
+                avgLifespan = totalLifespanDays / empties.length;
+            }
         }
 
         let runOut = "Need more data";
@@ -1569,7 +1587,7 @@
 
         let html = `
             <div style="display:flex; justify-content:space-between; font-size:11px; align-items:center; border-bottom:1px dashed var(--panel-border); padding-bottom:8px; margin-bottom:8px;">
-                <div>Total Bought: <strong style="font-size:12px;">${totalBought}</strong></div>
+                <div>Lifetime Bought (${s.mode === 'vacation' ? 'Land' : 'Ship'}): <strong style="font-size:12px;">${totalBought}</strong></div>
                 <div>Total Spent: <strong style="font-size:12px; color:var(--danger);">${totalSpent.toFixed(2)} ${sym}</strong></div>
             </div>
             <div style="display:flex; justify-content:space-between; font-size:11px; align-items:center;">
@@ -1602,8 +1620,25 @@
     }
 
     function updateContractDates() { s.settings.contractStart = document.getElementById('setContractStart').value; s.settings.contractEnd = document.getElementById('setContractEnd').value; saveState(); }
-    function updatePin() { s.settings.pin = document.getElementById('setPin').value; saveState(); }
-    function populateSettings() { document.getElementById('setMode').value = s.mode; document.getElementById('setVacLimit').value = s.history.vacation.limit; document.getElementById('setOnbLimit').value = s.history.onboard.limit; document.getElementById('setFX').value = s.fx_rate; document.getElementById('setContractStart').value = s.settings.contractStart; document.getElementById('setContractEnd').value = s.settings.contractEnd; document.getElementById('setPin').value = s.settings.pin || ''; }
+    
+    async function updatePin() { 
+        let raw = document.getElementById('setPin').value; 
+        if(raw.length === 4) { s.settings.pin = await hashPin(raw); saveState(); }
+        document.getElementById('setPin').value = '';
+        document.getElementById('setPin').placeholder = '****';
+    }
+
+    function populateSettings() { 
+        document.getElementById('setMode').value = s.mode; 
+        document.getElementById('setVacLimit').value = s.history.vacation.limit; 
+        document.getElementById('setOnbLimit').value = s.history.onboard.limit; 
+        document.getElementById('setFX').value = s.fx_rate; 
+        document.getElementById('setContractStart').value = s.settings.contractStart || ''; 
+        document.getElementById('setContractEnd').value = s.settings.contractEnd || ''; 
+        document.getElementById('setPin').value = ''; 
+        document.getElementById('setPin').placeholder = s.settings.pin ? '****' : '0000';
+    }
+
     function changeMode() { s.mode = document.getElementById('setMode').value; saveState(); }
     function updateLimits() { s.history.vacation.limit = parseFloat(document.getElementById('setVacLimit').value) || 49; s.history.onboard.limit = parseFloat(document.getElementById('setOnbLimit').value) || 7.25; saveState(); }
     function updateFX() { s.fx_rate = parseFloat(document.getElementById('setFX').value) || 2.93; saveState(); }
@@ -1659,3 +1694,4 @@
 </script>
 </body>
 </html>
+
