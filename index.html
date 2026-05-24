@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#0f172a">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon.png">
-    <title>Crew Wallet Master V29</title>
+    <title>Crew Wallet Master V30</title>
     <style>
         :root { --bg-color: #0f172a; --card-bg: #1e293b; --accent: #fbbf24; --text: #f8fafc; --text-muted: #94a3b8; --success: #4ade80; --warning: #facc15; --danger: #f87171; --panel-border: #334155; --vault-bg: rgba(15, 23, 42, 0.5); }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-color); color: var(--text); margin: 0; padding: 16px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; -webkit-tap-highlight-color: transparent; padding-bottom: 90px; }
@@ -124,7 +124,7 @@
         <button class="pin-btn" onclick="enterPin(7)">7</button><button class="pin-btn" onclick="enterPin(8)">8</button><button class="pin-btn" onclick="enterPin(9)">9</button>
         <button class="pin-btn" style="background:transparent; border:none;"></button><button class="pin-btn" onclick="enterPin(0)">0</button><button class="pin-btn" style="background:transparent; border:none; color:var(--danger); font-size:16px;" onclick="clearPin()">⌫</button>
     </div>
-    <button class="v-btn" style="margin-top:30px; background:var(--panel-border);" onclick="triggerBiometrics()">Scan FaceID</button>
+    <button class="v-btn" id="btnTriggerBio" style="margin-top:30px; background:var(--panel-border); display:none;" onclick="triggerBiometrics()">Scan FaceID</button>
 </div>
 
 <div class="app-container" id="appWrapper" style="display:none;">
@@ -263,13 +263,8 @@
             <div class="title" style="color:#a855f7;">💨 Vape Command Center</div>
             <div id="vapeStatsHtml" style="margin-top:10px;"></div>
         </div>
-        
-        <div class="vault-card" style="border-color: #38bdf8;">
-            <div class="title" style="color:#38bdf8;">🚢 Contract Roadmap</div>
-            <div id="contractPredictorHtml" style="margin-top:10px;"></div>
-        </div>
 
-        <div class="title"><span>📁 Envelopes</span><button onclick="openAddProjectModal('env')" style="background:none;border:none;color:var(--text);font-size:14px;cursor:pointer;">➕</button></div>
+        <div class="title" style="margin-top:10px;"><span>📁 Envelopes</span><button onclick="openAddProjectModal('env')" style="background:none;border:none;color:var(--text);font-size:14px;cursor:pointer;">➕</button></div>
         <div id="envelopeContainer" style="display:flex; flex-direction:column; gap:10px;"></div>
 
         <div class="title" style="margin-top:15px;"><span>🎯 Missions</span><button onclick="openAddProjectModal('mis')" style="background:none;border:none;color:var(--text);font-size:14px;cursor:pointer;">➕</button></div>
@@ -299,7 +294,6 @@
             <div class="title" style="border-bottom: 1px solid var(--panel-border); padding-bottom: 4px;">⏳ Time Machine Logbook</div>
             
             <input type="text" id="tmSearch" placeholder="🔍 Search logs by tag, category, or location..." oninput="searchLogs()" style="margin-top:10px; margin-bottom:10px; width:100%; border-radius:8px; border:1px solid var(--panel-border); padding:10px; background:#0f172a; color:white;">
-            
             <div id="tmSearchResults" style="display:none; margin-bottom:15px; max-height:250px; overflow-y:auto; border:1px solid var(--accent); padding:10px; border-radius:8px; background:var(--vault-bg);"></div>
 
             <div id="tmNormalView">
@@ -308,46 +302,48 @@
             </div>
 
             <div style="margin-top:10px; border-top:1px dashed var(--panel-border); padding-top:10px;">
-                <div class="title" style="font-size:9px;">Log item to selected date</div>
+                <button class="btn-secondary" id="btnToggleTMForm" onclick="toggleTMForm()" style="border-color:var(--accent); color:var(--accent);">➕ Log Past Expense</button>
                 
-                <div id="tmEditBanner" style="display:none; background:rgba(250, 204, 21, 0.2); color:var(--warning); padding:8px; border-radius:8px; margin-bottom:10px; font-weight:bold; font-size:11px; text-align:center; border: 1px solid var(--warning);">
-                    ✏️ Editing Past Record 
-                    <button onclick="cancelTMEdit()" style="margin-left:10px; background:#000; color:var(--warning); border:1px solid var(--warning); border-radius:4px; padding:4px 8px; font-weight:bold;">Cancel</button>
-                </div>
-
-                <div class="input-row" style="margin-top:6px;">
-                    <input type="text" id="tmTag" class="flex-main" placeholder="What?">
-                    <input type="number" id="tmAmount" class="flex-side" placeholder="Cost" oninput="toggleFXOverride('tm')">
-                    <button class="expand-btn" onclick="let el = document.getElementById('advTM'); el.style.display = el.style.display === 'flex' ? 'none' : 'flex'; toggleFXOverride('tm');">⚙️</button>
-                    <button class="btn-action" onclick="logPastExpense()">Add</button>
-                </div>
-                <div class="advanced-context-box" id="advTM">
-                    <select id="tmProject" onchange="toggleOnlineFields('tm')"></select>
-                    <div id="tmOnlineBox" style="display:none; gap:8px;">
-                        <input type="number" id="tmShipping" placeholder="Shipping $" class="flex-main" inputmode="decimal">
-                        <input type="number" id="tmTax" placeholder="Tax/Ministry $" class="flex-main" inputmode="decimal">
-                    </div>
-                    <select id="tmSourceWallet" onchange="toggleFXOverride('tm')">
-                        <option value="default">💰 Default Pocket Cash</option>
-                        <option value="cash_tnd">💵 Deduct from: Cash TND</option>
-                        <option value="brightwell">💳 Brightwell</option>
-                        <option value="wise">🦉 Wise</option>
-                        <option value="savings">🏦 Savings TND</option>
-                    </select>
-
-                    <div id="tmFXOverrideBox" style="display:none; flex-direction:column; gap:6px; margin-top:4px; background:rgba(250, 204, 21, 0.15); padding:10px; border-radius:8px; border:1px solid var(--warning);">
-                        <label style="font-size:11px; color:var(--warning); font-weight:bold;">⚠️ Currency Mismatch Detected</label>
-                        <div style="font-size:9px; color:var(--text-muted); margin-bottom:2px;">Enter the exact amount your bank deducted.</div>
-                        <input type="number" id="tmActualDeduct" placeholder="Exact bank charge" inputmode="decimal" style="border-color:var(--warning); background-color: rgba(15, 23, 42, 0.8); color:var(--text);">
+                <div id="tmFormContainer" style="display:none; margin-top:10px;">
+                    <div id="tmEditBanner" style="display:none; background:rgba(250, 204, 21, 0.2); color:var(--warning); padding:8px; border-radius:8px; margin-bottom:10px; font-weight:bold; font-size:11px; text-align:center; border: 1px solid var(--warning);">
+                        ✏️ Editing Past Record 
+                        <button onclick="cancelTMEdit()" style="margin-left:10px; background:#000; color:var(--warning); border:1px solid var(--warning); border-radius:4px; padding:4px 8px; font-weight:bold;">Cancel</button>
                     </div>
 
-                    <select id="tmCategory" onchange="handleCategoryChange('tmCategory')"></select>
-                    
-                    <div id="tmVapeQtyBox" style="display:none; margin-top:4px;">
-                        <input type="number" id="tmVapeQty" placeholder="How many vapes did you buy?" style="border-color:#a855f7;" inputmode="numeric">
+                    <div class="input-row" style="margin-top:6px;">
+                        <input type="text" id="tmTag" class="flex-main" placeholder="What?">
+                        <input type="number" id="tmAmount" class="flex-side" placeholder="Cost" oninput="toggleFXOverride('tm')">
+                        <button class="expand-btn" onclick="let el = document.getElementById('advTM'); el.style.display = el.style.display === 'flex' ? 'none' : 'flex'; toggleFXOverride('tm');">⚙️</button>
+                        <button class="btn-action" onclick="logPastExpense()">Save</button>
                     </div>
+                    <div class="advanced-context-box" id="advTM">
+                        <select id="tmProject" onchange="toggleOnlineFields('tm')"></select>
+                        <div id="tmOnlineBox" style="display:none; gap:8px;">
+                            <input type="number" id="tmShipping" placeholder="Shipping $" class="flex-main" inputmode="decimal">
+                            <input type="number" id="tmTax" placeholder="Tax/Ministry $" class="flex-main" inputmode="decimal">
+                        </div>
+                        <select id="tmSourceWallet" onchange="toggleFXOverride('tm')">
+                            <option value="default">💰 Default Pocket Cash</option>
+                            <option value="cash_tnd">💵 Deduct from: Cash TND</option>
+                            <option value="brightwell">💳 Brightwell</option>
+                            <option value="wise">🦉 Wise</option>
+                            <option value="savings">🏦 Savings TND</option>
+                        </select>
 
-                    <input type="text" id="tmLocation" placeholder="📍 Location"><input type="text" id="tmItems" placeholder="🛒 Exact items"><input type="text" id="tmWhom" placeholder="👥 For whom?">
+                        <div id="tmFXOverrideBox" style="display:none; flex-direction:column; gap:6px; margin-top:4px; background:rgba(250, 204, 21, 0.15); padding:10px; border-radius:8px; border:1px solid var(--warning);">
+                            <label style="font-size:11px; color:var(--warning); font-weight:bold;">⚠️ Currency Mismatch Detected</label>
+                            <div style="font-size:9px; color:var(--text-muted); margin-bottom:2px;">Enter the exact amount your bank deducted.</div>
+                            <input type="number" id="tmActualDeduct" placeholder="Exact bank charge" inputmode="decimal" style="border-color:var(--warning); background-color: rgba(15, 23, 42, 0.8); color:var(--text);">
+                        </div>
+
+                        <select id="tmCategory" onchange="handleCategoryChange('tmCategory')"></select>
+                        
+                        <div id="tmVapeQtyBox" style="display:none; margin-top:4px;">
+                            <input type="number" id="tmVapeQty" placeholder="How many vapes did you buy?" style="border-color:#a855f7;" inputmode="numeric">
+                        </div>
+
+                        <input type="text" id="tmLocation" placeholder="📍 Location"><input type="text" id="tmItems" placeholder="🛒 Exact items"><input type="text" id="tmWhom" placeholder="👥 For whom?">
+                    </div>
                 </div>
             </div>
         </div>
@@ -367,7 +363,7 @@
         </div>
         
         <div class="vault-card">
-            <div class="title" style="color:#38bdf8;">Contract Timeline</div>
+            <div class="title" style="color:#38bdf8;">Contract Settings</div>
             <div class="input-row"><span style="font-size:12px; width:100%;">Start Date:</span><input type="date" id="setContractStart" onchange="updateContractDates()"></div>
             <div class="input-row"><span style="font-size:12px; width:100%;">End Date:</span><input type="date" id="setContractEnd" onchange="updateContractDates()"></div>
         </div>
@@ -379,7 +375,8 @@
 
         <div class="vault-card">
             <div class="title" style="color:var(--accent);">Security</div>
-            <div class="input-row"><span style="font-size:12px; width:100%;">App Lock PIN:</span><input type="password" id="setPin" maxlength="4" onchange="updatePin()" placeholder="0000"></div>
+            <div class="input-row" style="margin-bottom:10px;"><span style="font-size:12px; width:100%;">App Lock PIN:</span><input type="password" id="setPin" maxlength="4" onchange="updatePin()" placeholder="0000"></div>
+            <button class="btn-secondary" style="border-color:var(--accent); color:var(--accent);" onclick="registerFaceID()">🛡️ Enable FaceID / TouchID</button>
         </div>
 
         <div class="vault-card">
@@ -683,19 +680,31 @@
     <button class="nav-btn" id="nav-settings" onclick="switchTab('settings')"><span class="nav-icon">⚙️</span>Setup</button>
 </div>
 
-<div id="printArea"></div>
-
-
 <script>
+    // To enable offline functionality, register the service worker
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js').then((registration) => {
+                console.log('ServiceWorker registered with scope:', registration.scope);
+            }, (err) => {
+                console.log('ServiceWorker registration failed:', err);
+            });
+        });
+    }
+
+    // Network Status Tracker
+    window.addEventListener('online', () => document.getElementById('offlineBadge').style.display = 'none');
+    window.addEventListener('offline', () => document.getElementById('offlineBadge').style.display = 'inline');
+    if (!navigator.onLine) document.getElementById('offlineBadge').style.display = 'inline';
     // ==========================================
-    // 1. DATA, INDEXED-DB & ASYNC UI ENGINE (V29)
+    // 1. DATA, INDEXED-DB & ASYNC UI ENGINE (V30)
     // ==========================================
     const USER_PRISTINE_DATA = {
-        "vault":{"ibkr":0,"brightwell":550,"wise":0,"cash_usd":462,"cash_tnd":53,"savings":261,"ibkr_fees":1.13,"lifetime_fees":1.13, "ibkr_cash":3.99, "ibkr_shares":0.4074, "ibkr_cost":331.60, "ibkr_price":805.79},
-        "loan":{"arrears":20000,"rate":11.5,"schedule":[]},
-        "ious":{"payables":[{"id":1779300930444,"name":"Adelith","amount":1000,"currency":"USD"},{"id":1779300945128,"name":"Ayoub","amount":1000,"currency":"TND"},{"id":1779300956262,"name":"Haroun","amount":600,"currency":"TND"}],"receivables":[{"id":1779300967539,"name":"Houssem","amount":1400,"currency":"TND"},{"id":1779300977213,"name":"Last","amount":70,"currency":"USD"}]},
+        "vault":{"ibkr":0,"brightwell":0,"wise":0,"cash_usd":0,"cash_tnd":0,"savings":0,"ibkr_fees":0,"lifetime_fees":0, "ibkr_cash":0, "ibkr_shares":0, "ibkr_cost":0, "ibkr_price":0},
+        "loan":{"arrears":0,"rate":11.5,"schedule":[]},
+        "ious":{"payables":[],"receivables":[]},
         "history":{"vacation":{"archive":[],"current":[],"limit":35,"balance":35},"onboard":{"archive":[],"current":[],"limit":7.25,"balance":7.25}},
-        "capital_saved_tnd":40, "capital_saved_usd":0, "fx_rate":2.93,"mode":"vacation","income_logs":[],
+        "capital_saved_tnd":0, "capital_saved_usd":0, "fx_rate":2.93,"mode":"vacation","income_logs":[],
         "projects":{"envelopes":{},"missions":{},"goals":[]},
         "settings":{"contractStart":"2026-08-03","contractEnd":"2027-02-01", "pin": ""},
         "vape_stash":{"count":0, "empty_logs":[]},
@@ -751,9 +760,9 @@
         if (!s.vape_stash) s.vape_stash = {"count":0, "empty_logs":[]};
         if (!s.custom_categories) s.custom_categories = [];
         
-        // V29 Capital Saved Isolation Migration
+        // Capital Saved Isolation Migration
         if (s.capital_saved_tnd === undefined) {
-            s.capital_saved_tnd = (s.capital_saved !== undefined) ? s.capital_saved : 40;
+            s.capital_saved_tnd = (s.capital_saved !== undefined) ? s.capital_saved : 0;
             if (Math.abs(s.capital_saved_tnd - 103.2) < 0.01) s.capital_saved_tnd = 68.2; 
             s.capital_saved_usd = 0;
             delete s.capital_saved;
@@ -806,34 +815,68 @@
     function closeUConfirm(isOk) { document.getElementById('uConfirmModal').style.display = 'none'; if(resolveConfirm) resolveConfirm(isOk); }
 
     // ==========================================
-    // 2. SECURITY & APP LOCK (V29)
+    // 2. SECURITY & APP LOCK (V30)
     // ==========================================
     let pinBuffer = "";
     let bioAttempts = 0;
     let lastActive = Date.now();
     let isLocked = false;
+    let hasBiometricsEnabled = localStorage.getItem('cw_bio_enabled') === 'true';
 
     function checkLock() {
         if (!s.settings.pin || s.settings.pin === "") { unlockApp(); return; }
         isLocked = true;
         document.getElementById('appLockScreen').style.display = 'flex';
         document.getElementById('appWrapper').style.display = 'none';
-        triggerBiometrics();
+        
+        if (hasBiometricsEnabled) {
+            document.getElementById('btnTriggerBio').style.display = 'block';
+            triggerBiometrics();
+        } else {
+            document.getElementById('btnTriggerBio').style.display = 'none';
+            showPinPad();
+        }
+    }
+
+    async function registerFaceID() {
+        if (!window.PublicKeyCredential) { await openUConfirm("Error", "Biometrics not supported on this device."); return; }
+        try {
+            const challenge = new Uint8Array(32); crypto.getRandomValues(challenge);
+            const userID = new Uint8Array(16); crypto.getRandomValues(userID);
+            
+            const credential = await navigator.credentials.create({
+                publicKey: {
+                    challenge: challenge,
+                    rp: { name: "Crew Wallet Master", id: window.location.hostname },
+                    user: { id: userID, name: "owner", displayName: "Owner" },
+                    pubKeyCredParams: [{ type: "public-key", alg: -7 }],
+                    authenticatorSelection: { userVerification: "required" },
+                    timeout: 60000
+                }
+            });
+            
+            if (credential) {
+                localStorage.setItem('cw_bio_enabled', 'true');
+                hasBiometricsEnabled = true;
+                await openUConfirm("Success", "FaceID / TouchID registered successfully.");
+            }
+        } catch (err) {
+            await openUConfirm("Error", "Biometric registration failed or was cancelled.");
+        }
     }
 
     async function triggerBiometrics() {
-        if (!window.PublicKeyCredential) { showPinPad(); return; }
+        if (!window.PublicKeyCredential || !hasBiometricsEnabled) { showPinPad(); return; }
         try {
-            // Simulated biometric trigger for PWA environment. Real passkey creation requires server challenge.
-            // Failing this gracefully will auto-trigger the PIN pad.
+            const challenge = new Uint8Array(32); crypto.getRandomValues(challenge);
             const credential = await navigator.credentials.get({
-                publicKey: { challenge: new Uint8Array(32), rpId: window.location.hostname, userVerification: "required", timeout: 60000 }
+                publicKey: { challenge: challenge, rpId: window.location.hostname, userVerification: "required", timeout: 60000 }
             });
             if (credential) unlockApp();
         } catch (err) {
             bioAttempts++;
             if (bioAttempts >= 3) { showPinPad(); } 
-            else { document.getElementById('lockMessage').innerText = `FaceID Failed. Attempts: ${bioAttempts}/3`; }
+            else { document.getElementById('lockMessage').innerText = `FaceID Failed. Attempts: ${bioAttempts}/3`; document.getElementById('lockMessage').style.color = "var(--danger)"; }
         }
     }
 
@@ -1000,7 +1043,7 @@
         document.getElementById('v_savings').innerText = s.vault.savings.toFixed(2) + ' TND';
         document.getElementById('l_arrears').innerText = s.loan.arrears.toFixed(2) + ' TND'; document.getElementById('l_bleed').innerText = ((s.loan.arrears * (s.loan.rate / 100)) / 365).toFixed(2) + ' TND';
         
-        // V29 Capital Saved Mode Isolation
+        // Capital Saved Mode Isolation
         let capSavedStr = s.mode === 'vacation' ? s.capital_saved_tnd.toFixed(2) + ' TND' : '$' + s.capital_saved_usd.toFixed(2);
         let capSavedLbl = s.mode === 'vacation' ? 'Total Capital Saved (TND)' : 'Total Capital Saved (USD)';
         document.getElementById('uiCapitalSaved').innerText = capSavedStr;
@@ -1009,7 +1052,7 @@
         let totUSD = ibkrTotal + s.vault.brightwell + s.vault.wise + s.vault.cash_usd; let totTND = (totUSD * s.fx_rate) + s.vault.cash_tnd + s.vault.savings;
         document.getElementById('totUSD').innerText = '$' + totUSD.toFixed(2); document.getElementById('totTND').innerText = totTND.toFixed(2) + ' TND';
 
-        // V29 Strict Onboard Runway & Net Runway
+        // Strict Onboard Runway & Net Runway
         let totalLiquid = 0; let activeEnvLocked = 0;
         let isUSDMode = (s.mode === 'onboard');
         
@@ -1128,6 +1171,13 @@
         if(type === 'mis') delete s.projects.missions[id];
         saveState();
     }
+    async function restoreTracker(type, id) {
+        let ok = await openUConfirm("Restore", "Restore this tracker to active status?");
+        if(!ok) return;
+        if(type === 'env') s.projects.envelopes[id].archived = false;
+        if(type === 'mis') s.projects.missions[id].archived = false;
+        saveState();
+    }
 
     function renderProjects() {
         const envBox = document.getElementById('envelopeContainer'); envBox.innerHTML = '';
@@ -1138,13 +1188,13 @@
         Object.keys(s.projects.envelopes).forEach(k => {
             let e = s.projects.envelopes[k]; let isOver = e.spent > e.limit; let pct = Math.min(100, (e.spent / e.limit) * 100);
             let actionIcon = e.spent > 0 ? '📦' : '❌'; let bypassTag = e.bypass ? '' : '<span style="color:var(--danger);font-size:8px;">(Hits Limit)</span>';
-            let html = `<div style="background:var(--card-bg); padding:10px; border-radius:8px; border:1px solid ${isOver ? 'var(--danger)' : 'var(--panel-border)'}; opacity:${e.archived?0.6:1};"><div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;"><strong>${e.name} ${bypassTag}</strong><div><span style="color:${isOver ? 'var(--danger)' : 'var(--text)'}; font-weight:bold;">${e.spent.toFixed(2)}</span> / ${e.limit.toFixed(2)}${e.archived ? `<button onclick="hardDeleteTracker('env', '${k}')" style="background:none;border:none;margin-left:5px;cursor:pointer;">🗑️</button>` : `<button onclick="processProjectAction('env', '${k}', ${e.spent})" style="background:none;border:none;margin-left:5px;cursor:pointer;">${actionIcon}</button>`}</div></div><div class="progress-container" style="height:4px; margin-top:0;"><div class="progress-bar" style="width:${pct}%; background:${isOver ? 'var(--danger)' : 'var(--accent)'};"></div></div>${isOver && !e.archived ? `<div style="font-size:9px; color:var(--danger); margin-top:4px;">⚠️ Overbudget: Spillover affecting daily limit</div>` : ''}</div>`;
+            let html = `<div style="background:var(--card-bg); padding:10px; border-radius:8px; border:1px solid ${isOver ? 'var(--danger)' : 'var(--panel-border)'}; opacity:${e.archived?0.6:1};"><div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;"><strong>${e.name} ${bypassTag}</strong><div><span style="color:${isOver ? 'var(--danger)' : 'var(--text)'}; font-weight:bold;">${e.spent.toFixed(2)}</span> / ${e.limit.toFixed(2)}${e.archived ? `<button onclick="restoreTracker('env', '${k}')" style="background:none;border:none;margin-left:5px;cursor:pointer;">🔙</button><button onclick="hardDeleteTracker('env', '${k}')" style="background:none;border:none;margin-left:5px;cursor:pointer;">🗑️</button>` : `<button onclick="processProjectAction('env', '${k}', ${e.spent})" style="background:none;border:none;margin-left:5px;cursor:pointer;">${actionIcon}</button>`}</div></div><div class="progress-container" style="height:4px; margin-top:0;"><div class="progress-bar" style="width:${pct}%; background:${isOver ? 'var(--danger)' : 'var(--accent)'};"></div></div>${isOver && !e.archived ? `<div style="font-size:9px; color:var(--danger); margin-top:4px;">⚠️ Overbudget: Spillover affecting daily limit</div>` : ''}</div>`;
             if(!e.archived) envBox.innerHTML += html; else archBox.innerHTML += html;
         });
 
         Object.keys(s.projects.missions).forEach(k => {
             let m = s.projects.missions[k]; let actionIcon = m.spent > 0 ? '📦' : '❌'; let bypassTag = m.bypass ? '<span style="color:var(--warning);font-size:8px;display:block;">(Bypass Active)</span>' : ''; let displayTND = m.spent * s.fx_rate; 
-            let html = `<div style="background:var(--card-bg); padding:10px; border-radius:8px; border:1px solid var(--panel-border); text-align:center; opacity:${m.archived?0.6:1}; position:relative;">${m.archived ? `<button onclick="hardDeleteTracker('mis', '${k}')" style="position:absolute;top:5px;right:5px;background:none;border:none;font-size:10px;cursor:pointer;">🗑️</button>` : `<button onclick="processProjectAction('mis', '${k}', ${m.spent})" style="position:absolute;top:5px;right:5px;background:none;border:none;font-size:10px;cursor:pointer;">${actionIcon}</button>`}<div style="font-size:10px; color:var(--text-muted); font-weight:bold; margin-bottom:4px;">${m.name} ${bypassTag}</div><div style="font-size:16px; font-weight:800; color:var(--text);">${displayTND.toFixed(2)} TND</div><div style="font-size:10px; color:var(--text-muted); margin-top:2px;">(≈ $${m.spent.toFixed(2)})</div>${m.hasLogistics ? `<div style="font-size:9px; color:var(--danger); margin-top:4px;">Dead Money: $${m.dead.toFixed(2)}</div>` : ''}</div>`;
+            let html = `<div style="background:var(--card-bg); padding:10px; border-radius:8px; border:1px solid var(--panel-border); text-align:center; opacity:${m.archived?0.6:1}; position:relative;">${m.archived ? `<div style="position:absolute;top:5px;right:5px;"><button onclick="restoreTracker('mis', '${k}')" style="background:none;border:none;font-size:12px;cursor:pointer;">🔙</button><button onclick="hardDeleteTracker('mis', '${k}')" style="background:none;border:none;font-size:12px;cursor:pointer;">🗑️</button></div>` : `<button onclick="processProjectAction('mis', '${k}', ${m.spent})" style="position:absolute;top:5px;right:5px;background:none;border:none;font-size:10px;cursor:pointer;">${actionIcon}</button>`}<div style="font-size:10px; color:var(--text-muted); font-weight:bold; margin-bottom:4px;">${m.name} ${bypassTag}</div><div style="font-size:16px; font-weight:800; color:var(--text);">${displayTND.toFixed(2)} TND</div><div style="font-size:10px; color:var(--text-muted); margin-top:2px;">(≈ $${m.spent.toFixed(2)})</div>${m.hasLogistics ? `<div style="font-size:9px; color:var(--danger); margin-top:4px;">Dead Money: $${m.dead.toFixed(2)}</div>` : ''}</div>`;
             if(!m.archived) misBox.innerHTML += html; else archBox.innerHTML += html;
         });
 
@@ -1239,6 +1289,12 @@
     }
 
     let tmEditingIdx = -1; let tmEditingMode = null; let tmEditingDate = null;
+    
+    function toggleTMForm() {
+        document.getElementById('tmFormContainer').style.display = 'block';
+        document.getElementById('btnToggleTMForm').style.display = 'none';
+    }
+
     function searchLogs() {
         let q = document.getElementById('tmSearch').value.toLowerCase(); let res = document.getElementById('tmSearchResults');
         if (!q) { res.style.display = 'none'; document.getElementById('tmNormalView').style.display = 'block'; return; }
@@ -1265,7 +1321,9 @@
     function editPastExpense(m, dateStr, idx) {
         let dayIdx = s.history[m].archive.findIndex(a => a.date === dateStr); if(dayIdx === -1) return;
         let item = s.history[m].archive[dayIdx].logs[idx];
-        tmEditingIdx = idx; tmEditingMode = m; tmEditingDate = dateStr; document.getElementById('tmEditBanner').style.display = 'block';
+        tmEditingIdx = idx; tmEditingMode = m; tmEditingDate = dateStr; 
+        toggleTMForm();
+        document.getElementById('tmEditBanner').style.display = 'block';
         let dObj = new Date(dateStr); document.getElementById('tmDate').value = `${dObj.getFullYear()}-${String(dObj.getMonth() + 1).padStart(2, '0')}-${String(dObj.getDate()).padStart(2, '0')}`; document.getElementById('setMode').value = m;
         document.getElementById('tmTag').value = item.tag.split(' [Incl.')[0]; document.getElementById('tmAmount').value = item.amount - (item.deadMoney||0); document.getElementById('tmCategory').value = item.category; document.getElementById('tmProject').value = item.project || 'none'; toggleOnlineFields('tm'); document.getElementById('tmSourceWallet').value = item.walletSource; toggleFXOverride('tm'); checkVapeField('tm');
         if (item.deductedAmount !== undefined) document.getElementById('tmActualDeduct').value = item.deductedAmount;
@@ -1275,7 +1333,14 @@
         window.scrollTo({ top: document.getElementById('advTM').offsetTop - 50, behavior: 'smooth' });
     }
 
-    function cancelTMEdit() { tmEditingIdx = -1; tmEditingMode = null; tmEditingDate = null; document.getElementById('tmEditBanner').style.display = 'none'; document.getElementById('tmAmount').value = ''; document.getElementById('tmTag').value = ''; document.getElementById('tmShipping').value = ''; document.getElementById('tmTax').value = ''; document.getElementById('tmActualDeduct').value = ''; document.getElementById('tmVapeQty').value = ''; document.getElementById('advTM').style.display = 'none'; }
+    function cancelTMEdit() { 
+        tmEditingIdx = -1; tmEditingMode = null; tmEditingDate = null; 
+        document.getElementById('tmEditBanner').style.display = 'none'; 
+        document.getElementById('tmAmount').value = ''; document.getElementById('tmTag').value = ''; document.getElementById('tmShipping').value = ''; document.getElementById('tmTax').value = ''; document.getElementById('tmActualDeduct').value = ''; document.getElementById('tmVapeQty').value = ''; 
+        document.getElementById('advTM').style.display = 'none'; 
+        document.getElementById('tmFormContainer').style.display = 'none';
+        document.getElementById('btnToggleTMForm').style.display = 'block';
+    }
 
     async function logPastExpense() {
         let dVal = document.getElementById('tmDate').value; if(!dVal) return; 
@@ -1460,15 +1525,6 @@
         Object.keys(cats).sort((a,b) => cats[b] - cats[a]).forEach(tag => { let pct = (cats[tag] / vol) * 100; bd.innerHTML += `<div class="chart-row"><span style="width:110px; font-weight:bold; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;">${tag}</span><div class="chart-bar-bg"><div class="chart-bar-fill" style="width:${pct}%"></div></div><span style="font-weight:bold;width:80px;text-align:right;">${cats[tag].toFixed(1)} TND</span></div>`; }); 
     }
 
-    function renderPredictor() {
-        const bd = document.getElementById('contractPredictorHtml');
-        let start = new Date(s.settings.contractStart).getTime(); let end = new Date(s.settings.contractEnd).getTime(); let now = Date.now();
-        let daysTotal = Math.floor((end - start) / 86400000); let daysLeft = Math.max(0, Math.floor((end - now) / 86400000));
-        let pctComplete = Math.min(100, Math.max(0, ((now - start) / (end - start)) * 100));
-        let mLeft = s.loan.arrears > 0 ? (s.loan.arrears / 1000).toFixed(1) : 0;
-        bd.innerHTML = `<div style="font-size:11px; display:flex; justify-content:space-between; margin-bottom:4px;"><span>${daysLeft} Days Remaining</span><span style="color:#38bdf8;">${pctComplete.toFixed(1)}%</span></div><div class="progress-container" style="height:6px; margin-top:0;"><div class="progress-bar" style="width:${pctComplete}%; background:#38bdf8;"></div></div><div style="font-size:10px; color:var(--text-muted); margin-top:10px;"><div>Est. Debt Months Left: <strong>${mLeft}</strong></div></div>`;
-    }
-
     function renderLeaderboard() {
         const bd = document.getElementById('leaderboardHtml'); let locs = {};
         ['vacation', 'onboard'].forEach(m => { 
@@ -1483,12 +1539,46 @@
 
     function renderVapeStats() {
         const bd = document.getElementById('vapeStatsHtml'); if (!bd) return;
+        let vLogs = [];
+        // Pull mode-specific vapes to calculate lifetime total spent & quantity
+        s.history[s.mode].archive.forEach(a => { a.logs.forEach(l => { if (l.category === '💨 Vape') vLogs.push({...l, ts: l.ts}); }); });
+        s.history[s.mode].current.forEach(l => { if (l.category === '💨 Vape') vLogs.push({...l, ts: l.ts}); });
+        vLogs.sort((a,b) => a.ts - b.ts);
+
+        let totalSpent = vLogs.reduce((sum, l) => sum + l.amount, 0);
+        let totalBought = vLogs.reduce((sum, l) => sum + (l.vapeQty || 1), 0);
+        let sym = s.mode === 'vacation' ? 'TND' : 'USD';
+
         let stash = s.vape_stash.count; let empties = s.vape_stash.empty_logs; let avgLifespan = 0;
-        if (empties.length > 1) { let totalLife = 0; for (let i = 1; i < empties.length; i++) { totalLife += (empties[i] - empties[i-1]) / 86400000; } avgLifespan = totalLife / (empties.length - 1); }
-        let runOut = "Need more data";
-        if (avgLifespan > 0 && stash > 0) { let daysLeft = stash * avgLifespan; let runDate = new Date(Date.now() + (daysLeft * 86400000)); runOut = runDate.toDateString(); } else if (stash === 0) { runOut = "Stash Empty"; }
         
-        let html = `<div style="display:flex; justify-content:space-between; font-size:11px; align-items:center;"><div>Active Stash: <strong style="font-size:16px; color:var(--accent);">${stash}</strong></div><button class="v-btn" style="background:var(--danger);" onclick="markVapeEmpty()">📉 Mark 1 Empty</button></div><div style="font-size:11px; margin-top:10px;">Avg Hardware Lifespan: <strong style="color:var(--success);">${avgLifespan > 0 ? avgLifespan.toFixed(1) + ' Days' : 'Need more data'}</strong></div><div style="font-size:11px; margin-top:5px;">Stash Depletion Est: <strong style="color:var(--warning);">${runOut}</strong></div>`;
+        // Lifespan: First vape purchase to latest empty log
+        if (vLogs.length > 0 && empties.length > 0) {
+            let firstPurchaseTs = vLogs[0].ts;
+            let latestEmptyTs = empties[empties.length - 1];
+            let totalLifespanDays = (latestEmptyTs - firstPurchaseTs) / 86400000;
+            // The number of empty vapes consumed represents the total lifespan
+            avgLifespan = totalLifespanDays / empties.length;
+        }
+
+        let runOut = "Need more data";
+        if (avgLifespan > 0 && stash > 0) { 
+            let daysLeft = stash * avgLifespan; 
+            let runDate = new Date(Date.now() + (daysLeft * 86400000)); 
+            runOut = runDate.toDateString(); 
+        } else if (stash === 0 && empties.length > 0) { runOut = "Stash Empty"; }
+
+        let html = `
+            <div style="display:flex; justify-content:space-between; font-size:11px; align-items:center; border-bottom:1px dashed var(--panel-border); padding-bottom:8px; margin-bottom:8px;">
+                <div>Total Bought: <strong style="font-size:12px;">${totalBought}</strong></div>
+                <div>Total Spent: <strong style="font-size:12px; color:var(--danger);">${totalSpent.toFixed(2)} ${sym}</strong></div>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:11px; align-items:center;">
+                <div>Active Stash: <strong style="font-size:16px; color:var(--accent);">${stash}</strong></div>
+                <button class="v-btn" style="background:var(--danger);" onclick="markVapeEmpty()">📉 Mark 1 Empty</button>
+            </div>
+            <div style="font-size:11px; margin-top:10px;">Avg Hardware Lifespan: <strong style="color:var(--success);">${avgLifespan > 0 ? avgLifespan.toFixed(1) + ' Days' : 'Need more data'}</strong></div>
+            <div style="font-size:11px; margin-top:5px;">Stash Depletion Est: <strong style="color:var(--warning);">${runOut}</strong></div>
+        `;
         bd.innerHTML = html;
     }
 
@@ -1558,17 +1648,9 @@
         
         let html = `<div style="font-family:'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color:#0f172a; max-width:800px; margin:0 auto; padding:20px; background:white;"><div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:4px solid #0f172a; padding-bottom:15px; margin-bottom:20px;"><div><h1 style="margin:0; font-size:24px; text-transform:uppercase; letter-spacing:1.5px;">Global Wealth Vault</h1><div style="font-size:11px; font-weight:700; color:#64748b; letter-spacing:2px; margin-top:4px;">FINANCIAL INTELLIGENCE REPORT</div></div><div style="text-align:right; font-size:11px; color:#475569; line-height:1.6;"><div>Generated: <strong>${now}</strong></div><div>Live FX Rate: <strong>${fx} TND</strong></div></div></div><h3 style="color:#0f172a; border-bottom:2px solid #cbd5e1; padding-bottom:5px; margin-top:0; font-size:13px; text-transform:uppercase;">I. Executive Vault Summary</h3><div style="display:flex; gap:15px; margin-bottom:20px;"><div style="flex:1; background:#f8fafc; padding:12px; border-radius:6px; border:1px solid #e2e8f0;"><div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:12px; border-bottom:1px dashed #e2e8f0;"><span>Total USD Assets:</span> <strong>$${totUSD.toFixed(2)}</strong></div><div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:12px; border-bottom:1px dashed #e2e8f0;"><span>Physical TND:</span> <strong>${s.vault.cash_tnd.toFixed(2)} TND</strong></div><div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:12px;"><span>Savings TND:</span> <strong>${s.vault.savings.toFixed(2)} TND</strong></div></div><div style="flex:1; background:#f8fafc; padding:12px; border-radius:6px; border:1px solid #e2e8f0;"><div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:12px; border-bottom:1px dashed #e2e8f0;"><span>STB Arrears:</span> <strong style="color:#ef4444;">${s.loan.arrears.toFixed(2)} TND</strong></div><div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:13px; margin-top:8px; border-top:2px solid #cbd5e1; padding-top:8px;"><span>Total Liquid Power:</span> <strong style="color:#10b981;">${totalLiquid.toFixed(2)} TND</strong></div><div style="display:flex; justify-content:space-between; font-size:12px;"><span>Mode Liquid Runway:</span> <strong style="color:#38bdf8;">${liquidRunway} Days</strong></div></div></div><h3 style="color:#0f172a; border-bottom:2px solid #cbd5e1; padding-bottom:5px; font-size:13px; text-transform:uppercase;">II. Project Trackers & IOUs</h3>${misHtml}${iouHtml}<h3 style="color:#0f172a; border-bottom:2px solid #cbd5e1; padding-bottom:5px; font-size:13px; text-transform:uppercase;">III. 30-Day Category Flow</h3><div style="margin-bottom:10px; font-size:12px; font-weight:bold;">Total Cap Saved (TND): <span style="color:#10b981;">+${s.capital_saved_tnd.toFixed(2)} TND</span> | Total Cap Saved (USD): <span style="color:#10b981;">+$${s.capital_saved_usd.toFixed(2)}</span></div>${catHtml}<h3 style="color:#0f172a; border-bottom:2px solid #cbd5e1; padding-bottom:5px; font-size:13px; text-transform:uppercase;">IV. Master Ledger</h3>${logHtml}</div>`; 
         
-        let printArea = document.getElementById('printArea');
-        printArea.innerHTML = html;
-        printArea.style.display = 'block';
-        
-        // V29 PDF Overhaul: Insert manual close button to escape print view if print fails on iOS Standalone
-        let closeBtn = document.createElement('button');
-        closeBtn.innerHTML = "❌ Close Report View";
-        closeBtn.style.cssText = "position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#0f172a; color:white; border:2px solid #38bdf8; padding:15px 30px; border-radius:30px; font-weight:bold; font-size:16px; z-index:10000; box-shadow:0 10px 25px rgba(0,0,0,0.5); cursor:pointer;";
-        closeBtn.onclick = function() { printArea.style.display = 'none'; };
-        printArea.appendChild(closeBtn);
-
+        let printArea = document.getElementById('printArea'); printArea.innerHTML = html; printArea.style.display = 'block';
+        let closeBtn = document.createElement('button'); closeBtn.innerHTML = "❌ Close Report View"; closeBtn.style.cssText = "position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#0f172a; color:white; border:2px solid #38bdf8; padding:15px 30px; border-radius:30px; font-weight:bold; font-size:16px; z-index:10000; box-shadow:0 10px 25px rgba(0,0,0,0.5); cursor:pointer;";
+        closeBtn.onclick = function() { printArea.style.display = 'none'; }; printArea.appendChild(closeBtn);
         setTimeout(() => { window.print(); }, 500);
     }
 
