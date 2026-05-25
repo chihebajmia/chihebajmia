@@ -1109,9 +1109,10 @@
         let rBudget = document.getElementById('uiRunwayBudget');
         if(rBudget) rBudget.innerText = daily > 0 ? `(at ${daily.toFixed(2)} ${isUSDMode?'USD':'TND'}/day)` : '';
         
-        let netLiquid = Math.max(0, totalLiquid - activeEnvLocked);
+                let netLiquid = Math.max(0, totalLiquid - activeEnvLocked);
         let netRunway = daily > 0 ? Math.floor(netLiquid / daily) : 0;
-        document.getElementById('uiNetRunway').innerText = `Net (Excl. Envelopes): ${netRunway} Days`;
+        let netLiquidDisplay = isUSDMode ? `$${netLiquid.toFixed(2)}` : `${netLiquid.toFixed(2)} TND`;
+        document.getElementById('uiNetRunway').innerText = `Net (Excl. Envelopes): ${netRunway} Days | ${netLiquidDisplay}`;
 
         let curHist = s.history[s.mode]; let sym = s.mode === 'vacation' ? ' TND' : ' USD'; let pre = s.mode === 'onboard' ? '$' : '';
         document.getElementById('balanceTitle').innerText = `Remaining Today (${s.mode === 'vacation' ? 'Vacation' : 'Onboard'})`;
