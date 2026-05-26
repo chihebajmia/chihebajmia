@@ -2101,10 +2101,24 @@
             }
         }
 
-        let vapeLockDisplay = '';
-        if(s.mode === 'vacation' && vapeLockedTND > 0) {
-            vapeLockDisplay = `<div style="font-size:11px; margin-top:5px;">Est. Vacation Cost: <strong style="color:var(--danger);">${vapeLockedTND.toFixed(2)} TND (Locked)</strong></div>`;
+                // V35 Vape Engine Update
+        let vapeLockedTND = 0;
+        let vStart = s.settings.vacationStart ? new Date(s.settings.vacationStart).getTime() : 0;
+        let vEnd = s.settings.vacationEnd ? new Date(s.settings.vacationEnd).getTime() : 0;
+        let now = Date.now();
+        let daysLeftOnLand = (vEnd - now) / 86400000;
+
+        if (s.mode === 'vacation' && vEnd > now) {
+            if (avgLifespan > 0 && totalBought > 0) {
+                let avgCost = totalSpent / totalBought;
+                let vapesNeeded = daysLeftOnLand / avgLifespan;
+                let netVapesToBuy = Math.max(0, vapesNeeded - stash);
+                vapeLockedTND = netVapesToBuy * avgCost;
+            }
         }
+
+        let vapeLockDisplay = `<div style="font-size:11px; margin-top:5px;">Est. Vacation Cost: <strong style="color:${vapeLockedTND > 0 ? 'var(--danger)' : 'var(--success)'};">${vapeLockedTND > 0 ? vapeLockedTND.toFixed(2) + ' TND (Locked)' : '0.00 TND (Stash Sufficient)'}</strong></div>`;
+  }
 
         let html = `
             <div style="display:flex; justify-content:space-between; font-size:11px; align-items:center; border-bottom:1px dashed var(--panel-border); padding-bottom:8px; margin-bottom:8px;">
