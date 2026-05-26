@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#0f172a">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon.png">
-    <title>Crew Wallet Master V33</title>
+    <title>Crew Wallet Master V34</title>
     <style>
         :root { --bg-color: #0f172a; --card-bg: #1e293b; --accent: #fbbf24; --text: #f8fafc; --text-muted: #94a3b8; --success: #4ade80; --warning: #facc15; --danger: #f87171; --panel-border: #334155; --vault-bg: rgba(15, 23, 42, 0.5); }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-color); color: var(--text); margin: 0; padding: 16px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; -webkit-tap-highlight-color: transparent; padding-bottom: 90px; }
@@ -229,8 +229,9 @@
     </div>
 
     <div id="tab-debt" class="page-section">
-        <div class="vault-card debt-card clickable" onclick="openSTBModal()">
-            <div class="vault-header" style="color: var(--danger);"><span>🚨 STB Bank Master Debt</span><span>Tap for Command ➔</span></div>
+        <div class="vault-card debt-card">
+            <div class="vault-header" style="color: var(--danger);"><span>🚨 STB Bank Master Debt</span></div>
+            
             <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
                 <div>
                     <div class="v-lbl">Total True Liability (TND)</div>
@@ -242,14 +243,38 @@
                     <div class="v-val" id="l_bleed" style="font-size:14px; color:var(--warning);">0.00 TND</div>
                 </div>
             </div>
+            
             <div style="margin-top:15px; padding-top:10px; border-top:1px dashed var(--panel-border); font-size:11px;">
-                <div style="display:flex; justify-content:space-between; margin-bottom:6px;"><span>Arrears Block:</span> <strong id="l_arrears">0.00 TND</strong></div>
-                <div style="display:flex; justify-content:space-between; margin-bottom:6px;"><span>Account Deficit:</span> <strong id="l_overdraft">0.00 TND</strong></div>
-                <div style="display:flex; justify-content:space-between;"><span>Pending Installments:</span> <strong id="l_scheduled">0.00 TND</strong></div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                    <span>Arrears Block:</span> 
+                    <strong onclick="editLoanComponent('arrears')" style="cursor:pointer; color:var(--accent); font-size:12px;">✏️ <span id="l_arrears">0.00</span> TND</strong>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                    <span>Account Deficit:</span> 
+                    <strong onclick="editLoanComponent('overdraft')" style="cursor:pointer; color:var(--accent); font-size:12px;">✏️ <span id="l_overdraft">0.00</span> TND</strong>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
+                    <span>Pending Installments:</span> 
+                    <strong id="l_scheduled" style="font-size:12px;">0.00 TND</strong>
+                </div>
             </div>
+
+            <div style="margin-top:15px; padding-top:10px; border-top:1px dashed var(--panel-border);">
+                <div style="font-size:10px; color:var(--text-muted); margin-bottom:5px;">Target Zero Date (Optional):</div>
+                <input type="month" id="l_target_date" onchange="calculateKillShot()" style="margin-bottom:10px; padding:8px;">
+                <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px;">
+                    <span>Months Left:</span> <strong id="l_months_left" style="font-size:13px;">0</strong>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:11px;">
+                    <span>Monthly "Kill Shot" Req:</span> <strong id="l_kill_shot" style="color:var(--warning); font-size:13px;">0.00 TND</strong>
+                </div>
+            </div>
+
+            <button class="btn-secondary" style="margin-top:15px; border-color:var(--danger); color:var(--danger);" onclick="openSTBModal()">Log Direct Manual Payment</button>
         </div>
+
         <div class="vault-card" style="border-color: rgba(220, 38, 38, 0.4);">
-            <div class="vault-header" style="color: var(--danger);"><span>💳 Amortization Schedule</span></div>
+            <div class="vault-header" style="color: var(--danger);"><span>💳 Amortization Schedule</span><button onclick="addInstallment()" style="background:none;border:none;color:var(--text);font-size:16px;">➕</button></div>
             <div id="loanScheduleList" style="margin-top: 10px;"></div>
         </div>
         <div class="vault-card" style="border-color: rgba(250, 204, 21, 0.4);">
@@ -650,15 +675,10 @@
 
 <div class="modal-overlay" id="stbModal">
     <div class="modal-content">
-        <div class="title" style="text-align:center; font-size:12px; color:var(--danger);">STB Debt Command</div>
-        <div style="display:flex; justify-content:space-between; margin-top:15px; background:var(--vault-bg); padding:10px; border-radius:10px;">
-            <div><div style="font-size:10px; color:var(--text-muted);">Total True Liability</div><div style="font-size:16px; font-weight:bold; color:var(--danger);" id="stb_arrearsModal">0.00 TND</div></div>
-            <div style="text-align:right;"><div style="font-size:10px; color:var(--text-muted);">Interest Rate</div><div style="font-size:16px; font-weight:bold;"><span id="stb_rateModal">13.5</span>% <button onclick="editSTBRate()" style="background:none;border:none;color:var(--accent);font-size:10px;padding:0;">Edit</button></div></div>
-        </div>
+        <div class="title" style="text-align:center; font-size:12px; color:var(--danger);">Log Manual STB Payment</div>
+        <div style="font-size:10px; color:var(--text-muted); text-align:center; margin-bottom:15px;">Use this only if paying outside the Paycheck Waterfall.</div>
         
         <div style="margin-top:20px; border-top:1px dashed var(--panel-border); padding-top:15px;">
-            <div class="title">Log Direct Manual Payment</div>
-            <div style="font-size:9px; color:var(--text-muted); margin-bottom:8px;">Only use this if paying from a land vault outside the Paycheck Waterfall.</div>
             <input type="number" id="stbPayAmt" placeholder="Amount (TND)" style="margin-bottom:8px; width:100%;" inputmode="decimal">
             <select id="stbPayWallet" style="margin-bottom:10px; width:100%;">
                 <option value="brightwell">Deduct from: Brightwell (Convert via FX)</option>
@@ -722,7 +742,7 @@
     if (!navigator.onLine) document.getElementById('offlineBadge').style.display = 'inline';
 
     // ==========================================
-    // 1. DATA, INDEXED-DB & CRYPTO ENGINE (V33)
+    // 1. DATA, INDEXED-DB & CRYPTO ENGINE (V34)
     // ==========================================
     async function hashPin(pin) {
         const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pin));
@@ -736,6 +756,7 @@
             "overdraft": 516.00,
             "rate": 13.5,
             "last_interest_ts": Date.now(),
+            "targetDate": "",
             "schedule": [
                 { "id": 1, "date": "May 31, 2026", "amount": 1010, "paid": false },
                 { "id": 2, "date": "Jun 30, 2026", "amount": 1010, "paid": false },
@@ -820,9 +841,10 @@
             await forceSaveState();
         }
 
-        // V33 STB Bank Architecture Migration
         if (!s.loan.overdraft) s.loan.overdraft = 0;
         if (!s.loan.last_interest_ts) s.loan.last_interest_ts = Date.now();
+        if (s.loan.targetDate === undefined) s.loan.targetDate = "";
+        
         if (!s.loan.schedule || s.loan.schedule.length === 0) {
              s.loan.schedule = [
                 { "id": 1, "date": "May 31, 2026", "amount": 1010, "paid": false },
@@ -856,7 +878,7 @@
         checkLock();
     }
 
-    // V33 Background Interest Chronometer
+    // V34 Background Interest Chronometer
     function processInterestBleed() {
         let now = Date.now();
         let msPassed = now - s.loan.last_interest_ts;
@@ -1118,9 +1140,54 @@
         if (cat === '💨 Vape') box.style.display = 'block'; else box.style.display = 'none';
     }
 
+    // V34 Editing Override Logic
+    async function editLoanComponent(comp) {
+        let currentVal = (comp === 'arrears') ? s.loan.arrears : s.loan.overdraft;
+        let newValStr = await openUPrompt(`Edit ${comp}`, `Current: ${currentVal.toFixed(2)} TND\nEnter new exact amount:`, currentVal.toFixed(2));
+        if(newValStr === null) return;
+        let newVal = parseFloat(newValStr);
+        if (!isNaN(newVal) && newVal >= 0) {
+            if (comp === 'arrears') s.loan.arrears = newVal;
+            else s.loan.overdraft = newVal;
+            saveState();
+        }
+    }
+
+    // V34 Target Zero Calculator
+    function calculateKillShot() {
+        let targetDateStr = document.getElementById('l_target_date').value;
+        if(!targetDateStr) {
+            document.getElementById('l_months_left').innerText = "0";
+            document.getElementById('l_kill_shot').innerText = "0.00 TND";
+            s.loan.targetDate = "";
+            return;
+        }
+        s.loan.targetDate = targetDateStr;
+
+        let targetDate = new Date(targetDateStr + "-01");
+        let now = new Date();
+        let monthsLeft = (targetDate.getFullYear() - now.getFullYear()) * 12 + (targetDate.getMonth() - now.getMonth());
+
+        if (monthsLeft <= 0) {
+            document.getElementById('l_months_left').innerText = "0";
+            document.getElementById('l_kill_shot').innerText = "Past Due";
+            saveState();
+            return;
+        }
+
+        let unpaidsTND = s.loan.schedule.filter(x => !x.paid).reduce((sum, item) => sum + item.amount, 0);
+        let totalTrueDebt = s.loan.arrears + s.loan.overdraft + unpaidsTND;
+
+        let killShot = totalTrueDebt / monthsLeft;
+
+        document.getElementById('l_months_left').innerText = monthsLeft;
+        document.getElementById('l_kill_shot').innerText = killShot.toFixed(2) + " TND";
+        forceSaveState(); // Save silently without re-rendering everything
+    }
+
     function renderApp() {
         applyTheme(); populateCategories(); populateProjectDropdowns(); calculateBehavioralStreaks(); checkVapeField('adv'); checkVapeField('tm');
-        processInterestBleed(); // Sync background bleed before rendering
+        processInterestBleed(); 
         
         let ibkrMktValue = s.vault.ibkr_shares * s.vault.ibkr_price;
         let ibkrUnrealized = ibkrMktValue - s.vault.ibkr_cost; let ibkrTotal = s.vault.ibkr_cash + ibkrMktValue;
@@ -1134,17 +1201,22 @@
         document.getElementById('v_cash_usd').innerText = '$' + s.vault.cash_usd.toFixed(2); document.getElementById('v_cash_tnd').innerText = s.vault.cash_tnd.toFixed(2) + ' TND'; 
         document.getElementById('v_savings').innerText = s.vault.savings.toFixed(2) + ' TND';
         
-        // V33 Master Debt Calculation and Display
+        // V34 Master Debt Calculation and Display
         let unpaidsTND = s.loan.schedule.filter(x => !x.paid).reduce((sum, item) => sum + item.amount, 0);
         let totalTrueDebt = s.loan.arrears + s.loan.overdraft + unpaidsTND;
         document.getElementById('l_total_tnd').innerText = totalTrueDebt.toFixed(2) + " TND";
         document.getElementById('l_total_usd').innerText = "$" + (totalTrueDebt / s.fx_rate).toFixed(2);
-        document.getElementById('l_arrears').innerText = s.loan.arrears.toFixed(2) + " TND";
-        document.getElementById('l_overdraft').innerText = s.loan.overdraft.toFixed(2) + " TND";
+        document.getElementById('l_arrears').innerText = s.loan.arrears.toFixed(2);
+        document.getElementById('l_overdraft').innerText = s.loan.overdraft.toFixed(2);
         document.getElementById('l_scheduled').innerText = unpaidsTND.toFixed(2) + " TND";
         
         let dailyBleed = ((s.loan.arrears * (s.loan.rate / 100)) / 365);
         document.getElementById('l_bleed').innerText = dailyBleed.toFixed(2) + ' TND';
+
+        if(document.getElementById('l_target_date')) {
+            document.getElementById('l_target_date').value = s.loan.targetDate || "";
+            calculateKillShot();
+        }
         
         let capSavedStr = s.mode === 'vacation' ? s.capital_saved_tnd.toFixed(2) + ' TND' : '$' + s.capital_saved_usd.toFixed(2);
         let capSavedLbl = s.mode === 'vacation' ? 'Total Capital Saved (TND)' : 'Total Capital Saved (USD)';
@@ -1179,7 +1251,7 @@
         let rBudget = document.getElementById('uiRunwayBudget');
         if(rBudget) rBudget.innerText = daily > 0 ? `(at ${daily.toFixed(2)} ${isUSDMode?'USD':'TND'}/day)` : '';
         
-        // V33 Net Runway Fix
+        // V34 Liquid Runway Text Fix
         let netLiquid = Math.max(0, totalLiquid - activeEnvLocked);
         let netRunway = daily > 0 ? Math.floor(netLiquid / daily) : 0;
         let netLiquidDisplay = isUSDMode ? `$${netLiquid.toFixed(2)}` : `${netLiquid.toFixed(2)} TND`;
@@ -1254,19 +1326,25 @@
         else { document.getElementById('npLimit').placeholder = "Target Goal Amount"; }
     }
     
-    // V33 Goal Parsing Fix
+    // V34 Goal Bug Permanently Fixed
     async function submitNewProject() {
         let type = document.getElementById('npType').value; let name = document.getElementById('npName').value.trim();
         if(!name) { await openUConfirm("Error", "Please provide a name."); return; }
         let limitVal = parseFloat(document.getElementById('npLimit').value); 
         if(isNaN(limitVal) || limitVal <= 0) { await openUConfirm("Error", "Please enter a valid numeric amount."); return; }
         
-        let bypass = document.getElementById('npBypass').checked; let logistics = document.getElementById('npLogistics').checked; 
         let currency = document.getElementById('npCurrency').value; let key = 'p_' + Date.now();
         
-        if(type === 'env') { s.projects.envelopes[key] = { name: '🏖️ ' + name, limit: limitVal, spent: 0, archived: false, bypass: bypass, currency: currency }; } 
-        else if(type === 'mis') { s.projects.missions[key] = { name: '🎯 ' + name, spent: 0, dead: 0, hasLogistics: logistics, archived: false, bypass: bypass, currency: currency }; } 
-        else if(type === 'goal') { s.projects.goals.push({ id: Date.now(), name: '🏆 ' + name, target: limitVal, saved: 0, archived: false, currency: currency }); }
+        if(type === 'env') { 
+            let bypass = document.getElementById('npBypass').checked;
+            s.projects.envelopes[key] = { name: '🏖️ ' + name, limit: limitVal, spent: 0, archived: false, bypass: bypass, currency: currency }; 
+        } else if(type === 'mis') { 
+            let bypass = document.getElementById('npBypass').checked;
+            let logistics = document.getElementById('npLogistics').checked; 
+            s.projects.missions[key] = { name: '🎯 ' + name, spent: 0, dead: 0, hasLogistics: logistics, archived: false, bypass: bypass, currency: currency }; 
+        } else if(type === 'goal') { 
+            s.projects.goals.push({ id: Date.now(), name: '🏆 ' + name, target: limitVal, saved: 0, archived: false, currency: currency }); 
+        }
         
         document.getElementById('addProjectModal').style.display = 'none'; saveState();
     }
@@ -1568,7 +1646,7 @@
             if(oldItem.category === '💨 Vape' && oldItem.vapeQty) s.vape_stash.count = Math.max(0, s.vape_stash.count - oldItem.vapeQty);
             if(oldItem.walletSource && s.vault[oldItem.walletSource] !== undefined) { 
                 let isOldTargetUSD = ['brightwell', 'wise', 'cash_usd', 'ibkr_cash'].includes(oldItem.walletSource); let refundAmount = oldItem.amount; 
-                if (oldItem.deductedAmount !== undefined) refundAmount = oldItem.deductedAmount; else { let rate = oldItem.fxRate && !isNaN(oldItem.fxRate) ? oldItem.fxRate : s.fx_rate; if (tmEditingMode === 'vacation' && isOldTargetUSD) { refundAmount = oldItem.amount / rate; } else if (tmEditingMode === 'onboard' && !isOldTargetUSD) { refundAmount = oldItem.amount * rate; } }
+                if (oldItem.deductedAmount !== undefined) refundAmount = oldItem.deductedAmount; else { let rate = oldItem.fxRate && !isNaN(oldItem.fxRate) ? item.fxRate : s.fx_rate; if (tmEditingMode === 'vacation' && isOldTargetUSD) { refundAmount = oldItem.amount / rate; } else if (tmEditingMode === 'onboard' && !isOldTargetUSD) { refundAmount = oldItem.amount * rate; } }
                 s.vault[oldItem.walletSource] += refundAmount; 
             } 
             reverseProjectTracking(oldItem, tmEditingMode); s.history[tmEditingMode].archive[dayIdxOld].logs.splice(tmEditingIdx, 1);
@@ -1657,7 +1735,7 @@
     }
 
     // ==========================================
-    // 6. IOU & DEBT ENGINE (V33 AUTOMATED)
+    // 6. IOU & DEBT ENGINE
     // ==========================================
     function renderIOUs() {
         const pList = document.getElementById('payablesList'); pList.innerHTML = '';
@@ -1739,7 +1817,6 @@
         document.getElementById('pwOpVal').innerText = '$' + (gross * (pOp/100)).toFixed(2); 
     }
 
-    // V33 Paycheck Waterfall Engine
     async function processPaycheck() {
         let gross = parseFloat(document.getElementById('pwGross').value); if(isNaN(gross) || gross <= 0) return;
         let pLoan = parseFloat(document.getElementById('pwLoanPct').value) || 0; 
@@ -1752,7 +1829,6 @@
         let remainingLoanTND = toLoanTND;
         let waterfallLogs = [];
         
-        // Waterfall Priority 1: Unpaid Scheduled Installment
         let unpaids = s.loan.schedule.filter(x => !x.paid);
         if (unpaids.length > 0 && remainingLoanTND > 0) {
             let inst = unpaids[0];
@@ -1764,7 +1840,6 @@
             }
         }
         
-        // Waterfall Priority 2: Overdraft Deficit
         if (s.loan.overdraft > 0 && remainingLoanTND > 0) {
             if (remainingLoanTND >= s.loan.overdraft) {
                 remainingLoanTND -= s.loan.overdraft;
@@ -1777,14 +1852,13 @@
             }
         }
         
-        // Waterfall Priority 3: Master Arrears Smash
         if (remainingLoanTND > 0) {
             s.loan.arrears -= remainingLoanTND;
             if(s.loan.arrears < 0) s.loan.arrears = 0; 
             waterfallLogs.push(`Smashed Arrears: ${remainingLoanTND.toFixed(2)} TND`);
         }
         
-        s.history[s.mode].current.push({ amount: toLoanUSD, tag: `🏦 STB Bank Auto-Wire (40%) [${waterfallLogs.join(' | ')}]`, category: "🏦 Financial & Fees", location: "International Wire", walletSource: "brightwell", bypassLimit: true, fxRate: s.fx_rate, ts: Date.now() });
+        s.history[s.mode].current.push({ amount: toLoanUSD, tag: `🏦 STB Bank Auto-Wire (${pLoan}%) [${waterfallLogs.join(' | ')}]`, category: "🏦 Financial & Fees", location: "International Wire", walletSource: "brightwell", bypassLimit: true, fxRate: s.fx_rate, ts: Date.now() });
 
         let savDest = document.getElementById('pwSavDest').value; 
         if(savDest === 'ibkr') s.vault.ibkr_cash += toSavUSD; else s.vault.savings += (toSavUSD * s.fx_rate);
@@ -1821,7 +1895,6 @@
     function openSTBModal() { document.getElementById('stbModal').style.display = 'flex'; }
     async function editSTBRate() { let rStr = await openUPrompt("Rate", "New Rate:", s.loan.rate); let r = parseFloat(rStr); if(!isNaN(r)) { s.loan.rate = r; saveState(); } }
     
-    // V33 Manual STB Direct Payment (If not using paycheck wizard)
     function logSTBPayment() { 
         let amt = parseFloat(document.getElementById('stbPayAmt').value); if(isNaN(amt) || amt <= 0) return; 
         let w = document.getElementById('stbPayWallet').value; 
@@ -2009,5 +2082,3 @@
 </script>
 </body>
 </html>
-
-    
