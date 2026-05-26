@@ -504,21 +504,26 @@
     <div class="modal-content">
         <div class="title" style="text-align:center; font-size:12px; color:var(--success);">💵 Smart Paycheck Wizard</div>
         <div style="font-size:10px; color:var(--text-muted); text-align:center; margin-bottom:15px;">Input gross pay and adjust splits.</div>
-        <input type="number" id="pwGross" placeholder="Gross Pay (USD)" style="font-size:20px; font-weight:bold; text-align:center;" inputmode="decimal" oninput="calcPaycheck()">
+        <input type="number" id="pwGross" placeholder="Gross Pay (USD)" style="font-size:20px; font-weight:bold; text-align:center;" inputmode="decimal" oninput="calcPaycheck('gross', null)">
+        
         <div style="margin-top:20px; background:var(--vault-bg); padding:12px; border-radius:8px; border:1px solid var(--panel-border);">
             
             <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px; align-items:center;">
                 <span style="color:var(--danger); display:flex; align-items:center; gap:4px;">🚨 STB Auto-Wire 
-                    <input type="number" id="pwLoanPct" value="40" style="width:45px; padding:4px; font-size:12px; text-align:center; background:#0f172a; border:1px solid var(--panel-border); color:var(--text); border-radius:6px;" oninput="calcPaycheck()">%
+                    <input type="number" id="pwLoanPct" value="40" style="width:45px; padding:4px; font-size:12px; text-align:center; background:#0f172a; border:1px solid var(--panel-border); color:var(--text); border-radius:6px;" oninput="calcPaycheck('pct', 'loan')">%
                 </span>
-                <strong id="pwLoanVal" style="font-size:13px;">$0.00</strong>
+                <div style="display:flex; align-items:center; gap:4px; font-size:13px; font-weight:bold;">
+                    $ <input type="number" id="pwLoanAmt" style="width:60px; padding:4px; font-size:12px; text-align:right; background:#0f172a; border:1px solid var(--panel-border); color:var(--text); border-radius:6px;" oninput="calcPaycheck('amt', 'loan')">
+                </div>
             </div>
 
             <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px; padding-top:8px; border-top:1px dashed var(--panel-border); align-items:center;">
                 <span style="color:#38bdf8; display:flex; align-items:center; gap:4px;">📈 Savings/IBKR 
-                    <input type="number" id="pwSavPct" value="15" style="width:45px; padding:4px; font-size:12px; text-align:center; background:#0f172a; border:1px solid var(--panel-border); color:var(--text); border-radius:6px;" oninput="calcPaycheck()">%
+                    <input type="number" id="pwSavPct" value="15" style="width:45px; padding:4px; font-size:12px; text-align:center; background:#0f172a; border:1px solid var(--panel-border); color:var(--text); border-radius:6px;" oninput="calcPaycheck('pct', 'sav')">%
                 </span>
-                <strong id="pwSavVal" style="font-size:13px;">$0.00</strong>
+                <div style="display:flex; align-items:center; gap:4px; font-size:13px; font-weight:bold;">
+                    $ <input type="number" id="pwSavAmt" style="width:60px; padding:4px; font-size:12px; text-align:right; background:#0f172a; border:1px solid var(--panel-border); color:var(--text); border-radius:6px;" oninput="calcPaycheck('amt', 'sav')">
+                </div>
             </div>
             <select id="pwSavDest" style="margin-top:4px; font-size:10px; padding:6px;">
                 <option value="ibkr">Route to: IBKR (Idle Cash)</option>
@@ -527,9 +532,11 @@
             
             <div style="display:flex; justify-content:space-between; font-size:11px; margin-top:8px; padding-top:8px; border-top:1px dashed var(--panel-border); align-items:center;">
                 <span style="color:var(--success); display:flex; align-items:center; gap:4px;">💳 Brightwell (Op.) 
-                    <input type="number" id="pwOpPct" value="45" style="width:45px; padding:4px; font-size:12px; text-align:center; background:#0f172a; border:1px solid var(--panel-border); color:var(--text); border-radius:6px;" oninput="calcPaycheck()">%
+                    <input type="number" id="pwOpPct" value="45" style="width:45px; padding:4px; font-size:12px; text-align:center; background:#0f172a; border:1px solid var(--panel-border); color:var(--text); border-radius:6px;" oninput="calcPaycheck('pct', 'op')">%
                 </span>
-                <strong id="pwOpVal" style="font-size:13px;">$0.00</strong>
+                <div style="display:flex; align-items:center; gap:4px; font-size:13px; font-weight:bold;">
+                    $ <input type="number" id="pwOpAmt" style="width:60px; padding:4px; font-size:12px; text-align:right; background:#0f172a; border:1px solid var(--panel-border); color:var(--text); border-radius:6px;" oninput="calcPaycheck('amt', 'op')">
+                </div>
             </div>
         </div>
         <div class="modal-btn-row">
@@ -731,8 +738,7 @@
 </div>
 
 <div id="printArea"></div>
-
-<script>
+  <script>
     // ==========================================
     // 0. SERVICE WORKER & NETWORK TRACKER
     // ==========================================
@@ -907,12 +913,16 @@
 
         s.loan.schedule.forEach(inst => {
             if(!inst.paid) {
-                let instDate = new Date(inst.date).getTime();
-                if(instDate >= vStart && instDate <= vEnd && instDate <= now) {
-                    inst.paid = true;
-                    inst.shiftedToArrears = true;
-                    s.loan.arrears += inst.amount;
-                    shifted = true;
+                // Approximate installment timestamp to the 28th of its month to catch late-month schedules safely
+                let dParts = inst.date.split(' ');
+                if(dParts.length === 3) {
+                    let estDate = new Date(`${dParts[0]} 28, ${dParts[2]}`).getTime();
+                    if(estDate >= vStart && estDate <= vEnd && estDate <= now) {
+                        inst.paid = true;
+                        inst.shiftedToArrears = true;
+                        s.loan.arrears += inst.amount;
+                        shifted = true;
+                    }
                 }
             }
         });
@@ -1164,6 +1174,7 @@
         if (cat === '💨 Vape') box.style.display = 'block'; else box.style.display = 'none';
     }
 
+    // V35 Editing Override Logic
     async function editLoanComponent(comp) {
         let currentVal = (comp === 'arrears') ? s.loan.arrears : s.loan.overdraft;
         let newValStr = await openUPrompt(`Edit ${comp}`, `Current: ${currentVal.toFixed(2)} TND\nEnter new exact amount:`, currentVal.toFixed(2));
@@ -1184,6 +1195,7 @@
         if(!isNaN(n) && n > 0) { p.amount = n; saveState(); }
     }
 
+    // V35 Target Zero Calculator
     function calculateKillShot() {
         let targetDateStr = document.getElementById('l_target_date').value;
         if(!targetDateStr) {
@@ -1257,7 +1269,6 @@
 
         // V35 Predictive Vape Engine (Locks projection from runway)
         let vapeLockedTND = 0;
-        let vapeLockedStr = "";
         
         let vLogs = [];
         s.history[s.mode].archive.forEach(a => { a.logs.forEach(l => { if (l.category === '💨 Vape') vLogs.push({...l, ts: l.ts}); }); });
@@ -1283,7 +1294,6 @@
                     let vapesNeeded = daysLeftOnLand / avgLifespan;
                     let netVapesToBuy = Math.max(0, vapesNeeded - stash);
                     vapeLockedTND = netVapesToBuy * avgCost;
-                    vapeLockedStr = `Est. Vac. Cost: ${vapeLockedTND.toFixed(2)} TND (Locked)`;
                 }
             }
         }
@@ -1837,15 +1847,27 @@
         let html = ''; let pending = s.loan.schedule.filter(x => !x.paid); let paid = s.loan.schedule.filter(x => x.paid);
         if(pending.length === 0 && paid.length === 0) html = '<div style="font-size:11px;color:var(--text-muted);text-align:center;">No installments logged.</div>';
         
+        let vStart = s.settings.vacationStart ? new Date(s.settings.vacationStart).getTime() : 0;
+        let vEnd = s.settings.vacationEnd ? new Date(s.settings.vacationEnd).getTime() : 0;
+
         pending.forEach((p, idx) => { 
-            let badge = idx <= 1 ? `<span style="background:var(--danger);color:white;padding:2px 4px;border-radius:4px;font-size:8px;">🔴 Overdue / Next</span>` : `<span style="background:#38bdf8;color:white;padding:2px 4px;border-radius:4px;font-size:8px;">🔵 Upcoming</span>`;
-            html += `<div class="iou-item" style="border-color:var(--panel-border);"><div><strong style="font-size:12px;">🗓️ ${p.date}</strong> ${badge} <button onclick="editInstallmentAmount(${p.id})" style="background:none;border:none;cursor:pointer;">✏️</button><div style="font-size:11px;color:var(--danger); font-weight:bold; margin-top:4px;">${p.amount.toFixed(2)} TND</div></div><div><button class="iou-btn" onclick="payInstallment(${p.id})">Manual Pay</button></div></div>`; 
+            let pDate = new Date(p.date).getTime();
+            let isVacation = (vStart && vEnd && pDate >= vStart && pDate <= vEnd);
+            
+            let badge = '';
+            if (isVacation) {
+                badge = `<span style="background:var(--warning);color:black;padding:2px 4px;border-radius:4px;font-size:8px;font-weight:bold;">🏖️ Vacation Hold (Will shift to Arrears)</span>`;
+            } else {
+                badge = idx === 0 ? `<span style="background:var(--danger);color:white;padding:2px 4px;border-radius:4px;font-size:8px;">🔴 Next</span>` : `<span style="background:#38bdf8;color:white;padding:2px 4px;border-radius:4px;font-size:8px;">🔵 Upcoming</span>`;
+            }
+            
+            html += `<div class="iou-item" style="border-color:var(--panel-border);"><div><strong style="font-size:12px;">🗓️ ${p.date}</strong> <button onclick="editInstallmentAmount(${p.id})" style="background:none;border:none;cursor:pointer;">✏️</button><div style="font-size:11px;color:var(--danger); font-weight:bold; margin-top:4px;">${p.amount.toFixed(2)} TND</div><div style="margin-top:4px;">${badge}</div></div><div><button class="iou-btn" onclick="payInstallment(${p.id})">Manual Pay</button></div></div>`; 
         });
         
         if(paid.length > 0) { 
             html += `<div style="font-size:10px; color:var(--text-muted); margin:10px 0 5px 0; text-align:center;">Archived Payments</div>`; 
             paid.forEach(p => { 
-                let shiftNote = p.shiftedToArrears ? `<span style="color:var(--warning);font-size:8px; display:block;">(Shifted to Arrears via Vacation)</span>` : "";
+                let shiftNote = p.shiftedToArrears ? `<span style="color:var(--warning);font-size:8px; display:block; margin-top:2px;">(Shifted to Arrears via Vacation)</span>` : "";
                 html += `<div class="iou-item" style="opacity:0.6; border-color:var(--success);"><div><strike style="font-size:12px;">${p.date}</strike> <span style="background:var(--success);color:white;padding:2px 4px;border-radius:4px;font-size:8px;">🟢 Paid</span><div style="font-size:11px;color:var(--success); font-weight:bold; margin-top:4px;">${p.amount.toFixed(2)} TND</div>${shiftNote}</div></div>`; 
             }); 
         }
@@ -1875,28 +1897,49 @@
     // ==========================================
     // 7. WIZARDS, AUTOMATIONS & UTILITIES
     // ==========================================
-    function openPaycheckModal() { document.getElementById('pwGross').value = ''; document.getElementById('pwLoanVal').innerText = '$0.00'; document.getElementById('pwSavVal').innerText = '$0.00'; document.getElementById('pwOpVal').innerText = '$0.00'; document.getElementById('pwLoanPct').value = 40; document.getElementById('pwSavPct').value = 15; document.getElementById('pwOpPct').value = 45; document.getElementById('paycheckModal').style.display = 'flex'; }
+    function openPaycheckModal() { 
+        document.getElementById('pwGross').value = ''; 
+        document.getElementById('pwLoanAmt').value = ''; 
+        document.getElementById('pwSavAmt').value = ''; 
+        document.getElementById('pwOpAmt').value = ''; 
+        document.getElementById('pwLoanPct').value = 40; 
+        document.getElementById('pwSavPct').value = 15; 
+        document.getElementById('pwOpPct').value = 45; 
+        document.getElementById('paycheckModal').style.display = 'flex'; 
+    }
     
-    function calcPaycheck() { 
+    // V35 Dual-Input Paycheck Calculator
+    function calcPaycheck(mode, target) { 
         let gross = parseFloat(document.getElementById('pwGross').value) || 0; 
-        let pLoan = parseFloat(document.getElementById('pwLoanPct').value) || 0; 
-        let pSav = parseFloat(document.getElementById('pwSavPct').value) || 0; 
-        let pOp = parseFloat(document.getElementById('pwOpPct').value) || 0; 
-        document.getElementById('pwLoanVal').innerText = '$' + (gross * (pLoan/100)).toFixed(2); 
-        document.getElementById('pwSavVal').innerText = '$' + (gross * (pSav/100)).toFixed(2); 
-        document.getElementById('pwOpVal').innerText = '$' + (gross * (pOp/100)).toFixed(2); 
+        if(gross <= 0) return;
+
+        if (mode === 'gross') {
+            let pLoan = parseFloat(document.getElementById('pwLoanPct').value) || 0; 
+            let pSav = parseFloat(document.getElementById('pwSavPct').value) || 0; 
+            let pOp = parseFloat(document.getElementById('pwOpPct').value) || 0; 
+            document.getElementById('pwLoanAmt').value = (gross * (pLoan/100)).toFixed(2); 
+            document.getElementById('pwSavAmt').value = (gross * (pSav/100)).toFixed(2); 
+            document.getElementById('pwOpAmt').value = (gross * (pOp/100)).toFixed(2); 
+        } else if (mode === 'pct') {
+            let pct = parseFloat(document.getElementById(target === 'loan' ? 'pwLoanPct' : target === 'sav' ? 'pwSavPct' : 'pwOpPct').value) || 0;
+            let amtBox = document.getElementById(target === 'loan' ? 'pwLoanAmt' : target === 'sav' ? 'pwSavAmt' : 'pwOpAmt');
+            amtBox.value = (gross * (pct/100)).toFixed(2);
+        } else if (mode === 'amt') {
+            let amt = parseFloat(document.getElementById(target === 'loan' ? 'pwLoanAmt' : target === 'sav' ? 'pwSavAmt' : 'pwOpAmt').value) || 0;
+            let pctBox = document.getElementById(target === 'loan' ? 'pwLoanPct' : target === 'sav' ? 'pwSavPct' : 'pwOpPct');
+            pctBox.value = ((amt / gross) * 100).toFixed(2);
+        }
     }
 
     // V35 "Current + Oldest" Paycheck Waterfall
     async function processPaycheck() {
         let gross = parseFloat(document.getElementById('pwGross').value); if(isNaN(gross) || gross <= 0) return;
-        let pLoan = parseFloat(document.getElementById('pwLoanPct').value) || 0; 
-        let pSav = parseFloat(document.getElementById('pwSavPct').value) || 0; 
-        let pOp = parseFloat(document.getElementById('pwOpPct').value) || 0;
         
-        let toLoanUSD = gross * (pLoan/100); let toSavUSD = gross * (pSav/100); let toOpUSD = gross * (pOp/100);
+        let toLoanUSD = parseFloat(document.getElementById('pwLoanAmt').value) || 0; 
+        let toSavUSD = parseFloat(document.getElementById('pwSavAmt').value) || 0; 
+        let toOpUSD = parseFloat(document.getElementById('pwOpAmt').value) || 0;
+        
         let toLoanTND = toLoanUSD * s.fx_rate; 
-        
         let remainingLoanTND = toLoanTND;
         let waterfallLogs = [];
         
@@ -1929,7 +1972,7 @@
             waterfallLogs.push(`Arrears (Oldest): ${remainingLoanTND.toFixed(2)} TND`);
         }
         
-        s.history[s.mode].current.push({ amount: toLoanUSD, tag: `🏦 STB Bank Auto-Wire (${pLoan}%) [${waterfallLogs.join(' | ')}]`, category: "🏦 Financial & Fees", location: "International Wire", walletSource: "brightwell", bypassLimit: true, fxRate: s.fx_rate, ts: Date.now() });
+        s.history[s.mode].current.push({ amount: toLoanUSD, tag: `🏦 STB Bank Auto-Wire ($${toLoanUSD.toFixed(2)}) [${waterfallLogs.join(' | ')}]`, category: "🏦 Financial & Fees", location: "International Wire", walletSource: "brightwell", bypassLimit: true, fxRate: s.fx_rate, ts: Date.now() });
 
         let savDest = document.getElementById('pwSavDest').value; 
         if(savDest === 'ibkr') s.vault.ibkr_cash += toSavUSD; else s.vault.savings += (toSavUSD * s.fx_rate);
@@ -2044,6 +2087,25 @@
             runOut = runDate.toDateString(); 
         } else if (stash === 0 && empties.length > 0) { runOut = "Stash Empty"; }
 
+        // Fetch the locked vape cost specifically for display in the Command Center
+        let vapeLockedTND = 0;
+        if (s.mode === 'vacation' && s.settings.vacationEnd) {
+            let vEnd = new Date(s.settings.vacationEnd).getTime();
+            let now = Date.now();
+            let daysLeftOnLand = (vEnd - now) / 86400000;
+            if (daysLeftOnLand > 0 && avgLifespan > 0 && totalBought > 0) {
+                let avgCost = totalSpent / totalBought;
+                let vapesNeeded = daysLeftOnLand / avgLifespan;
+                let netVapesToBuy = Math.max(0, vapesNeeded - stash);
+                vapeLockedTND = netVapesToBuy * avgCost;
+            }
+        }
+
+        let vapeLockDisplay = '';
+        if(s.mode === 'vacation' && vapeLockedTND > 0) {
+            vapeLockDisplay = `<div style="font-size:11px; margin-top:5px;">Est. Vacation Cost: <strong style="color:var(--danger);">${vapeLockedTND.toFixed(2)} TND (Locked)</strong></div>`;
+        }
+
         let html = `
             <div style="display:flex; justify-content:space-between; font-size:11px; align-items:center; border-bottom:1px dashed var(--panel-border); padding-bottom:8px; margin-bottom:8px;">
                 <div>Lifetime Bought (${s.mode === 'vacation' ? 'Land' : 'Ship'}): <strong style="font-size:12px;">${totalBought}</strong></div>
@@ -2055,6 +2117,7 @@
             </div>
             <div style="font-size:11px; margin-top:10px;">Avg Hardware Lifespan: <strong style="color:var(--success);">${avgLifespan > 0 ? avgLifespan.toFixed(1) + ' Days' : 'Need more data'}</strong></div>
             <div style="font-size:11px; margin-top:5px;">Stash Depletion Est: <strong style="color:var(--warning);">${runOut}</strong></div>
+            ${vapeLockDisplay}
         `;
         bd.innerHTML = html;
     }
@@ -2161,3 +2224,4 @@
 </script>
 </body>
 </html>
+  
