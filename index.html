@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#0f172a">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon.png">
-    <title>Crew Wallet Master V34</title>
+    <title>Crew Wallet Master V35</title>
     <style>
         :root { --bg-color: #0f172a; --card-bg: #1e293b; --accent: #fbbf24; --text: #f8fafc; --text-muted: #94a3b8; --success: #4ade80; --warning: #facc15; --danger: #f87171; --panel-border: #334155; --vault-bg: rgba(15, 23, 42, 0.5); }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-color); color: var(--text); margin: 0; padding: 16px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; -webkit-tap-highlight-color: transparent; padding-bottom: 90px; }
@@ -145,7 +145,7 @@
                     <span id="uiRunway">0 Days</span> 
                     <span id="uiRunwayBudget" style="font-size:10px; color:var(--text-muted); font-weight:normal; margin-left:4px;"></span>
                 </div>
-                <div style="font-size:9px; color:var(--warning); font-weight:bold; margin-top:4px;" id="uiNetRunway">Net (Excl. Envelopes): 0 Days</div>
+                <div style="font-size:9px; color:var(--warning); font-weight:bold; margin-top:4px;" id="uiNetRunway">Net (Excl. Envelopes & Vapes): 0 Days</div>
                 <div style="display:flex; justify-content:space-between; margin-top:10px; border-top:1px dashed var(--panel-border); padding-top:8px;">
                     <div style="font-size:10px; color:var(--text-muted); text-align:left;">Total USD Assets:<br><strong id="totUSD" style="color:var(--text); font-size:13px;">$0.00</strong></div>
                     <div style="font-size:10px; color:var(--text-muted); text-align:right;">Total Wealth:<br><strong id="totTND" style="color:var(--success); font-size:13px;">0.00 TND</strong></div>
@@ -400,6 +400,14 @@
             <select id="setMode" onchange="changeMode()" style="margin-bottom:10px;"><option value="vacation">🏖️ Vacation Mode (TND)</option><option value="onboard">🚢 Onboard Mode (USD)</option></select>
             <div class="input-row"><span style="font-size:12px; width:100%;">Vacation Limit:</span><input type="number" id="setVacLimit" onchange="updateLimits()"></div>
             <div class="input-row"><span style="font-size:12px; width:100%;">Onboard Limit:</span><input type="number" id="setOnbLimit" onchange="updateLimits()"></div>
+        </div>
+
+        <div class="vault-card">
+            <div class="title">Contract & Vacation Dates</div>
+            <div class="input-row" style="margin-bottom:8px;"><span style="font-size:12px; width:100%;">Vacation Start:</span><input type="date" id="setVacationStart" onchange="updateContractDates()"></div>
+            <div class="input-row" style="margin-bottom:8px;"><span style="font-size:12px; width:100%;">Vacation End:</span><input type="date" id="setVacationEnd" onchange="updateContractDates()"></div>
+            <div class="input-row" style="margin-bottom:8px;"><span style="font-size:12px; width:100%;">Contract Start:</span><input type="date" id="setContractStart" onchange="updateContractDates()"></div>
+            <div class="input-row"><span style="font-size:12px; width:100%;">Contract End:</span><input type="date" id="setContractEnd" onchange="updateContractDates()"></div>
         </div>
 
         <div class="vault-card">
@@ -723,6 +731,7 @@
 </div>
 
 <div id="printArea"></div>
+
 <script>
     // ==========================================
     // 0. SERVICE WORKER & NETWORK TRACKER
@@ -742,7 +751,7 @@
     if (!navigator.onLine) document.getElementById('offlineBadge').style.display = 'inline';
 
     // ==========================================
-    // 1. DATA, INDEXED-DB & CRYPTO ENGINE (V34)
+    // 1. DATA, INDEXED-DB & CRYPTO ENGINE (V35)
     // ==========================================
     async function hashPin(pin) {
         const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pin));
@@ -771,7 +780,7 @@
         "history":{"vacation":{"archive":[],"current":[],"limit":35,"balance":35},"onboard":{"archive":[],"current":[],"limit":7.25,"balance":7.25}},
         "capital_saved_tnd":0, "capital_saved_usd":0, "fx_rate":2.923,"mode":"vacation","income_logs":[],
         "projects":{"envelopes":{},"missions":{},"goals":[]},
-        "settings":{"contractStart":"","contractEnd":"", "pin": ""},
+        "settings":{"contractStart":"","contractEnd":"", "vacationStart":"", "vacationEnd":"", "pin": ""},
         "vape_stash":{"count":0, "empty_logs":[]},
         "custom_categories":[]
     };
@@ -824,6 +833,9 @@
         if (!s.vape_stash.empty_logs) s.vape_stash.empty_logs = []; 
         if (!s.custom_categories) s.custom_categories = [];
         
+        if (s.settings.vacationStart === undefined) s.settings.vacationStart = "";
+        if (s.settings.vacationEnd === undefined) s.settings.vacationEnd = "";
+
         if (s.capital_saved_tnd === undefined) {
             s.capital_saved_tnd = (s.capital_saved !== undefined) ? s.capital_saved : 0;
             if (Math.abs(s.capital_saved_tnd - 103.2) < 0.01) s.capital_saved_tnd = 68.2; 
@@ -846,15 +858,7 @@
         if (s.loan.targetDate === undefined) s.loan.targetDate = "";
         
         if (!s.loan.schedule || s.loan.schedule.length === 0) {
-             s.loan.schedule = [
-                { "id": 1, "date": "May 31, 2026", "amount": 1010, "paid": false },
-                { "id": 2, "date": "Jun 30, 2026", "amount": 1010, "paid": false },
-                { "id": 3, "date": "Jul 31, 2026", "amount": 1010, "paid": false },
-                { "id": 4, "date": "Aug 31, 2026", "amount": 1010, "paid": false },
-                { "id": 5, "date": "Sep 30, 2026", "amount": 1010, "paid": false },
-                { "id": 6, "date": "Oct 31, 2026", "amount": 1010, "paid": false },
-                { "id": 7, "date": "Nov 30, 2026", "amount": 1010, "paid": false }
-             ];
+             s.loan.schedule = USER_PRISTINE_DATA.loan.schedule;
              s.loan.arrears = 18746.54;
              s.loan.rate = 13.5;
              s.loan.overdraft = 516.00;
@@ -875,10 +879,10 @@
         });
 
         processInterestBleed();
+        processVacationArrears();
         checkLock();
     }
 
-    // V34 Background Interest Chronometer
     function processInterestBleed() {
         let now = Date.now();
         let msPassed = now - s.loan.last_interest_ts;
@@ -891,6 +895,28 @@
         } else if (daysPassed < 0) {
             s.loan.last_interest_ts = now; 
         }
+    }
+
+    // V35 Automated Vacation Arrears Shifter
+    function processVacationArrears() {
+        if(!s.settings.vacationStart || !s.settings.vacationEnd) return;
+        let vStart = new Date(s.settings.vacationStart).getTime();
+        let vEnd = new Date(s.settings.vacationEnd).getTime();
+        let now = Date.now();
+        let shifted = false;
+
+        s.loan.schedule.forEach(inst => {
+            if(!inst.paid) {
+                let instDate = new Date(inst.date).getTime();
+                if(instDate >= vStart && instDate <= vEnd && instDate <= now) {
+                    inst.paid = true;
+                    inst.shiftedToArrears = true;
+                    s.loan.arrears += inst.amount;
+                    shifted = true;
+                }
+            }
+        });
+        if(shifted) forceSaveState();
     }
 
     async function forceSaveState() {
@@ -955,7 +981,6 @@
         try {
             const challenge = new Uint8Array(32); crypto.getRandomValues(challenge);
             const userID = new Uint8Array(16); crypto.getRandomValues(userID);
-            
             const credential = await navigator.credentials.create({
                 publicKey: {
                     challenge: challenge,
@@ -966,7 +991,6 @@
                     timeout: 60000
                 }
             });
-            
             if (credential) {
                 localStorage.setItem('cw_bio_enabled', 'true');
                 hasBiometricsEnabled = true;
@@ -1140,7 +1164,6 @@
         if (cat === '💨 Vape') box.style.display = 'block'; else box.style.display = 'none';
     }
 
-    // V34 Editing Override Logic
     async function editLoanComponent(comp) {
         let currentVal = (comp === 'arrears') ? s.loan.arrears : s.loan.overdraft;
         let newValStr = await openUPrompt(`Edit ${comp}`, `Current: ${currentVal.toFixed(2)} TND\nEnter new exact amount:`, currentVal.toFixed(2));
@@ -1153,7 +1176,14 @@
         }
     }
 
-    // V34 Target Zero Calculator
+    async function editInstallmentAmount(id) {
+        let p = s.loan.schedule.find(x => x.id === id); if(!p) return;
+        let val = await openUPrompt("Edit Installment", `Current Amount: ${p.amount.toFixed(2)} TND\nEnter new amount for ${p.date}:`, p.amount.toFixed(2));
+        if(val === null) return;
+        let n = parseFloat(val);
+        if(!isNaN(n) && n > 0) { p.amount = n; saveState(); }
+    }
+
     function calculateKillShot() {
         let targetDateStr = document.getElementById('l_target_date').value;
         if(!targetDateStr) {
@@ -1182,7 +1212,7 @@
 
         document.getElementById('l_months_left').innerText = monthsLeft;
         document.getElementById('l_kill_shot').innerText = killShot.toFixed(2) + " TND";
-        forceSaveState(); // Save silently without re-rendering everything
+        forceSaveState(); 
     }
 
     function renderApp() {
@@ -1201,7 +1231,6 @@
         document.getElementById('v_cash_usd').innerText = '$' + s.vault.cash_usd.toFixed(2); document.getElementById('v_cash_tnd').innerText = s.vault.cash_tnd.toFixed(2) + ' TND'; 
         document.getElementById('v_savings').innerText = s.vault.savings.toFixed(2) + ' TND';
         
-        // V34 Master Debt Calculation and Display
         let unpaidsTND = s.loan.schedule.filter(x => !x.paid).reduce((sum, item) => sum + item.amount, 0);
         let totalTrueDebt = s.loan.arrears + s.loan.overdraft + unpaidsTND;
         document.getElementById('l_total_tnd').innerText = totalTrueDebt.toFixed(2) + " TND";
@@ -1226,6 +1255,39 @@
         let totUSD = ibkrTotal + s.vault.brightwell + s.vault.wise + s.vault.cash_usd; let totTND = (totUSD * s.fx_rate) + s.vault.cash_tnd + s.vault.savings;
         document.getElementById('totUSD').innerText = '$' + totUSD.toFixed(2); document.getElementById('totTND').innerText = totTND.toFixed(2) + ' TND';
 
+        // V35 Predictive Vape Engine (Locks projection from runway)
+        let vapeLockedTND = 0;
+        let vapeLockedStr = "";
+        
+        let vLogs = [];
+        s.history[s.mode].archive.forEach(a => { a.logs.forEach(l => { if (l.category === '💨 Vape') vLogs.push({...l, ts: l.ts}); }); });
+        s.history[s.mode].current.forEach(l => { if (l.category === '💨 Vape') vLogs.push({...l, ts: l.ts}); });
+        vLogs.sort((a,b) => a.ts - b.ts);
+        let stash = s.vape_stash.count; let empties = s.vape_stash.empty_logs; let avgLifespan = 0;
+        
+        if (vLogs.length > 0 && empties.length > 0) {
+            let firstPurchaseTs = vLogs[0].ts; let latestEmptyTs = empties[empties.length - 1];
+            let totalLifespanDays = (latestEmptyTs - firstPurchaseTs) / 86400000;
+            if (totalLifespanDays > 0) avgLifespan = totalLifespanDays / empties.length;
+        }
+
+        if (s.mode === 'vacation' && s.settings.vacationEnd) {
+            let vEnd = new Date(s.settings.vacationEnd).getTime();
+            let now = Date.now();
+            let daysLeftOnLand = (vEnd - now) / 86400000;
+            if (daysLeftOnLand > 0 && avgLifespan > 0) {
+                let totalVapeSpend = vLogs.reduce((sum, l) => sum + l.amount, 0);
+                let totalBought = vLogs.reduce((sum, l) => sum + (l.vapeQty || 1), 0);
+                if (totalBought > 0) {
+                    let avgCost = totalVapeSpend / totalBought;
+                    let vapesNeeded = daysLeftOnLand / avgLifespan;
+                    let netVapesToBuy = Math.max(0, vapesNeeded - stash);
+                    vapeLockedTND = netVapesToBuy * avgCost;
+                    vapeLockedStr = `Est. Vac. Cost: ${vapeLockedTND.toFixed(2)} TND (Locked)`;
+                }
+            }
+        }
+
         let totalLiquid = 0; let activeEnvLocked = 0;
         let isUSDMode = (s.mode === 'onboard');
         
@@ -1246,16 +1308,20 @@
             }
         });
 
+        // Add the vape projected lock to the TND envelopes deduction
+        if (!isUSDMode && vapeLockedTND > 0) {
+            activeEnvLocked += vapeLockedTND;
+        }
+
         let daily = s.history[s.mode].limit; 
         document.getElementById('uiRunway').innerText = daily > 0 ? Math.floor(totalLiquid / daily) + " Days" : "N/A";
         let rBudget = document.getElementById('uiRunwayBudget');
         if(rBudget) rBudget.innerText = daily > 0 ? `(at ${daily.toFixed(2)} ${isUSDMode?'USD':'TND'}/day)` : '';
         
-        // V34 Liquid Runway Text Fix
         let netLiquid = Math.max(0, totalLiquid - activeEnvLocked);
         let netRunway = daily > 0 ? Math.floor(netLiquid / daily) : 0;
         let netLiquidDisplay = isUSDMode ? `$${netLiquid.toFixed(2)}` : `${netLiquid.toFixed(2)} TND`;
-        document.getElementById('uiNetRunway').innerText = `Net (Excl. Envelopes): ${netRunway} Days | ${netLiquidDisplay}`;
+        document.getElementById('uiNetRunway').innerText = `Net (Excl. Envelopes & Vapes): ${netRunway} Days | ${netLiquidDisplay}`;
 
         let curHist = s.history[s.mode]; let sym = s.mode === 'vacation' ? ' TND' : ' USD'; let pre = s.mode === 'onboard' ? '$' : '';
         document.getElementById('balanceTitle').innerText = `Remaining Today (${s.mode === 'vacation' ? 'Vacation' : 'Onboard'})`;
@@ -1326,7 +1392,6 @@
         else { document.getElementById('npLimit').placeholder = "Target Goal Amount"; }
     }
     
-    // V34 Goal Bug Permanently Fixed
     async function submitNewProject() {
         let type = document.getElementById('npType').value; let name = document.getElementById('npName').value.trim();
         if(!name) { await openUConfirm("Error", "Please provide a name."); return; }
@@ -1399,10 +1464,14 @@
             if(!e.archived) envBox.innerHTML += html; else archBox.innerHTML += html;
         });
 
+        // V35 Dual Currency Missions Restored
         Object.keys(s.projects.missions).forEach(k => {
             let m = s.projects.missions[k]; let actionIcon = m.spent > 0 ? '📦' : '❌'; let bypassTag = m.bypass ? '<span style="color:var(--warning);font-size:8px;display:block;">(Bypass Active)</span>' : ''; 
             let currTag = m.currency;
-            let html = `<div style="background:var(--card-bg); padding:10px; border-radius:8px; border:1px solid var(--panel-border); text-align:center; opacity:${m.archived?0.6:1}; position:relative;">${m.archived ? `<div style="position:absolute;top:5px;right:5px;"><button onclick="restoreTracker('mis', '${k}')" style="background:none;border:none;font-size:12px;cursor:pointer;">🔙</button><button onclick="hardDeleteTracker('mis', '${k}')" style="background:none;border:none;font-size:12px;cursor:pointer;">🗑️</button></div>` : `<div style="position:absolute;top:5px;right:5px;"><button onclick="editProjectTracker('mis', '${k}')" style="background:none;border:none;font-size:10px;cursor:pointer;">⚙️</button><button onclick="processProjectAction('mis', '${k}', ${m.spent})" style="background:none;border:none;font-size:10px;cursor:pointer;">${actionIcon}</button></div>`}<div style="font-size:10px; color:var(--text-muted); font-weight:bold; margin-bottom:4px;">${m.name} ${bypassTag}</div><div style="font-size:16px; font-weight:800; color:var(--text);">${m.spent.toFixed(2)} <span style="font-size:10px;">${currTag}</span></div>${m.hasLogistics ? `<div style="font-size:9px; color:var(--danger); margin-top:4px;">Dead Money: ${m.dead.toFixed(2)} ${currTag}</div>` : ''}</div>`;
+            let displayVal = m.spent.toFixed(2);
+            let convVal = (m.currency === 'USD') ? (m.spent * s.fx_rate).toFixed(2) + " TND" : (m.spent / s.fx_rate).toFixed(2) + " USD";
+            
+            let html = `<div style="background:var(--card-bg); padding:10px; border-radius:8px; border:1px solid var(--panel-border); text-align:center; opacity:${m.archived?0.6:1}; position:relative;">${m.archived ? `<div style="position:absolute;top:5px;right:5px;"><button onclick="restoreTracker('mis', '${k}')" style="background:none;border:none;font-size:12px;cursor:pointer;">🔙</button><button onclick="hardDeleteTracker('mis', '${k}')" style="background:none;border:none;font-size:12px;cursor:pointer;">🗑️</button></div>` : `<div style="position:absolute;top:5px;right:5px;"><button onclick="editProjectTracker('mis', '${k}')" style="background:none;border:none;font-size:10px;cursor:pointer;">⚙️</button><button onclick="processProjectAction('mis', '${k}', ${m.spent})" style="background:none;border:none;font-size:10px;cursor:pointer;">${actionIcon}</button></div>`}<div style="font-size:10px; color:var(--text-muted); font-weight:bold; margin-bottom:4px;">${m.name} ${bypassTag}</div><div style="font-size:16px; font-weight:800; color:var(--text);">${displayVal} <span style="font-size:10px;">${currTag}</span></div><div style="font-size:10px; color:var(--text-muted); margin-top:2px;">(≈ ${convVal})</div>${m.hasLogistics ? `<div style="font-size:9px; color:var(--danger); margin-top:4px;">Dead Money: ${m.dead.toFixed(2)} ${currTag}</div>` : ''}</div>`;
             if(!m.archived) misBox.innerHTML += html; else archBox.innerHTML += html;
         });
 
@@ -1769,14 +1838,15 @@
         if(pending.length === 0 && paid.length === 0) html = '<div style="font-size:11px;color:var(--text-muted);text-align:center;">No installments logged.</div>';
         
         pending.forEach((p, idx) => { 
-            let badge = idx <= 1 ? `<span style="background:var(--danger);color:white;padding:2px 4px;border-radius:4px;font-size:8px;">🔴 Overdue</span>` : `<span style="background:#38bdf8;color:white;padding:2px 4px;border-radius:4px;font-size:8px;">🔵 Upcoming</span>`;
-            html += `<div class="iou-item" style="border-color:var(--panel-border);"><div><strong style="font-size:12px;">🗓️ ${p.date}</strong> ${badge}<div style="font-size:11px;color:var(--danger); font-weight:bold; margin-top:4px;">${p.amount.toFixed(2)} TND</div></div><div><button class="iou-btn" onclick="payInstallment(${p.id})">Manual Pay</button></div></div>`; 
+            let badge = idx <= 1 ? `<span style="background:var(--danger);color:white;padding:2px 4px;border-radius:4px;font-size:8px;">🔴 Overdue / Next</span>` : `<span style="background:#38bdf8;color:white;padding:2px 4px;border-radius:4px;font-size:8px;">🔵 Upcoming</span>`;
+            html += `<div class="iou-item" style="border-color:var(--panel-border);"><div><strong style="font-size:12px;">🗓️ ${p.date}</strong> ${badge} <button onclick="editInstallmentAmount(${p.id})" style="background:none;border:none;cursor:pointer;">✏️</button><div style="font-size:11px;color:var(--danger); font-weight:bold; margin-top:4px;">${p.amount.toFixed(2)} TND</div></div><div><button class="iou-btn" onclick="payInstallment(${p.id})">Manual Pay</button></div></div>`; 
         });
         
         if(paid.length > 0) { 
             html += `<div style="font-size:10px; color:var(--text-muted); margin:10px 0 5px 0; text-align:center;">Archived Payments</div>`; 
             paid.forEach(p => { 
-                html += `<div class="iou-item" style="opacity:0.6; border-color:var(--success);"><div><strike style="font-size:12px;">${p.date}</strike> <span style="background:var(--success);color:white;padding:2px 4px;border-radius:4px;font-size:8px;">🟢 Paid</span><div style="font-size:11px;color:var(--success); font-weight:bold; margin-top:4px;">${p.amount.toFixed(2)} TND</div></div></div>`; 
+                let shiftNote = p.shiftedToArrears ? `<span style="color:var(--warning);font-size:8px; display:block;">(Shifted to Arrears via Vacation)</span>` : "";
+                html += `<div class="iou-item" style="opacity:0.6; border-color:var(--success);"><div><strike style="font-size:12px;">${p.date}</strike> <span style="background:var(--success);color:white;padding:2px 4px;border-radius:4px;font-size:8px;">🟢 Paid</span><div style="font-size:11px;color:var(--success); font-weight:bold; margin-top:4px;">${p.amount.toFixed(2)} TND</div>${shiftNote}</div></div>`; 
             }); 
         }
         document.getElementById('loanScheduleList').innerHTML = html;
@@ -1817,6 +1887,7 @@
         document.getElementById('pwOpVal').innerText = '$' + (gross * (pOp/100)).toFixed(2); 
     }
 
+    // V35 "Current + Oldest" Paycheck Waterfall
     async function processPaycheck() {
         let gross = parseFloat(document.getElementById('pwGross').value); if(isNaN(gross) || gross <= 0) return;
         let pLoan = parseFloat(document.getElementById('pwLoanPct').value) || 0; 
@@ -1836,18 +1907,18 @@
                 inst.paid = true;
                 inst.paidOn = Date.now();
                 remainingLoanTND -= inst.amount;
-                waterfallLogs.push(`Paid Installment: ${inst.amount} TND`);
+                waterfallLogs.push(`1 New Inst: ${inst.amount} TND`);
             }
         }
         
         if (s.loan.overdraft > 0 && remainingLoanTND > 0) {
             if (remainingLoanTND >= s.loan.overdraft) {
                 remainingLoanTND -= s.loan.overdraft;
-                waterfallLogs.push(`Cleared Overdraft: ${s.loan.overdraft.toFixed(2)} TND`);
+                waterfallLogs.push(`Clr Overdraft: ${s.loan.overdraft.toFixed(2)} TND`);
                 s.loan.overdraft = 0;
             } else {
                 s.loan.overdraft -= remainingLoanTND;
-                waterfallLogs.push(`Reduced Overdraft by: ${remainingLoanTND.toFixed(2)} TND`);
+                waterfallLogs.push(`Red. Overdraft: ${remainingLoanTND.toFixed(2)} TND`);
                 remainingLoanTND = 0;
             }
         }
@@ -1855,7 +1926,7 @@
         if (remainingLoanTND > 0) {
             s.loan.arrears -= remainingLoanTND;
             if(s.loan.arrears < 0) s.loan.arrears = 0; 
-            waterfallLogs.push(`Smashed Arrears: ${remainingLoanTND.toFixed(2)} TND`);
+            waterfallLogs.push(`Arrears (Oldest): ${remainingLoanTND.toFixed(2)} TND`);
         }
         
         s.history[s.mode].current.push({ amount: toLoanUSD, tag: `🏦 STB Bank Auto-Wire (${pLoan}%) [${waterfallLogs.join(' | ')}]`, category: "🏦 Financial & Fees", location: "International Wire", walletSource: "brightwell", bypassLimit: true, fxRate: s.fx_rate, ts: Date.now() });
@@ -2007,7 +2078,13 @@
         try { const res = await fetch('https://open.er-api.com/v6/latest/USD'); const data = await res.json(); if (data && data.rates && data.rates.TND) { s.fx_rate = parseFloat(data.rates.TND); populateSettings(); saveState(); await openUConfirm("Success", "FX updated to " + s.fx_rate); } } catch (e) { await openUConfirm("Error", "Network Error."); } 
     }
 
-    function updateContractDates() { s.settings.contractStart = document.getElementById('setContractStart').value; s.settings.contractEnd = document.getElementById('setContractEnd').value; saveState(); }
+    function updateContractDates() { 
+        s.settings.contractStart = document.getElementById('setContractStart').value; 
+        s.settings.contractEnd = document.getElementById('setContractEnd').value; 
+        s.settings.vacationStart = document.getElementById('setVacationStart').value;
+        s.settings.vacationEnd = document.getElementById('setVacationEnd').value;
+        saveState(); 
+    }
     
     async function updatePin() { 
         let raw = document.getElementById('setPin').value; 
@@ -2023,6 +2100,8 @@
         document.getElementById('setFX').value = s.fx_rate; 
         document.getElementById('setContractStart').value = s.settings.contractStart || ''; 
         document.getElementById('setContractEnd').value = s.settings.contractEnd || ''; 
+        document.getElementById('setVacationStart').value = s.settings.vacationStart || ''; 
+        document.getElementById('setVacationEnd').value = s.settings.vacationEnd || ''; 
         document.getElementById('setPin').value = ''; 
         document.getElementById('setPin').placeholder = s.settings.pin ? '****' : '0000';
     }
