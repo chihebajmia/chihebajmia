@@ -1,5 +1,5 @@
 // ==========================================
-// ENGINE.JS - CORE LOGIC & MATH (V37)
+// ENGINE.JS - CORE LOGIC & MATH (V38)
 // ==========================================
 
 window.engine = {
@@ -7,6 +7,7 @@ window.engine = {
         const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pin));
         return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
     },
+
     processInterestBleed: function() {
         let s = window.s;
         let now = Date.now();
@@ -95,7 +96,7 @@ window.engine = {
         let totUSD = ibkrTotal + s.vault.brightwell + s.vault.wise + s.vault.cash_usd; let totTND = (totUSD * s.fx_rate) + s.vault.cash_tnd + s.vault.savings;
         document.getElementById('totUSD').innerText = '$' + totUSD.toFixed(2); document.getElementById('totTND').innerText = totTND.toFixed(2) + ' TND';
 
-        // --- V37 Countdown Injection ---
+        // --- V38 Dashboard Countdowns ---
         let now = Date.now();
         let countdownHtml = '';
         if (s.mode === 'vacation') {
@@ -110,7 +111,7 @@ window.engine = {
             let cEnd = s.settings.contractEnd ? new Date(s.settings.contractEnd).getTime() : 0;
             let daysToHome = cEnd > now ? Math.ceil((cEnd - now) / 86400000) : 0;
             
-            // Sunrise Bi-Weekly Pay Cycle
+            // Hardcoded Bi-Weekly Pay Dates for Carnival Sunrise Contract
             let payDates = [
                 "2026-08-21T00:00:00", "2026-09-04T00:00:00", "2026-09-18T00:00:00", 
                 "2026-10-02T00:00:00", "2026-10-16T00:00:00", "2026-10-30T00:00:00", 
@@ -134,7 +135,7 @@ window.engine = {
         let countdownBox = document.getElementById('uiCountdownBox');
         if (countdownBox) countdownBox.innerHTML = countdownHtml;
 
-        // Mode-Aware Predictive Vape Lock
+        // V38 Mode-Aware Predictive Vape Lock
         let vapeLockedCost = 0;
         let vLogs = [];
         s.history[s.mode].archive.forEach(a => { a.logs.forEach(l => { if (l.category === '💨 Vape') vLogs.push({...l, ts: l.ts}); }); });
@@ -1073,6 +1074,105 @@ window.engine = {
         s.vape_stash.count--; s.vape_stash.empty_logs.push(Date.now()); window.db.saveState();
     },
 
+    fetchLiveFX: async function() { 
+        let s = window.s; 
+        if (!navigator.onLine) { await window.ui.openUConfirm("Offline", "You are offline. Cannot fetch FX."); return; }
+        try { 
+            const res = await fetch('https://open.er-api.com/v6/latest/USD'); 
+            const data = await res.json(); 
+            if (data && data.rates && data.rates.TND) { 
+                s.fx_rate = parseFloat(data.rates.TND); 
+                window.engine.populateSettings(); 
+                window.db.saveState(); 
+                await window.ui.openUConfirm("Success", "FX updated to " + s.fx_rate); 
+            } 
+        } catch (e) { await window.ui.openUConfirm("Error", "Network Error."); } 
+    },
+
+    updateContractDates: function() { 
+        let s = window.s; 
+        s.settings.contractStart = document.getElementById('setContractStart').value; 
+        s.settings.contractEnd = document.getElementById('setContractEnd').value; 
+        s.settings.vacationStart = document.getElementById('setVacationStart').value;
+        s.settings.vacationEnd = document.getElementById('setVacationEnd').value;
+        this.processVacationArrears(); 
+        window.db.saveState(); 
+    },
+    
+    updatePin: async function() { 
+        let s = window.s; 
+        let raw = document.getElementById('setPin').value; 
+        if(raw.length === 4) { s.settings.pin = await this.hashPin(raw); window.db.saveState(); }
+        document.getElementById('setPin').value = '';
+        document.getElementById('setPin').placeholder = '****';
+    },
+
+    populateSettings: function() { 
+        let s = window.s; 
+        document.getElementById('setMode').value = s.mode; 
+        document.getElementById('setVacLimit').value = s.history.vacation.limit; 
+        document.getElementById('setOnbLimit').value = s.history.onboard.limit; 
+        document.getElementById('setFX').value = s.fx_rate; 
+        document.getElementById('setContractStart').value = s.settings.contractStart || ''; 
+        document.getElementById('setContractEnd').value = s.settings.contractEnd || ''; 
+        document.getElementById('setVacationStart').value = s.settings.vacationStart || ''; 
+        document.getElementById('setVacationEnd').value = s.settings.vacationEnd || ''; 
+        document.getElementById('setPin').value = ''; 
+        document.getElementById('setPin').placeholder = s.settings.pin ? '****' : '0000';
+    },
+
+    changeMode: function() { window.s.mode = document.getElementById('setMode').value; window.db.saveState(); },
+    updateLimits: function() { window.s.history.vacation.limit = parseFloat(document.getElementById('setVacLimit').value) || 49; window.s.history.onboard.limit = parseFloat(document.getElementById('setOnbLimit').value) || 7.25; window.db.saveState(); },
+    updateFX: function() { window.s.fx_rate = parseFloat(document.getElementById('setFX').value) || 2.923; window.db.saveState(); },
+    
+    recalibrateMath: async function() { 
+        let s = window.s;
+        let ok = await window.ui.openUConfirm("Recalibrate", "Recalibrate database?"); if(!ok) return; 
+        let cap_tnd = 0; let cap_usd = 0; 
+        ['vacation', 'onboard'].forEach(m => { 
+            for (let i = s.history[m].archive.length - 1; i >= 0; i--) { 
+                let day = s.history[m].archive[i]; day.date = new Date(day.date).toDateString(); 
+                let activeLimit = day.limit || s.history[m].limit;
+                let spent = day.logs.reduce((sum, item) => sum + ((item.category === "🏦 Financial & Fees") ? 0 : (item.bypassLimit ? (item.spillover||0) : item.amount)), 0); 
+                let surplus = activeLimit - spent; 
+                if (m === 'onboard') cap_usd += surplus; else cap_tnd += surplus; 
+            } 
+        }); 
+        s.capital_saved_tnd = cap_tnd; s.capital_saved_usd = cap_usd; window.db.saveState(); await window.ui.openUConfirm("Success", "Recalibrated!"); 
+    },
+    
+    exportData: function() { const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(window.s)); const dlAnchorElem = document.createElement('a'); dlAnchorElem.setAttribute("href", dataStr); dlAnchorElem.setAttribute("download", `CrewWallet_Backup_${new Date().toISOString().split('T')[0]}.json`); dlAnchorElem.click(); },
+    importData: async function(event) { const file = event.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = async function(e) { try { window.s = JSON.parse(e.target.result); window.db.saveState(); await window.ui.openUConfirm("Success", "Restored!"); } catch(err) { await window.ui.openUConfirm("Error", "Failed to parse file."); } }; reader.readAsText(file); },
+    factoryReset: async function() { let ans = await window.ui.openUPrompt("Wipe", "Type RESET to wipe everything:"); if (ans === "RESET") { localStorage.clear(); indexedDB.deleteDatabase('CrewWalletDB'); location.reload(); } },
+    
+    exportPDFReport: function() { 
+        let s = window.s;
+        let now = new Date().toLocaleString(); let fx = s.fx_rate; let mode = s.mode.charAt(0).toUpperCase() + s.mode.slice(1); 
+        let totUSD = s.vault.ibkr_cash + (s.vault.ibkr_shares * s.vault.ibkr_price) + s.vault.brightwell + s.vault.wise + s.vault.cash_usd; 
+        let totalLiquid = (totUSD * fx) + s.vault.cash_tnd + s.vault.savings; 
+        let isUSDMode = (s.mode === 'onboard'); let daily = s.history[s.mode].limit;
+        let modLiquid = isUSDMode ? (s.vault.cash_usd + s.vault.brightwell + s.vault.wise) : totalLiquid;
+        let liquidRunway = daily > 0 ? Math.floor(modLiquid / daily) : 0; 
+        
+        let misHtml = `<div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">`; Object.keys(s.projects.missions).forEach(k => { let m = s.projects.missions[k]; if(!m.archived) misHtml += `<div style="flex:1; min-width:120px; border:1px solid #cbd5e1; padding:8px; border-radius:4px; text-align:center; background:#f8fafc;"><strong style="font-size:11px; color:#475569;">${m.name}</strong><div style="font-size:14px; font-weight:bold;">${m.spent.toFixed(2)} ${m.currency}</div>${m.hasLogistics?`<div style="font-size:9px; color:#dc2626;">Dead: ${m.dead.toFixed(2)} ${m.currency}</div>`:''}</div>`; }); misHtml += `</div>`; 
+        
+        let iouHtml = `<div style="display:flex; gap:15px; margin-bottom:20px;">`;
+        iouHtml += `<div style="flex:1; background:#fef2f2; padding:10px; border-radius:6px; border:1px solid #fecaca;"><strong style="color:#ef4444; font-size:12px;">Payables (Owe)</strong>`; s.ious.payables.forEach(p => iouHtml += `<div style="font-size:11px; display:flex; justify-content:space-between; margin-top:4px;"><span>${p.name}</span><strong>${p.amount} ${p.currency}</strong></div>`); iouHtml += `</div>`;
+        iouHtml += `<div style="flex:1; background:#f0fdf4; padding:10px; border-radius:6px; border:1px solid #bbf7d0;"><strong style="color:#10b981; font-size:12px;">Receivables (Owed To Me)</strong>`; s.ious.receivables.forEach(r => iouHtml += `<div style="font-size:11px; display:flex; justify-content:space-between; margin-top:4px;"><span>${r.name}</span><strong>${r.amount} ${r.currency}</strong></div>`); iouHtml += `</div></div>`;
+
+        let vol = 0; let cats = {}; let cutoff = Date.now() - (30 * 86400000); ['vacation', 'onboard'].forEach(m => { s.history[m].archive.forEach(d => d.logs.forEach(l => { if(l.ts >= cutoff) { let amtTND = m === 'onboard' ? l.amount * l.fxRate : l.amount; vol += amtTND; cats[l.category] = (cats[l.category] || 0) + amtTND; } })); s.history[m].current.forEach(l => { if(l.ts >= cutoff) { let amtTND = m === 'onboard' ? l.amount * l.fxRate : l.amount; vol += amtTND; cats[l.category] = (cats[l.category] || 0) + amtTND; } }); }); 
+        let catHtml = `<table style="width:100%; border-collapse:collapse; margin-bottom:20px; font-size:12px;"><tr><th style="border-bottom:2px solid #cbd5e1; text-align:left; padding:8px;">Category</th><th style="border-bottom:2px solid #cbd5e1; text-align:right; padding:8px;">Amount</th><th style="border-bottom:2px solid #cbd5e1; text-align:right; padding:8px;">%</th><th style="border-bottom:2px solid #cbd5e1; text-align:left; padding:8px;">Visual Indicator</th></tr>`; Object.keys(cats).sort((a,b) => cats[b] - cats[a]).forEach(tag => { let pct = vol > 0 ? ((cats[tag] / vol) * 100).toFixed(1) : 0; let filledBlocks = Math.min(20, Math.round(pct / 5)); let emptyBlocks = Math.max(0, 20 - filledBlocks); let bars = "█".repeat(filledBlocks) + "░".repeat(emptyBlocks); catHtml += `<tr><td style="padding:8px; border-bottom:1px solid #e2e8f0; font-weight:bold;">${tag}</td><td style="padding:8px; border-bottom:1px solid #e2e8f0; text-align:right;">${cats[tag].toFixed(2)} TND</td><td style="padding:8px; border-bottom:1px solid #e2e8f0; text-align:right;">${pct}%</td><td style="padding:8px; border-bottom:1px solid #e2e8f0; font-family:monospace; color:#38bdf8; letter-spacing:1px;">${bars}</td></tr>`; }); catHtml += `</table>`; 
+        
+        let logHtml = `<table style="width:100%; border-collapse:collapse; margin-bottom:20px; font-size:10px;"><tr><th style="background:#f1f5f9; border:1px solid #cbd5e1; padding:6px; text-align:left;">Date</th><th style="background:#f1f5f9; border:1px solid #cbd5e1; padding:6px; text-align:left;">Description</th><th style="background:#f1f5f9; border:1px solid #cbd5e1; padding:6px; text-align:left;">Category</th><th style="background:#f1f5f9; border:1px solid #cbd5e1; padding:6px; text-align:left;">Source</th><th style="background:#f1f5f9; border:1px solid #cbd5e1; padding:6px; text-align:right;">Impact</th><th style="background:#f1f5f9; border:1px solid #cbd5e1; padding:6px; text-align:center;">Status</th></tr>`; let allLogs = []; ['vacation','onboard'].forEach(m => { s.history[m].archive.forEach(a => allLogs.push(...a.logs.map(l => ({...l, d: a.date, m: m})))); allLogs.push(...s.history[m].current.map(l => ({...l, d: 'Today', m: m}))); }); allLogs.sort((a,b) => b.ts - a.ts).slice(0, 35).forEach((log, i) => { let status = (log.bypassLimit || log.category === "🏦 Financial & Fees") ? "Bypassed" : "Logged"; if(log.spillover > 0) status = "Spillover"; let sym = log.m === 'vacation' ? 'TND' : 'USD'; let bg = i % 2 === 0 ? "#ffffff" : "#f8fafc"; logHtml += `<tr style="background:${bg};"><td style="border:1px solid #cbd5e1; padding:4px;">${log.d}</td><td style="border:1px solid #cbd5e1; padding:4px; font-weight:600;">${log.tag}</td><td style="border:1px solid #cbd5e1; padding:4px;">${log.category}</td><td style="border:1px solid #cbd5e1; padding:4px; color:#64748b;">${log.walletSource}</td><td style="border:1px solid #cbd5e1; padding:4px; text-align:right; font-weight:bold;">-${log.amount.toFixed(2)} ${sym}</td><td style="border:1px solid #cbd5e1; padding:4px; text-align:center; color:${status==='Bypassed'?'#f59e0b':(status==='Spillover'?'#ef4444':'#10b981')}; font-weight:bold;">${status}</td></tr>`; }); logHtml += `</table>`; 
+        
+        let html = `<div style="font-family:'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color:#0f172a; max-width:800px; margin:0 auto; padding:20px; background:white;"><div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:4px solid #0f172a; padding-bottom:15px; margin-bottom:20px;"><div><h1 style="margin:0; font-size:24px; text-transform:uppercase; letter-spacing:1.5px;">Global Wealth Vault</h1><div style="font-size:11px; font-weight:700; color:#64748b; letter-spacing:2px; margin-top:4px;">FINANCIAL INTELLIGENCE REPORT</div></div><div style="text-align:right; font-size:11px; color:#475569; line-height:1.6;"><div>Generated: <strong>${now}</strong></div><div>Live FX Rate: <strong>${fx} TND</strong></div></div></div><h3 style="color:#0f172a; border-bottom:2px solid #cbd5e1; padding-bottom:5px; margin-top:0; font-size:13px; text-transform:uppercase;">I. Executive Vault Summary</h3><div style="display:flex; gap:15px; margin-bottom:20px;"><div style="flex:1; background:#f8fafc; padding:12px; border-radius:6px; border:1px solid #e2e8f0;"><div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:12px; border-bottom:1px dashed #e2e8f0;"><span>Total USD Assets:</span> <strong>$${totUSD.toFixed(2)}</strong></div><div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:12px; border-bottom:1px dashed #e2e8f0;"><span>Physical TND:</span> <strong>${s.vault.cash_tnd.toFixed(2)} TND</strong></div><div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:12px;"><span>Savings TND:</span> <strong>${s.vault.savings.toFixed(2)} TND</strong></div></div><div style="flex:1; background:#f8fafc; padding:12px; border-radius:6px; border:1px solid #e2e8f0;"><div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:12px; border-bottom:1px dashed #e2e8f0;"><span>STB True Liability:</span> <strong style="color:#ef4444;">${(s.loan.arrears + s.loan.overdraft + s.loan.schedule.filter(x=>!x.paid).reduce((s,i)=>s+i.amount,0)).toFixed(2)} TND</strong></div><div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:13px; margin-top:8px; border-top:2px solid #cbd5e1; padding-top:8px;"><span>Total Liquid Power:</span> <strong style="color:#10b981;">${totalLiquid.toFixed(2)} TND</strong></div><div style="display:flex; justify-content:space-between; font-size:12px;"><span>Mode Liquid Runway:</span> <strong style="color:#38bdf8;">${liquidRunway} Days</strong></div></div></div><h3 style="color:#0f172a; border-bottom:2px solid #cbd5e1; padding-bottom:5px; font-size:13px; text-transform:uppercase;">II. Project Trackers & IOUs</h3>${misHtml}${iouHtml}<h3 style="color:#0f172a; border-bottom:2px solid #cbd5e1; padding-bottom:5px; font-size:13px; text-transform:uppercase;">III. 30-Day Category Flow</h3><div style="margin-bottom:10px; font-size:12px; font-weight:bold;">Total Cap Saved (TND): <span style="color:#10b981;">+${s.capital_saved_tnd.toFixed(2)} TND</span> | Total Cap Saved (USD): <span style="color:#10b981;">+$${s.capital_saved_usd.toFixed(2)}</span></div>${catHtml}<h3 style="color:#0f172a; border-bottom:2px solid #cbd5e1; padding-bottom:5px; font-size:13px; text-transform:uppercase;">IV. Master Ledger</h3>${logHtml}</div>`; 
+        
+        let printArea = document.getElementById('printArea'); printArea.innerHTML = html; printArea.style.display = 'block';
+        let closeBtn = document.createElement('button'); closeBtn.innerHTML = "❌ Close Report View"; closeBtn.style.cssText = "position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#0f172a; color:white; border:2px solid #38bdf8; padding:15px 30px; border-radius:30px; font-weight:bold; font-size:16px; z-index:10000; box-shadow:0 10px 25px rgba(0,0,0,0.5); cursor:pointer;";
+        closeBtn.onclick = function() { printArea.style.display = 'none'; }; printArea.appendChild(closeBtn);
+        setTimeout(() => { window.print(); }, 500);
+    },
+
     forceAppUpdate: async function() {
         let ok = await window.ui.openUConfirm("Force Update", "This will clear the offline cache and instantly fetch the latest code from GitHub. Your financial data is 100% safe. Proceed?");
         if(!ok) return;
@@ -1093,36 +1193,4 @@ window.engine = {
         
         window.location.reload(true);
     }
-       renderIOUs: function() {
-        let s = window.s;
-        const pList = document.getElementById('payablesList'); pList.innerHTML = '';
-        s.ious.payables.forEach(p => { pList.innerHTML += `<div class="iou-item"><div><div style="font-weight:bold;">${p.name}</div><div style="color:var(--warning); font-size:11px;">Owe: ${p.amount.toFixed(2)} ${p.currency}</div></div><div><button class="iou-btn" onclick="window.engine.processIOU('payable', ${p.id})">Pay</button> <button class="iou-del" style="background:none;border:none;color:var(--danger);" onclick="window.engine.deleteIOU('payable', ${p.id})">❌</button></div></div>`; });
-        const rList = document.getElementById('receivablesList'); rList.innerHTML = '';
-        s.ious.receivables.forEach(r => { rList.innerHTML += `<div class="iou-item"><div><div style="font-weight:bold;">${r.name}</div><div style="color:var(--success); font-size:11px;">Owed: ${r.amount.toFixed(2)} ${r.currency}</div></div><div><button class="iou-btn" style="background:var(--success);" onclick="window.engine.processIOU('receivable', ${r.id})">Collect</button> <button class="iou-del" style="background:none;border:none;color:var(--danger);" onclick="window.engine.deleteIOU('receivable', ${r.id})">❌</button></div></div>`; });
-    },
-
-    // Final closing helper for UI interactions
-    closeOutDay: async function() { 
-        let s = window.s;
-        let curHist = s.history[s.mode]; let guessDate = new Date(); 
-        if (curHist.current.length > 0) guessDate = new Date(curHist.current[0].ts); else if (guessDate.getHours() < 5) guessDate.setDate(guessDate.getDate() - 1); 
-        let archiveDate = await window.ui.openUPrompt("Close Day", "Archive today's logs under which date?", guessDate.toDateString()); if (!archiveDate) return; 
-        
-        let spentTND = 0; let spentUSD = 0;
-        if (curHist.current.length > 0) { 
-            let spent = curHist.current.reduce((sum, item) => sum + ((item.category === "🏦 Financial & Fees") ? 0 : (item.bypassLimit ? (item.spillover||0) : item.amount)), 0); 
-            if (s.mode === 'onboard') spentUSD = spent; else spentTND = spent;
-        }
-
-        let existingIdx = curHist.archive.findIndex(a => a.date === archiveDate); 
-        if (existingIdx > -1) { 
-            curHist.archive[existingIdx].logs.push(...curHist.current); 
-            if (s.mode === 'onboard') s.capital_saved_usd -= spentUSD; else s.capital_saved_tnd -= spentTND;
-        } else { 
-            if (s.mode === 'onboard') s.capital_saved_usd += (curHist.limit - spentUSD); else s.capital_saved_tnd += (curHist.limit - spentTND);
-            curHist.archive.push({ date: archiveDate, limit: curHist.limit, logs: [...curHist.current] }); 
-        } 
-        curHist.current = []; curHist.balance = curHist.limit; window.db.saveState(); 
-    }
- 
 };
