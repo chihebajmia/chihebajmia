@@ -1,4 +1,4 @@
-const CACHE_NAME = 'crew-wallet-v38-offline';
+const CACHE_NAME = 'crew-wallet-v39-offline';
 const FILES_TO_CACHE = [
   './',
   './index.html',
@@ -6,8 +6,7 @@ const FILES_TO_CACHE = [
   './icon.png',
   './js/db.js',
   './js/engine.js',
-  './js/ui.js',
-  './js/main.js'
+  './js/ui.js'
 ];
 
 self.addEventListener('install', (event) => {
