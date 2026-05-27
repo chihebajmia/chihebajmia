@@ -1,5 +1,5 @@
 // ==========================================
-// UI.JS - INTERFACE CONTROLLER (V36)
+// UI.JS - INTERFACE CONTROLLER (V38)
 // ==========================================
 
 window.ui = {
@@ -298,4 +298,3 @@ document.addEventListener("visibilitychange", () => {
         if (window.s && window.s.settings.pin && !window.ui.isLocked && (Date.now() - window.ui.lastActive > 120000)) window.ui.checkLock(); 
     }
 });
-
