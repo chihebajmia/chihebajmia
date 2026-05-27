@@ -1093,4 +1093,36 @@ window.engine = {
         
         window.location.reload(true);
     }
+       renderIOUs: function() {
+        let s = window.s;
+        const pList = document.getElementById('payablesList'); pList.innerHTML = '';
+        s.ious.payables.forEach(p => { pList.innerHTML += `<div class="iou-item"><div><div style="font-weight:bold;">${p.name}</div><div style="color:var(--warning); font-size:11px;">Owe: ${p.amount.toFixed(2)} ${p.currency}</div></div><div><button class="iou-btn" onclick="window.engine.processIOU('payable', ${p.id})">Pay</button> <button class="iou-del" style="background:none;border:none;color:var(--danger);" onclick="window.engine.deleteIOU('payable', ${p.id})">❌</button></div></div>`; });
+        const rList = document.getElementById('receivablesList'); rList.innerHTML = '';
+        s.ious.receivables.forEach(r => { rList.innerHTML += `<div class="iou-item"><div><div style="font-weight:bold;">${r.name}</div><div style="color:var(--success); font-size:11px;">Owed: ${r.amount.toFixed(2)} ${r.currency}</div></div><div><button class="iou-btn" style="background:var(--success);" onclick="window.engine.processIOU('receivable', ${r.id})">Collect</button> <button class="iou-del" style="background:none;border:none;color:var(--danger);" onclick="window.engine.deleteIOU('receivable', ${r.id})">❌</button></div></div>`; });
+    },
+
+    // Final closing helper for UI interactions
+    closeOutDay: async function() { 
+        let s = window.s;
+        let curHist = s.history[s.mode]; let guessDate = new Date(); 
+        if (curHist.current.length > 0) guessDate = new Date(curHist.current[0].ts); else if (guessDate.getHours() < 5) guessDate.setDate(guessDate.getDate() - 1); 
+        let archiveDate = await window.ui.openUPrompt("Close Day", "Archive today's logs under which date?", guessDate.toDateString()); if (!archiveDate) return; 
+        
+        let spentTND = 0; let spentUSD = 0;
+        if (curHist.current.length > 0) { 
+            let spent = curHist.current.reduce((sum, item) => sum + ((item.category === "🏦 Financial & Fees") ? 0 : (item.bypassLimit ? (item.spillover||0) : item.amount)), 0); 
+            if (s.mode === 'onboard') spentUSD = spent; else spentTND = spent;
+        }
+
+        let existingIdx = curHist.archive.findIndex(a => a.date === archiveDate); 
+        if (existingIdx > -1) { 
+            curHist.archive[existingIdx].logs.push(...curHist.current); 
+            if (s.mode === 'onboard') s.capital_saved_usd -= spentUSD; else s.capital_saved_tnd -= spentTND;
+        } else { 
+            if (s.mode === 'onboard') s.capital_saved_usd += (curHist.limit - spentUSD); else s.capital_saved_tnd += (curHist.limit - spentTND);
+            curHist.archive.push({ date: archiveDate, limit: curHist.limit, logs: [...curHist.current] }); 
+        } 
+        curHist.current = []; curHist.balance = curHist.limit; window.db.saveState(); 
+    }
+ 
 };
