@@ -1103,7 +1103,30 @@ window.engine = {
         }); 
         s.capital_saved_tnd = cap_tnd; s.capital_saved_usd = cap_usd; window.db.saveState(); await window.ui.openUConfirm("Success", "Recalibrated!"); 
     },
-    
+        forceAppUpdate: async function() {
+        let ok = await window.ui.openUConfirm("Force Update", "This will clear the offline cache and instantly fetch the latest code from GitHub. Your financial data is 100% safe. Proceed?");
+        if(!ok) return;
+        
+        // 1. Unregister the Service Worker
+        if ('serviceWorker' in navigator) {
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            for (let registration of registrations) {
+                await registration.unregister();
+            }
+        }
+        
+        // 2. Wipe the Cache API
+        if ('caches' in window) {
+            const keys = await caches.keys();
+            for (let key of keys) {
+                await caches.delete(key);
+            }
+        }
+        
+        // 3. Force a hard reload from the server
+        window.location.reload(true);
+    },
+
     exportData: function() { const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(window.s)); const dlAnchorElem = document.createElement('a'); dlAnchorElem.setAttribute("href", dataStr); dlAnchorElem.setAttribute("download", `CrewWallet_Backup_${new Date().toISOString().split('T')[0]}.json`); dlAnchorElem.click(); },
     importData: async function(event) { const file = event.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = async function(e) { try { window.s = JSON.parse(e.target.result); window.db.saveState(); await window.ui.openUConfirm("Success", "Restored!"); } catch(err) { await window.ui.openUConfirm("Error", "Failed to parse file."); } }; reader.readAsText(file); },
     factoryReset: async function() { let ans = await window.ui.openUPrompt("Wipe", "Type RESET to wipe everything:"); if (ans === "RESET") { localStorage.clear(); indexedDB.deleteDatabase('CrewWalletDB'); location.reload(); } },
