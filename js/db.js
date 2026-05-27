@@ -1,8 +1,8 @@
 // ==========================================
-// DB.JS - CREW WALLET MASTER VAULT (V36)
+// DB.JS - CREW WALLET MASTER VAULT (V39)
 // ==========================================
 
-window.s = null; // Global State Object
+window.s = null; 
 
 const DB_NAME = 'CrewWalletDB';
 const STORE_NAME = 'stateStore';
@@ -10,18 +10,11 @@ const STORE_NAME = 'stateStore';
 const USER_PRISTINE_DATA = {
     "vault": { "ibkr": 0, "brightwell": 0, "wise": 0, "cash_usd": 0, "cash_tnd": 0, "savings": 0, "ibkr_fees": 0, "lifetime_fees": 0, "ibkr_cash": 0, "ibkr_shares": 0, "ibkr_cost": 0, "ibkr_price": 0 },
     "loan": {
-        "arrears": 18746.54,
-        "overdraft": 516.00,
-        "rate": 13.5,
-        "last_interest_ts": Date.now(),
-        "targetDate": "",
+        "arrears": 18746.54, "overdraft": 516.00, "rate": 13.5, "last_interest_ts": Date.now(), "targetDate": "",
         "schedule": [
-            { "id": 1, "date": "May 31, 2026", "amount": 1010, "paid": false },
-            { "id": 2, "date": "Jun 30, 2026", "amount": 1010, "paid": false },
-            { "id": 3, "date": "Jul 31, 2026", "amount": 1010, "paid": false },
-            { "id": 4, "date": "Aug 31, 2026", "amount": 1010, "paid": false },
-            { "id": 5, "date": "Sep 30, 2026", "amount": 1010, "paid": false },
-            { "id": 6, "date": "Oct 31, 2026", "amount": 1010, "paid": false },
+            { "id": 1, "date": "May 31, 2026", "amount": 1010, "paid": false }, { "id": 2, "date": "Jun 30, 2026", "amount": 1010, "paid": false },
+            { "id": 3, "date": "Jul 31, 2026", "amount": 1010, "paid": false }, { "id": 4, "date": "Aug 31, 2026", "amount": 1010, "paid": false },
+            { "id": 5, "date": "Sep 30, 2026", "amount": 1010, "paid": false }, { "id": 6, "date": "Oct 31, 2026", "amount": 1010, "paid": false },
             { "id": 7, "date": "Nov 30, 2026", "amount": 1010, "paid": false }
         ]
     },
@@ -30,21 +23,15 @@ const USER_PRISTINE_DATA = {
     "capital_saved_tnd": 0, "capital_saved_usd": 0, "fx_rate": 2.923, "mode": "vacation", "income_logs": [],
     "projects": { "envelopes": {}, "missions": {}, "goals": [] },
     "settings": { "contractStart": "", "contractEnd": "", "vacationStart": "", "vacationEnd": "", "pin": "" },
-    "vape_stash": { "count": 0, "empty_logs": [] },
-    "custom_categories": [],
-    "ledger": [] // V36 Global Transaction Trace Ledger
+    "vape_stash": { "count": 0, "empty_logs": [] }, "custom_categories": [], "ledger": [] 
 };
 
 window.db = {
     initDB: function() {
         return new Promise((resolve, reject) => {
             let request = indexedDB.open(DB_NAME, 1);
-            request.onupgradeneeded = (e) => {
-                let database = e.target.result;
-                if (!database.objectStoreNames.contains(STORE_NAME)) database.createObjectStore(STORE_NAME);
-            };
-            request.onsuccess = (e) => resolve(e.target.result);
-            request.onerror = (e) => reject(e.target.error);
+            request.onupgradeneeded = (e) => { let database = e.target.result; if (!database.objectStoreNames.contains(STORE_NAME)) database.createObjectStore(STORE_NAME); };
+            request.onsuccess = (e) => resolve(e.target.result); request.onerror = (e) => reject(e.target.error);
         });
     },
 
@@ -54,10 +41,7 @@ window.db = {
             let tx = database.transaction(STORE_NAME, 'readonly');
             let store = tx.objectStore(STORE_NAME);
             let request = store.get('master_data');
-            request.onsuccess = () => {
-                if (request.result) { window.s = JSON.parse(request.result); this.migrateData(); } 
-                else this.fallbackLoad();
-            };
+            request.onsuccess = () => { if (request.result) { window.s = JSON.parse(request.result); this.migrateData(); } else this.fallbackLoad(); };
             request.onerror = () => this.fallbackLoad();
         } catch (e) { this.fallbackLoad(); }
     },
@@ -69,6 +53,13 @@ window.db = {
 
     migrateData: async function() {
         if (!window.s || !window.s.vault || !window.s.history) window.s = USER_PRISTINE_DATA;
+        
+        // V39 Backup Corruption Fail-Safe: Force restructuring of old history objects
+        if (!window.s.history.vacation || !window.s.history.onboard) {
+            console.warn("Old backup detected. Rebuilding history object.");
+            window.s.history = USER_PRISTINE_DATA.history;
+        }
+
         if (!window.s.projects) window.s.projects = USER_PRISTINE_DATA.projects;
         if (!window.s.projects.envelopes) window.s.projects.envelopes = {};
         if (!window.s.projects.missions) window.s.projects.missions = {};
@@ -79,16 +70,13 @@ window.db = {
         if (!window.s.vape_stash) window.s.vape_stash = {"count":0, "empty_logs":[]};
         if (!window.s.vape_stash.empty_logs) window.s.vape_stash.empty_logs = []; 
         if (!window.s.custom_categories) window.s.custom_categories = [];
-        if (!window.s.ledger) window.s.ledger = []; // Global Ledger Initialization
-        
+        if (!window.s.ledger) window.s.ledger = []; 
         if (window.s.settings.vacationStart === undefined) window.s.settings.vacationStart = "";
         if (window.s.settings.vacationEnd === undefined) window.s.settings.vacationEnd = "";
 
         if (window.s.capital_saved_tnd === undefined) {
             window.s.capital_saved_tnd = (window.s.capital_saved !== undefined) ? window.s.capital_saved : 0;
-            if (Math.abs(window.s.capital_saved_tnd - 103.2) < 0.01) window.s.capital_saved_tnd = 68.2; 
-            window.s.capital_saved_usd = 0;
-            delete window.s.capital_saved;
+            window.s.capital_saved_usd = 0; delete window.s.capital_saved;
         }
 
         if(window.s.vault.ibkr_cash === undefined) window.s.vault.ibkr_cash = window.s.vault.ibkr || 0;
@@ -107,9 +95,7 @@ window.db = {
         
         if (!window.s.loan.schedule || window.s.loan.schedule.length === 0) {
             window.s.loan.schedule = USER_PRISTINE_DATA.loan.schedule;
-            window.s.loan.arrears = 18746.54;
-            window.s.loan.rate = 13.5;
-            window.s.loan.overdraft = 516.00;
+            window.s.loan.arrears = 18746.54; window.s.loan.rate = 13.5; window.s.loan.overdraft = 516.00;
         }
 
         Object.keys(window.s.projects.envelopes).forEach(k => { 
@@ -122,57 +108,23 @@ window.db = {
             if(window.s.projects.missions[k].bypass === undefined) window.s.projects.missions[k].bypass = false;
             if(!window.s.projects.missions[k].currency) window.s.projects.missions[k].currency = 'TND';
         });
-        window.s.projects.goals.forEach(g => {
-            if(!g.currency) g.currency = 'TND';
-        });
+        window.s.projects.goals.forEach(g => { if(!g.currency) g.currency = 'TND'; });
 
-        // Trigger the brain and ui locks once migration settles
-        if(window.engine) {
-            window.engine.processInterestBleed();
-            window.engine.processVacationArrears();
-        }
+        if(window.engine) { window.engine.processInterestBleed(); window.engine.processVacationArrears(); }
         if(window.ui) window.ui.checkLock();
     },
 
     forceSaveState: async function() {
-        let dataStr = JSON.stringify(window.s);
-        localStorage.setItem('CrewWalletMaster', dataStr); 
-        try {
-            let database = await this.initDB();
-            let tx = database.transaction(STORE_NAME, 'readwrite');
-            let store = tx.objectStore(STORE_NAME);
-            store.put(dataStr, 'master_data');
-        } catch (e) { console.error("IndexedDB save failed"); }
+        let dataStr = JSON.stringify(window.s); localStorage.setItem('CrewWalletMaster', dataStr); 
+        try { let database = await this.initDB(); let tx = database.transaction(STORE_NAME, 'readwrite'); let store = tx.objectStore(STORE_NAME); store.put(dataStr, 'master_data'); } catch (e) {}
     },
 
-    saveState: async function() {
-        await this.forceSaveState();
-        if(window.engine) window.engine.renderApp(); 
-    },
+    saveState: async function() { await this.forceSaveState(); if(window.engine) window.engine.renderApp(); },
 
-    // ==========================================
-    // V36 GLOBAL LEDGER AUDIT ENGINE
-    // ==========================================
     logTransaction: function(type, amount, currency, wallet, details) {
         if(!window.s.ledger) window.s.ledger = [];
-        
-        window.s.ledger.push({
-            id: Date.now(),
-            type: type,
-            amount: amount,
-            currency: currency,
-            wallet: wallet,
-            details: details,
-            mode: window.s.mode,
-            fxRate: window.s.fx_rate,
-            timestamp: Date.now()
-        });
-
-        // Cap ledger size at 500 actions to protect IndexedDB memory limit
-        if(window.s.ledger.length > 500) {
-            window.s.ledger.shift();
-        }
+        window.s.ledger.push({ id: Date.now(), type: type, amount: amount, currency: currency, wallet: wallet, details: details, mode: window.s.mode, fxRate: window.s.fx_rate, timestamp: Date.now() });
+        if(window.s.ledger.length > 500) window.s.ledger.shift();
         this.forceSaveState();
     }
 };
-
