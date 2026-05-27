@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#0f172a">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon.png">
-    <title>Crew Wallet Master V38</title>
+    <title>Crew Wallet Master V39</title>
     <style>
         :root { --bg-color: #0f172a; --card-bg: #1e293b; --accent: #fbbf24; --text: #f8fafc; --text-muted: #94a3b8; --success: #4ade80; --warning: #facc15; --danger: #f87171; --panel-border: #334155; --vault-bg: rgba(15, 23, 42, 0.5); }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-color); color: var(--text); margin: 0; padding: 16px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; -webkit-tap-highlight-color: transparent; padding-bottom: 90px; }
@@ -745,6 +745,21 @@
 
 <div id="printArea"></div>
 
+<script>
+    // This inline script acts as the "Ignition Sequence" fallback. 
+    // It verifies that the JS folder was found and loaded correctly.
+    document.addEventListener("DOMContentLoaded", () => {
+        setTimeout(() => {
+            if (!window.db || !window.engine || !window.ui) {
+                console.error("CRITICAL ERROR: Folder mapping failed.");
+                let errorMsg = document.createElement("div");
+                errorMsg.style.cssText = "position:absolute; top:0; left:0; width:100%; height:100vh; background: var(--bg-color); z-index:99999; color: var(--danger); text-align: center; padding: 40px; font-weight: bold; display:flex; flex-direction:column; justify-content:center; align-items:center;";
+                errorMsg.innerHTML = `<span style="font-size:40px; margin-bottom:20px;">⚠️</span><span style="font-size:20px; text-transform:uppercase; margin-bottom:10px;">File Not Found</span><span style="color:var(--text-muted); font-size:12px;">Your browser could not find the 'js' folder.<br><br>If your folder in GitHub is named 'JS' (capital letters), you must rename it to exactly 'js' (lowercase) or update the script tags in index.html to match. GitHub Pages is strictly case-sensitive.</span>`;
+                document.body.appendChild(errorMsg);
+            }
+        }, 1000);
+    });
+</script>
 <script src="./js/db.js"></script>
 <script src="./js/engine.js"></script>
 <script src="./js/ui.js"></script>
