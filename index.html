@@ -438,6 +438,16 @@
             <button class="btn-secondary" onclick="document.getElementById('importFile').click()" style="color:var(--text);">📂 Restore from Backup</button>
             <button class="btn-secondary" onclick="engine.recalibrateMath()" style="margin-top: 10px; border-color: var(--warning); color: var(--warning);">🧮 Recalibrate Database Math</button>
             <button class="btn-secondary" onclick="engine.factoryReset()" style="margin-top: 10px; border-color: var(--danger); color: var(--danger); background: rgba(248, 113, 113, 0.1);">🗑️ Factory Reset App</button>
+                    <div class="vault-card">
+            <div class="title" style="color:var(--success);">Data Sovereignty & System</div>
+            <button class="btn-secondary" onclick="engine.forceAppUpdate()" style="margin-bottom: 10px; border-color: #38bdf8; color: #38bdf8; background: rgba(56, 189, 248, 0.1);">🔄 Force App Update (Clear Cache)</button>
+            <button class="btn-secondary" onclick="engine.exportData()" style="color:var(--text);">💾 Export JSON Backup</button>
+            <input type="file" id="importFile" style="display:none;" onchange="engine.importData(event)" accept=".json">
+            <button class="btn-secondary" onclick="document.getElementById('importFile').click()" style="color:var(--text);">📂 Restore from Backup</button>
+            <button class="btn-secondary" onclick="engine.recalibrateMath()" style="margin-top: 10px; border-color: var(--warning); color: var(--warning);">🧮 Recalibrate Database Math</button>
+            <button class="btn-secondary" onclick="engine.factoryReset()" style="margin-top: 10px; border-color: var(--danger); color: var(--danger); background: rgba(248, 113, 113, 0.1);">🗑️ Factory Reset App</button>
+        </div>
+
         </div>
     </div>
 </div>
