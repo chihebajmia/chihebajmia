@@ -4,9 +4,10 @@ const FILES_TO_CACHE = [
   './index.html',
   './manifest.json',
   './icon.png',
-  './js/db.js',
-  './js/engine.js',
-  './js/ui.js'
+  './db.js',
+  './engine.js',
+  './ui.js',
+  './main.js'
 ];
 
 self.addEventListener('install', (event) => {
