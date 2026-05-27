@@ -1,5 +1,5 @@
 // ==========================================
-// MAIN.JS - IGNITION SEQUENCE (V36)
+// MAIN.JS - IGNITION SEQUENCE (V38)
 // ==========================================
 
 // Wait for the HTML structure to fully render before firing the engine
@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
     
     // Verify that the modular architecture loaded successfully
     if (window.db && typeof window.db.loadState === 'function') {
-        console.log("Crew Wallet V36: Modules linked. Igniting database...");
+        console.log("Crew Wallet V38: Modules linked. Igniting database...");
         
         // Boot the vault, migrate data, and trigger the UI
         window.db.loadState();
@@ -22,4 +22,3 @@ document.addEventListener("DOMContentLoaded", () => {
         document.body.appendChild(errorMsg);
     }
 });
-
