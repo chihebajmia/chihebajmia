@@ -1,5 +1,5 @@
 // ==========================================
-// ENGINE.JS - CORE LOGIC & MATH (V36)
+// ENGINE.JS - CORE LOGIC & MATH (V36.1)
 // ==========================================
 
 window.engine = {
@@ -332,7 +332,7 @@ window.engine = {
         s.projects.goals.forEach(g => {
             let pct = Math.min(100, (g.saved / g.target) * 100); let actionIcon = g.saved > 0 ? '📦' : '❌';
             let currTag = `<span style="font-size:8px; color:var(--text-muted);">${g.currency}</span>`;
-            let html = `<div style="background:var(--card-bg); padding:10px; border-radius:8px; border:1px solid rgba(74, 222, 128, 0.4); opacity:${g.archived?0.6:1};"><div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;"><strong>${g.name}</strong><div><span style="color:var(--success); font-weight:bold;">${g.saved.toFixed(0)} / ${g.target.toFixed(0)}</span> ${currTag} ${g.archived ? `<button onclick="window.engine.restoreTracker('goal', ${g.id})" style="background:none;border:none;margin-left:5px;cursor:pointer;">🔙</button><button onclick="window.engine.hardDeleteTracker('goal', ${g.id})" style="background:none;border:none;margin-left:5px;cursor:pointer;">🗑️</button>` : `<button onclick="window.engine.editProjectTracker('goal', ${g.id})" style="background:none;border:none;margin-left:5px;cursor:pointer;">⚙️</button><button onclick="window.engine.processProjectAction('goal', ${g.id}, ${g.saved})" style="background:none;border:none;margin-left:5px;cursor:pointer;">${actionIcon}</button>`}</div></div><div class="progress-container" style="height:4px; margin-top:0;"><div class="progress-bar" style="width:${pct}%;"></div></div>${g.archived ? '' : `<button class="v-btn" style="width:100%; margin-top:10px; background:#16a34a;" onclick="window.engine.fundGoal(${g.id})">➕ Add Funds (Virtual Hold)</button>`}</div>`;
+            let html = `<div style="background:var(--card-bg); padding:10px; border-radius:8px; border:1px solid rgba(74, 222, 128, 0.4); opacity:${g.archived?0.6:1};"><div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;"><strong>${g.name}</strong><div><span style="color:var(--success); font-weight:bold;">${g.saved.toFixed(0)} / ${g.target.toFixed(0)}</span> ${currTag} ${g.archived ? `<button onclick="window.engine.restoreTracker('goal', ${g.id})" style="background:none;border:none;margin-left:5px;cursor:pointer;">🔙</button><button onclick="window.engine.hardDeleteTracker('goal', ${g.id})" style="background:none;border:none;margin-left:5px;cursor:pointer;">🗑️</button>` : `<button onclick="window.engine.editProjectTracker('goal', ${g.id})" style="background:none;border:none;margin-left:5px;cursor:pointer;">⚙️</button><button onclick="window.engine.processProjectAction('goal', ${g.id}, ${g.saved})" style="background:none;border:none;margin-left:5px;cursor:pointer;">${actionIcon}</button></div></div><div class="progress-container" style="height:4px; margin-top:0;"><div class="progress-bar" style="width:${pct}%;"></div></div>${g.archived ? '' : `<button class="v-btn" style="width:100%; margin-top:10px; background:#16a34a;" onclick="window.engine.fundGoal(${g.id})">➕ Add Funds (Virtual Hold)</button>`}</div>`;
             if(!g.archived) goalBox.innerHTML += html; else archBox.innerHTML += html;
         });
 
@@ -1037,36 +1037,51 @@ window.engine = {
         s.vape_stash.count--; s.vape_stash.empty_logs.push(Date.now()); window.db.saveState();
     },
 
-    processTransfer: async function() {
-        let s = window.s;
-        let amt = parseFloat(document.getElementById('trfAmount').value); let fromW = document.getElementById('trfFrom').value; let toW = document.getElementById('trfTo').value;
-        if(isNaN(amt) || amt <= 0) return; if(fromW === toW) { await window.ui.openUConfirm("Error", "Cannot transfer to the same wallet."); return; }
-        let fromUSD = ['brightwell','wise','cash_usd','ibkr_cash'].includes(fromW); let toUSD = ['brightwell','wise','cash_usd','ibkr_cash'].includes(toW);
-        let amountToSubtract = amt; let amountToAdd = amt;
-        if(fromUSD && !toUSD) amountToAdd = amt * s.fx_rate; else if(!fromUSD && toUSD) amountToAdd = amt / s.fx_rate;
-        if (s.vault[fromW] < amountToSubtract) { let ok = await window.ui.openUConfirm("Warning", `This will push ${fromW} into a negative balance. Proceed?`); if(!ok) return; }
-        s.vault[fromW] -= amountToSubtract; s.vault[toW] += amountToAdd;
-        
-        window.db.logTransaction('Transfer', amt, fromUSD ? 'USD' : 'TND', `${fromW} -> ${toW}`, 'Internal vault movement');
-        
-        document.getElementById('transferModal').style.display = 'none'; window.db.saveState();
+    fetchLiveFX: async function() { 
+        let s = window.s; 
+        if (!navigator.onLine) { await window.ui.openUConfirm("Offline", "You are offline. Cannot fetch FX."); return; }
+        try { 
+            const res = await fetch('https://open.er-api.com/v6/latest/USD'); 
+            const data = await res.json(); 
+            if (data && data.rates && data.rates.TND) { 
+                s.fx_rate = parseFloat(data.rates.TND); 
+                this.populateSettings(); 
+                window.db.saveState(); 
+                await window.ui.openUConfirm("Success", "FX updated to " + s.fx_rate); 
+            } 
+        } catch (e) { await window.ui.openUConfirm("Error", "Network Error."); } 
     },
 
     updateContractDates: function() { 
-        let s = window.s;
+        let s = window.s; 
         s.settings.contractStart = document.getElementById('setContractStart').value; 
         s.settings.contractEnd = document.getElementById('setContractEnd').value; 
         s.settings.vacationStart = document.getElementById('setVacationStart').value;
         s.settings.vacationEnd = document.getElementById('setVacationEnd').value;
+        this.processVacationArrears(); 
         window.db.saveState(); 
     },
     
     updatePin: async function() { 
-        let s = window.s;
+        let s = window.s; 
         let raw = document.getElementById('setPin').value; 
         if(raw.length === 4) { s.settings.pin = await this.hashPin(raw); window.db.saveState(); }
         document.getElementById('setPin').value = '';
         document.getElementById('setPin').placeholder = '****';
+    },
+
+    populateSettings: function() { 
+        let s = window.s; 
+        document.getElementById('setMode').value = s.mode; 
+        document.getElementById('setVacLimit').value = s.history.vacation.limit; 
+        document.getElementById('setOnbLimit').value = s.history.onboard.limit; 
+        document.getElementById('setFX').value = s.fx_rate; 
+        document.getElementById('setContractStart').value = s.settings.contractStart || ''; 
+        document.getElementById('setContractEnd').value = s.settings.contractEnd || ''; 
+        document.getElementById('setVacationStart').value = s.settings.vacationStart || ''; 
+        document.getElementById('setVacationEnd').value = s.settings.vacationEnd || ''; 
+        document.getElementById('setPin').value = ''; 
+        document.getElementById('setPin').placeholder = s.settings.pin ? '****' : '0000';
     },
 
     changeMode: function() { window.s.mode = document.getElementById('setMode').value; window.db.saveState(); },
@@ -1121,4 +1136,3 @@ window.engine = {
         setTimeout(() => { window.print(); }, 500);
     }
 };
-
