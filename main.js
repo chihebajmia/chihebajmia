@@ -1,7 +1,11 @@
+// ==========================================
+// MAIN.JS - IGNITION SEQUENCE (V42)
+// ==========================================
+
 // Wait for the HTML structure to fully render before firing the engine
 document.addEventListener("DOMContentLoaded", () => {
     if (window.db && typeof window.db.loadState === 'function') {
-        console.log("Crew Wallet V41: Modules linked. Igniting database...");
+        console.log("Crew Wallet V42: Modules linked. Igniting database...");
         window.db.loadState();
     } else {
         console.error("CRITICAL ERROR: Core modules failed to link.");
