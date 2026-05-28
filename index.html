@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#0f172a">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon.png">
-    <title>Crew Wallet Master V39</title>
+    <title>Crew Wallet V41</title>
     <style>
         :root { --bg-color: #0f172a; --card-bg: #1e293b; --accent: #fbbf24; --text: #f8fafc; --text-muted: #94a3b8; --success: #4ade80; --warning: #facc15; --danger: #f87171; --panel-border: #334155; --vault-bg: rgba(15, 23, 42, 0.5); }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-color); color: var(--text); margin: 0; padding: 16px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; -webkit-tap-highlight-color: transparent; padding-bottom: 90px; }
@@ -22,7 +22,6 @@
         .nav-icon { font-size: 22px; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .nav-btn.active .nav-icon { transform: translateY(-3px); }
         .vault-card { background-color: var(--card-bg); border-radius: 16px; padding: 16px; border: 1px solid var(--panel-border); transition: transform 0.1s ease-out;}
-        .vault-card.clickable:active { transform: scale(0.97); border-color: var(--accent); }
         .vault-header { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); margin-bottom: 12px; text-align: center; display: flex; justify-content: space-between; align-items: center;}
         .vault-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
         .vault-item { background-color: var(--vault-bg); padding: 10px 4px; border-radius: 10px; text-align: center; border: 1px solid var(--panel-border); position: relative; cursor: pointer; transition: transform 0.1s;}
@@ -91,15 +90,6 @@
         .pnl-positive { color: var(--success) !important; }
         .pnl-negative { color: var(--danger) !important; }
         
-        /* App Lock Engine */
-        #appLockScreen { display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 9999; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
-        .pin-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 30px; width: 100%; max-width: 250px; }
-        .pin-btn { background: var(--card-bg); color: white; border: 1px solid var(--panel-border); border-radius: 50%; width: 60px; height: 60px; font-size: 24px; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; margin: 0 auto; transition: transform 0.1s, background 0.1s; }
-        .pin-btn:active { transform: scale(0.9); background: var(--accent); color: #000; }
-        .pin-dots { display: flex; gap: 10px; margin-top: 20px; }
-        .pin-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--panel-border); background: transparent; transition: background 0.2s; }
-        .pin-dot.filled { background: var(--accent); border-color: var(--accent); }
-
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideInLeft { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
         @keyframes slideUpModal { from { opacity: 0; transform: translateY(40px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
@@ -114,23 +104,7 @@
 </head>
 <body>
 
-<div id="appLockScreen">
-    <div style="font-size:40px; margin-bottom:10px;">🏦</div>
-    <div style="font-size:18px; font-weight:bold; letter-spacing:2px; text-transform:uppercase;">Crew Wallet Locked</div>
-    <div id="lockMessage" style="font-size:12px; color:var(--text-muted); margin-top:10px;">Enter PIN or use FaceID to unlock.</div>
-    <div class="pin-dots" id="pinDots">
-        <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
-    </div>
-    <div class="pin-pad" id="pinPad">
-        <button class="pin-btn" onclick="ui.enterPin(1)">1</button><button class="pin-btn" onclick="ui.enterPin(2)">2</button><button class="pin-btn" onclick="ui.enterPin(3)">3</button>
-        <button class="pin-btn" onclick="ui.enterPin(4)">4</button><button class="pin-btn" onclick="ui.enterPin(5)">5</button><button class="pin-btn" onclick="ui.enterPin(6)">6</button>
-        <button class="pin-btn" onclick="ui.enterPin(7)">7</button><button class="pin-btn" onclick="ui.enterPin(8)">8</button><button class="pin-btn" onclick="ui.enterPin(9)">9</button>
-        <button class="pin-btn" style="background:transparent; border:none;"></button><button class="pin-btn" onclick="ui.enterPin(0)">0</button><button class="pin-btn" style="background:transparent; border:none; color:var(--danger); font-size:16px;" onclick="ui.clearPin()">⌫</button>
-    </div>
-    <button class="v-btn" id="btnTriggerBio" style="margin-top:30px; background:var(--panel-border); display:none;" onclick="ui.triggerBiometrics()">Scan FaceID</button>
-</div>
-
-<div class="app-container" id="appWrapper" style="display:none;">
+<div class="app-container" id="appWrapper">
     <div id="tab-dash" class="page-section active">
         <div class="vault-card" style="border-color: var(--accent); position: relative; overflow: hidden;">
             <div style="position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: var(--accent);"></div>
@@ -418,12 +392,6 @@
         <div class="vault-card">
             <div class="title">Custom Categories</div>
             <button class="btn-secondary" onclick="ui.manageCategories()">🛠️ Manage Custom Categories</button>
-        </div>
-
-        <div class="vault-card">
-            <div class="title" style="color:var(--accent);">Security</div>
-            <div class="input-row" style="margin-bottom:10px;"><span style="font-size:12px; width:100%;">App Lock PIN:</span><input type="password" id="setPin" maxlength="4" onchange="engine.updatePin()" placeholder="0000"></div>
-            <button class="btn-secondary" style="border-color:var(--accent); color:var(--accent);" onclick="ui.registerFaceID()">🛡️ Enable FaceID / TouchID</button>
         </div>
 
         <div class="vault-card">
@@ -745,31 +713,10 @@
 
 <div id="printArea"></div>
 
-<script>
-    // This inline script acts as the "Ignition Sequence" fallback. 
-    // It verifies that the JS folder was found and loaded correctly.
-    document.addEventListener("DOMContentLoaded", () => {
-        setTimeout(() => {
-            if (!window.db || !window.engine || !window.ui) {
-                console.error("CRITICAL ERROR: Folder mapping failed.");
-                let errorMsg = document.createElement("div");
-                errorMsg.style.cssText = "position:absolute; top:0; left:0; width:100%; height:100vh; background: var(--bg-color); z-index:99999; color: var(--danger); text-align: center; padding: 40px; font-weight: bold; display:flex; flex-direction:column; justify-content:center; align-items:center;";
-                errorMsg.innerHTML = `<span style="font-size:40px; margin-bottom:20px;">⚠️</span><span style="font-size:20px; text-transform:uppercase; margin-bottom:10px;">File Not Found</span><span style="color:var(--text-muted); font-size:12px;">Your browser could not find the 'js' folder.<br><br>If your folder in GitHub is named 'JS' (capital letters), you must rename it to exactly 'js' (lowercase) or update the script tags in index.html to match. GitHub Pages is strictly case-sensitive.</span>`;
-                document.body.appendChild(errorMsg);
-            }
-        }, 1000);
-    });
-</script>
-
-
-
-    <script src="./db.js"></script>
+<script src="./db.js"></script>
 <script src="./engine.js"></script>
 <script src="./ui.js"></script>
 <script src="./main.js"></script>
-
-</body>
-</html>
 
 </body>
 </html>
