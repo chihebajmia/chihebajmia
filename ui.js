@@ -1,3 +1,7 @@
+// ==========================================
+// UI.JS - INTERFACE CONTROLLER (V42 - Unlocked)
+// ==========================================
+
 window.ui = {
     resolvePrompt: null,
     resolveConfirm: null,
@@ -157,6 +161,10 @@ window.ui = {
         document.getElementById('advTM').style.display = 'none'; 
         document.getElementById('tmFormContainer').style.display = 'none';
         document.getElementById('btnToggleTMForm').style.display = 'block';
+    },
+
+    registerFaceID: async function() {
+        await this.openUConfirm("Security Disabled", "App Lock features (FaceID and PIN) have been disabled in the V42 Flat Architecture to guarantee offline stability and prevent lockouts.");
     },
 
     openUPrompt: function(title, msg, defaultVal = '') {
