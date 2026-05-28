@@ -1,3 +1,7 @@
+// ==========================================
+// DB.JS - STANDARD VAULT (V42)
+// ==========================================
+
 window.s = null;
 const DB_NAME = 'CrewWalletDB';
 const STORE_NAME = 'stateStore';
@@ -36,6 +40,7 @@ window.db = {
     },
 
     fallbackLoad: function() {
+        // Pre-configured payload mapped to your specific timeline and goals
         window.s = { 
             "vault": { "ibkr": 0, "brightwell": 0, "wise": 0, "cash_usd": 0, "cash_tnd": 0, "savings": 0, "ibkr_cash": 0, "ibkr_shares": 0, "ibkr_cost": 0, "ibkr_price": 0, "lifetime_fees": 0 }, 
             "loan": { "arrears": 0, "overdraft": 0, "rate": 13.5, "schedule": [], "targetDate": "2026-11", "last_interest_ts": Date.now() }, 
@@ -45,10 +50,18 @@ window.db = {
             "fx_rate": 2.923, 
             "capital_saved_tnd": 0,
             "capital_saved_usd": 0,
-            "projects": { "envelopes": {}, "missions": {}, "goals": [] }, 
+            "projects": { 
+                "envelopes": {}, 
+                "missions": {
+                    "p_infra": { "name": "🎯 Port Infrastructure Tender Report", "spent": 0, "dead": 0, "hasLogistics": false, "archived": false, "bypass": false, "currency": "TND" }
+                }, 
+                "goals": [
+                    { "id": 1, "name": "🏆 Used Toyota RAV4 Fund", "target": 50000, "saved": 0, "archived": false, "currency": "TND" }
+                ] 
+            }, 
             "settings": { "contractStart": "2026-08-03", "contractEnd": "2027-02-01", "vacationStart": "2026-05-15", "vacationEnd": "2026-08-02", "pin": "" }, 
             "vape_stash": { "count": 0, "empty_logs": [] }, 
-            "custom_categories": ["⛽ Car Fuel", "📱 Telecommunications", "🚢 Port Infrastructure"], 
+            "custom_categories": ["⛽ Car Fuel", "📱 Telecommunications", "🚢 Visa & Seaman Docs"], 
             "income_logs": [], 
             "ledger": [] 
         };
