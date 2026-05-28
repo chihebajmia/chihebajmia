@@ -106,7 +106,7 @@ window.engine = {
             let cEnd = s.settings.contractEnd ? new Date(s.settings.contractEnd).getTime() : 0;
             let daysToHome = cEnd > now ? Math.ceil((cEnd - now) / 86400000) : 0;
             
-            // Hardcoded Bi-Weekly Pay Dates for Carnival Sunrise Contract
+            // Hardcoded Bi-Weekly Pay Dates for Contract
             let payDates = [
                 "2026-08-21T00:00:00", "2026-09-04T00:00:00", "2026-09-18T00:00:00", 
                 "2026-10-02T00:00:00", "2026-10-16T00:00:00", "2026-10-30T00:00:00", 
