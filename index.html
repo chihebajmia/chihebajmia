@@ -718,5 +718,14 @@
 <script src="./ui.js"></script>
 <script src="./main.js"></script>
 
+<script>
+    // Service Worker Registration for PWA caching and offline support
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW setup failed: ', err));
+        });
+    }
+</script>
+
 </body>
 </html>
