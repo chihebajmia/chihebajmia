@@ -1,4 +1,7 @@
-const CACHE_NAME = 'crew-wallet-v41-offline';
+// ==========================================
+// SW.JS - FLAT CACHE BUSTER (V42)
+// ==========================================
+const CACHE_NAME = 'crew-wallet-v42-offline';
 const FILES_TO_CACHE = [
   './',
   './index.html',
